@@ -1,0 +1,19 @@
+---
+title: "tables-and-report-values"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{tables-and-report-values}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(SSAND)
+```

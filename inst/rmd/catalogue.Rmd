@@ -1,0 +1,788 @@
+---
+title: "A catalogue of plots produced by SSAND"
+date: "`r Sys.Date()`"
+output: 
+  html_document
+---
+
+---
+# Copyright 2024 Fisheries Queensland
+
+# This file is part of SSAND.
+# SSAND is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+# SSAND is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+# You should have received a copy of the GNU General Public License along with SSAND. If not, see <https://www.gnu.org/licenses/>.
+---
+
+<script>
+   $(document).ready(function() {
+     $head = $('#header');
+     $head.prepend('<img src=\"../../man/figures/logo.png\" style=\"float: right;width: 100px;\"/>')
+   });
+</script>
+
+```{r setup, include=FALSE}
+library(SSAND)
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# {.tabset}
+
+The purpose of this document is to showcase some of the plots available within SSAND. More detail on usage can be found The code to produce the plots can be found in the function documentation by searching '?functionname' in R. 
+
+## Pre-model plots {.tabset .tabset-fade .tabset-pills}
+
+### Logbook data investigation
+```{r include=FALSE, eval=FALSE}
+data <- format_logbooks(raw_logbook_data) # format logbooks for investigation plots
+investigate(data) # produce an Rmd and HTML to view logbook data
+```
+
+### Biological data investigation
+```{r include=FALSE, eval=FALSE}
+investigate_biology(data) # produce an Rmd and HTML to view biological data
+```
+
+### Upset plot
+```{r echo=TRUE, include=TRUE}
+head(upset) # View sample data
+upsetplot(upset, species = "Glitterfin snapper")
+```
+
+### Life history plot
+```{r echo=TRUE, include=TRUE}
+lifehistoryplot(ss_mle)
+lifehistoryplot(Linf = 38, k = 0.3, a0 = 0,
+                M = 0.73, L50 = 18, L95 = 22,
+                WLa = 0.0013, WLb = 1.949,
+                MLS = 20, max_length = 45)
+```
+
+### CPUE influence plot
+```{r echo=TRUE, include=TRUE, warning=FALSE}
+data <- data.frame(year=rep(1988:2024,6),
+                   cpue = c(sin(1988:2024 / 10),
+                            cos(1988:2024 / 10),
+                            cos(sin(1988:2024 / 10)),
+                            sin(cos(1988:2024 / 10)),
+                            sin(cos(sin(1988:2024 / 10))),
+                            cos( sin(cos(1988:2024 / 10)))),
+                   cpue_lwr = c(sin(1988:2024 / 10) /1.1,
+                                cos(1988:2024 / 10)  /1.1,
+                                cos(sin(1988:2024 / 10))  /1.1,
+                                sin(cos(1988:2024 / 10)) /1.1,
+                                sin(cos(sin(1988:2024 / 10)) /1.1),
+                                cos(sin(cos(1988:2024 / 10)))/1.1),
+                   cpue_upr = c(sin(1988:2024 / 10) /1.1,
+                                cos(1988:2024 / 10)  /0.9,
+                                cos(sin(1988:2024 / 10))  /0.9,
+                                sin(cos(1988:2024 / 10)) /0.9,
+                                sin(cos(sin(1988:2024 / 10)) /0.9),
+                                cos(sin(cos(1988:2024 / 10)))/0.9),
+                   model=c(rep(1,37),rep(2,37),rep(3,37),
+                              rep(4,37),rep(5,37),rep(6,37)))
+
+influenceplot(data)
+influenceplot(data, step=FALSE)
+influenceplot(data, step=FALSE, show_CI=TRUE)
+influenceplot(data, show_CI=TRUE)
+influenceplot(data, model_names = c("Raw","Add A","Add B","Add C","Add D","Add E"))
+```
+
+
+
+
+## Model input plots {.tabset .tabset-fade .tabset-pills}
+
+### Age plot
+
+Note that no age composition input was used in the sample data, so this plot won't render.
+
+```{r echo=TRUE, include=TRUE, eval=FALSE}
+ageplot(ageplot_prep_SS(ss_mle)
+```
+
+### Catch data sources
+```{r echo=TRUE, include=TRUE}
+data <- data.frame(c('Queensland commercial'  , 'Hindcast (linear)', 1958, 1989, 'C', 1),
+                   c('Queensland commercial'  , 'Logbook records'  , 1989, 2021, 'B', 1),
+                   c('Queensland charter'     , 'Hindcast (linear)', 1958, 1995, 'C', 1),
+                   c('Queensland charter'     , 'Logbook records'  , 1995, 2021, 'B', 1),
+                   c('Queensland recreational', 'Hindcast'         , 1958, 2001, 'C', 1),
+                   c('Queensland recreational', 'NRIFS'            , 2001, 2002, 'B', 4),
+                   c('Queensland recreational', 'RFish'            , 2002, 2003, 'B', 4),
+                   c('Queensland recreational', 'Estimated'        , 2003, 2005, 'A', 0),
+                   c('Queensland recreational', 'RFish'            , 2005, 2006, 'B', 4),
+                   c('Queensland recreational', 'Estimated'        , 2006, 2011, 'A', 2),
+                   c('Queensland recreational', 'SRFS'             , 2011, 2012, 'B', 4),
+                   c('Queensland recreational', 'Estimated'        , 2012, 2014, 'A', 0),
+                   c('Queensland recreational', 'SRFS'             , 2014, 2015, 'B', 4),
+                   c('Queensland recreational', 'Estimated'        , 2015, 2020, 'A', 0),
+                   c('Queensland recreational', 'SRFS'             , 2020, 2021, 'B', 4),
+                   c('Queensland recreational', 'Estimated'        , 2021, 2021, 'B', 0),
+                   c('Queensland Indigenous'  , 'Equal to NRIFS'   , 1958, 2001, 'C', 1),
+                   c('Queensland Indigenous'  , 'NRIFS'            , 2001, 2002, 'B', 4),
+                   c('Queensland Indigenous'  , 'Equal to NRIFS'   , 2002, 2021, 'C', 1)) |>
+  t() |>
+  `rownames<-`(NULL) |>
+  `colnames<-`(c("sector","source","startyr","endyr","col","label")) |>
+  as.data.frame() |>
+  dplyr::mutate(startyr = as.numeric(startyr), endyr = as.numeric(endyr)) |>
+  dplyr::mutate(sector = as.factor(sector))
+
+  data$sector <- factor(data$sector, levels = c('Queensland Indigenous',
+                                                'Queensland recreational',
+                                                'Queensland charter',
+                                                'Queensland commercial'))
+catchdatasourcesplot(data)
+```
+
+### Catch plot
+
+```{r echo=TRUE, include=TRUE}
+data <- catchplot_prep_SS(ss_mle)
+catchplot(data, fleet_names = "Commercial")
+```
+
+### Conditional age at length plot
+
+```{r echo=TRUE, include=TRUE}
+data <- conditionalageatlengthplot_prep_SS(ss_mle, sex_code=1)
+conditionalageatlengthplot(data, show_fits=FALSE)
+```
+
+### CPUE plot
+
+Adjust the 'data' input variables ub and lb if you want to plot different uncertainty than that which was put into the model. 
+
+```{r echo=TRUE, include=TRUE}
+data <- cpueplot_prep_SS(ss_mle, scenarios=1)
+
+# To create a suitable CPUE plot for a report summary:
+cpueplot(data |> dplyr::filter(fleet==1),
+        show_inputs = TRUE,
+        show_fits = FALSE,
+        show_CI_ribbon = TRUE,
+        show_error_bar = FALSE,
+        show_point = TRUE)
+```
+
+### Data plot
+
+```{r echo=TRUE, include=TRUE}
+data <- dataplot_prep_SS(ss_mle)
+dataplot(data)
+```
+
+### Influence plot
+
+```{r echo=TRUE, include=TRUE, warning=FALSE}
+data <- data.frame(year=rep(1988:2024,6),
+                   cpue = c(sin(1988:2024 / 10),
+                            cos(1988:2024 / 10),
+                            cos(sin(1988:2024 / 10)),
+                            sin(cos(1988:2024 / 10)),
+                            sin(cos(sin(1988:2024 / 10))),
+                            cos( sin(cos(1988:2024 / 10)))),
+                   cpue_lwr = c(sin(1988:2024 / 10) /1.1,
+                                cos(1988:2024 / 10)  /1.1,
+                                cos(sin(1988:2024 / 10))  /1.1,
+                                sin(cos(1988:2024 / 10)) /1.1,
+                                sin(cos(sin(1988:2024 / 10)) /1.1),
+                                cos(sin(cos(1988:2024 / 10)))/1.1),
+                   cpue_upr = c(sin(1988:2024 / 10) /1.1,
+                                cos(1988:2024 / 10)  /0.9,
+                                cos(sin(1988:2024 / 10))  /0.9,
+                                sin(cos(1988:2024 / 10)) /0.9,
+                                sin(cos(sin(1988:2024 / 10)) /0.9),
+                                cos(sin(cos(1988:2024 / 10)))/0.9),
+                   model=c(rep(1,37),rep(2,37),rep(3,37),
+                              rep(4,37),rep(5,37),rep(6,37)))
+
+influenceplot(data)
+influenceplot(data, step=FALSE)
+influenceplot(data, step=FALSE, show_CI=TRUE)
+influenceplot(data, show_CI=TRUE)
+influenceplot(data, model_names = c("Raw","Add A","Add B","Add C","Add D","Add E"))
+```
+
+### Length plot
+
+```{r echo=TRUE, include=TRUE}
+data <- lengthplot_prep_SS(ss_mle)
+lengthplot(data, show_fits=FALSE)
+```
+
+
+## Model output plots (MLE) {.tabset .tabset-fade .tabset-pills}
+
+### Age plot
+
+Sample data does not contain age compositions as an input. 
+
+```{r echo=TRUE, include=TRUE, eval=FALSE}
+data <- ageplot_prep_SS(ss_mle)
+ageplot(data)
+```
+
+### Biomass plot
+
+```{r echo=TRUE, include=TRUE}
+data <- biomassplot_prep_SS(ss_mle)
+biomassplot(data)
+```
+
+### CAAL age fit plot (instead of ghost fleets)
+
+```{r echo=TRUE, include=TRUE}
+data <- caal_agefitplot_prep_SS(ss_mle)
+caal_agefitplot(data, scenario=1)
+```
+
+### Catchability plot
+
+```{r echo=TRUE, include=TRUE, warning=FALSE}
+data <- catchabilityplot_prep_DD(dd_mle)
+catchabilityplot(data)
+```
+
+### Conditional age at length plot
+
+```{r echo=TRUE, include=TRUE, warning=FALSE}
+data <- conditionalageatlengthplot_prep_SS(ss_mle, sex_code=1)
+conditionalageatlengthplot(data)
+```
+
+### Correlation plot
+
+```{r echo=TRUE, include=TRUE}
+parameters <- extract_SS_parameters(ss_mle)[c(2,3,4,26),]
+data <- correlationplot_prep_SS(ss_mle, scenario = 1, parameters = parameters)
+correlationplot(data)
+```
+
+### CPUE plot
+
+```{r echo=TRUE, include=TRUE}
+data <- cpueplot_prep_SS(ss_mle)
+cpueplot(data, show_colour=FALSE, show_CI_ribbon = TRUE, show_error_bar = FALSE)
+cpueplot(data, show_colour=FALSE,fleets=3, show_CI_ribbon = TRUE, show_error_bar = FALSE)
+```
+
+### CPUE catchability plot
+
+```{r echo=TRUE, include=TRUE}
+print("Under construction")
+```
+
+### Discard plot
+
+```{r echo=TRUE, include=TRUE}
+data <- discardplot_prep_SS(ss_mle)
+discardplot(data)
+discardplot(data,
+            fleets=c(1,2),
+            fleet_names = c("Commercial","Recreational"))
+```
+
+### Dynamic B0
+
+```{r echo=TRUE, include=TRUE}
+data <- dynamicB0plot_prep_SS(ss_mle)
+dynamicB0plot(data, scenarios = 1:2)
+```
+
+### F plot
+
+```{r echo=TRUE, include=TRUE}
+data <- Fplot_prep_SS(ss_mle)
+Fplot(data)
+```
+
+### Growth plot
+
+```{r echo=TRUE, include=TRUE}
+data <- growthplot_prep_SS(ss_mle)
+growthplot(data)
+```
+
+### Length plot
+
+```{r echo=TRUE, include=TRUE}
+data <- lengthplot_prep_SS(ss_mle)
+lengthplot(data)
+```
+
+### Likelihood plot
+
+```{r echo=TRUE, include=TRUE, eval=FALSE}
+# STOCK SYNTHESIS:
+r4ss::profile(dir = '.', # directory of 4 SS files
+              oldctlfile = "control.ctl",
+              newctlfile = "control.ctl",
+              string = "steep",
+              profilevec = c(0.4,0.5,0.6),
+              exe = "C:/stocksynthesis/ss_3.30.22.exe")
+
+profile_input <- r4ss::SSsummarize(
+  r4ss::SSgetoutput(dirvec = ".",
+                    keyvec = 1:3, 
+                    getcovar = FALSE,
+                    getcomp = FALSE))
+
+
+data <- likelihoodprofileplot_prep_SS(profile_input, parameter="SR_BH_steep")
+likelihoodprofileplot(data)
+
+# DDUST:
+# Run DDUST model:
+data <- dd_mle[[1]]$data
+parameters <- dd_mle[[1]]$parameters
+map <- dd_mle[[1]]$map
+dd_out <- DDUST::run_DDUST(data, parameters, map, MCMC = FALSE)
+
+# Set up parameter profile:
+Rinit <- seq(11,12,by = 0.05)
+
+# Simulate model over every value of parameter
+profile <- c()
+for (i in 1:length(Rinit)){
+  simulation_parameters <- parameters
+  for (item in names(map)){
+    simulation_parameters[item] <- NULL
+  }
+  simulation_parameters$Rinit <- Rinit[i]
+  sim <- dd_out$dd_mle$model$simulate(unlist(simulation_parameters))
+
+  profile <- rbind(profile,
+                   data.frame(x_vector = Rinit[i],
+                              likelihood = sim$LL, component = 'Total'),
+                   data.frame(x_vector = Rinit[i],
+                              likelihood = sim$biomassLL, component = 'Biomass vey'),
+                   data.frame(x_vector = Rinit[i],
+                              likelihood = sim$cpueLL, component = 'Index'),
+                   data.frame(x_vector = Rinit[i],
+                              likelihood = sim$RecDevLL, component = 'Recruitment'),
+                   data.frame(x_vector = Rinit[i],
+                              likelihood = sim$penLL1, component = 'Catch penalty'),
+                   data.frame(x_vector = Rinit[i],
+                              likelihood = sim$penLL2, component = 'Recruits alty'))
+}
+
+likelihoodprofileplot(profile)
+```
+
+![An example likelihood profile plot, produced using likelihoodprofileplot()](fig/likelihood_example.png)
+
+### Maturity plot
+
+```{r echo=TRUE, include=TRUE}
+data <- maturityplot_prep_SS(ss_mle)
+maturityplot(data)
+
+data <- maturityplot_prep_DD(x_max=10,x_mat=2)
+maturityplot(data)
+```
+
+### Phase plot
+
+```{r echo=TRUE, include=TRUE}
+data <- phaseplot_prep_SS(ss_mle)
+phaseplot(data)
+```
+
+### Piner plot
+
+```{r echo=TRUE, include=TRUE, eval=FALSE}
+r4ss::profile(dir = '.', # directory of 4 SS files
+              oldctlfile = "control.ctl",
+              newctlfile = "control.ctl",
+              string = "steep",
+              profilevec = c(0.4,0.5,0.6),
+              exe = "C:/stocksynthesis/ss_3.30.22.exe")
+
+profile_input <- r4ss::SSsummarize(
+  r4ss::SSgetoutput(dirvec = ".",
+                    keyvec = 1:3, 
+                    getcovar = FALSE,
+                    getcomp = FALSE))
+
+pinerplot_component_options(profile_input)
+data <- pinerplot_prep_SS(profile_input, component="Length_like")
+pinerplot(data)
+```
+
+
+### Proportion spawning plot
+
+```{r echo=TRUE, include=TRUE}
+data <- proportionspawningplot_prep_DD(dd_mle)
+proportionspawningplot(data)
+```
+
+### Rec dev plot
+
+```{r echo=TRUE, include=TRUE}
+data <- recdevplot_prep_SS(ss_mle)
+recdevplot(data)
+```
+
+### Recruitment pattern plot
+
+```{r echo=TRUE, include=TRUE}
+data <- recruitmentpatternplot_prep_SS(ss_mle)
+recruitmentpatternplot(data)
+```
+
+### Selectivity plot
+
+```{r echo=TRUE, include=TRUE}
+data <- selectivityplot_prep_SS(ss_mle)
+selectivityplot(data)
+selectivityplot(data, selectivity_type = "Selectivity (length)")
+selectivityplot(data, selectivity_type = "Selectivity (age)", xlab = "Age (years)")
+selectivityplot(data, selectivity_type = c("Selectivity (length)", "Retention","Dead","Discard"),xlab = "Age (years)")
+```
+
+### Sensitivity plot
+
+```{r echo=TRUE, include=TRUE}
+parm <- extract_SS_parameters(ss_mle)[c(3:6),]
+data <- sensitivityplot_prep_SS(ss_mle,
+                                ss_mcmc,
+                                show_MSY = TRUE,
+                                show_LL = TRUE,
+                                show_B_ratio = TRUE,
+                                parameters = parm)
+sensitivityplot(data)
+```
+
+### Spaghetti plot
+
+```{r echo=TRUE, include=TRUE}
+data <- spaghettiplot_prep_DD(dd_mle)
+spaghettiplot(data)
+
+spaghettiplot(data, template = "greyscale", line_width = 0.5)
+
+spaghettiplot(data,
+              linetype_categories = c(1,2),
+              linetype_labels = c("Catch rate A", "Catch rate B"),
+              linetypes = c("solid", "dashed"),
+              colour_categories = c(1,2),
+              colour_labels = c("High M", "Medium M"),
+              colours = fq_palette("alisecolours")[1:2])
+```
+
+### Spawning output
+
+```{r echo=TRUE, include=TRUE}
+data <- spawningoutputplot_prep_SS(ss_mle)
+spawningoutputplot(data,xaxis="length")
+```
+
+### SR plot
+
+```{r echo=TRUE, include=TRUE}
+data <- srplot_prep_SS(ss_mle)
+srplot(data)
+```
+
+### Weight plot
+
+```{r echo=TRUE, include=TRUE}
+data <- weightplot_prep_SS(ss_mle)
+weightplot(data)
+```
+
+### Yield plot
+
+```{r echo=TRUE, include=TRUE}
+data <- yieldplot_prep_SS(ss_mle)
+yieldplot(data, show_msy_line=TRUE)
+```
+
+
+## Model output plots (MCMC) {.tabset .tabset-fade .tabset-pills}
+
+### Biomass plot
+
+```{r echo=TRUE, include=TRUE, warning=FALSE, message=FALSE}
+data <- biomassplot_prep_SS(ss_mle, ss_mcmc)
+biomassplot(data, mcmc_style = "banded", show_median = c("annual_biomass","trajectory"))
+biomassplot(data, mcmc_style = "boxplot", show_median = c("annual_biomass","trajectory"))
+biomassplot(data, mcmc_style = "hairy", show_median = c("annual_biomass","trajectory"))
+biomassplot(data, mcmc_style = "CI", show_median = c("annual_biomass","trajectory"), CI_range = 0.9)
+biomassplot(data, mcmc_style = "joy", show_median = c("none"))
+```
+
+### Correlation plot
+
+```{r echo=TRUE, include=TRUE}
+data <- correlationplot_prep_SS(ss_mle, ss_mcmc, scenario = 1, parameters = parameters)
+correlationplot(data)
+
+ss_mcmc_ens <- mcmc_ensemble_SS(ss_mcmc)
+data <- correlationplot_prep_SS(ss_mle, ss_mcmc_ens, scenario = 1, parameters = parameters)
+correlationplot(data)
+```
+
+### F plot
+
+```{r echo=TRUE, include=TRUE}
+data <- Fplot_prep_SS(ss_mle, ss_mcmc, intervals = c(0.2, 0.5, 0.7, 0.9, 0.95))
+
+Fplot(data, mcmc_style = "banded", show_median = c("annual_F","trajectory"), legend_box="vertical")
+Fplot(data, mcmc_style = "boxplot", show_median = c("annual_F","trajectory"))
+Fplot(data, mcmc_style = "hairy", show_median = c("annual_F","trajectory"))
+Fplot(data, mcmc_style = "CI", show_median = c("annual_F","trajectory"))
+Fplot(data, mcmc_style = "CI", show_median = c("none"))
+```
+
+### Growth plot
+In the sample data provided, scenario 1 is one-sex, scenario 2 is two-sex. Only showing example for one scenario. 
+
+```{r echo=TRUE, include=TRUE}
+ss_mcmc_ens <- mcmc_ensemble_SS(ss_mcmc,scenarios=1) 
+data <- growthplot_prep_SS(list(ss_mle[[1]]),ss_mcmc_ens)
+growthplot(data)
+```
+
+
+### MCMC final biomass posterior
+
+```{r echo=TRUE, include=TRUE, warning=FALSE}
+ss_mcmc_ens <- mcmc_ensemble_SS(ss_mcmc)
+data <- mcmc_finalbiomassposterior_prep_SS(ss_mle,ss_mcmc_ens)
+mcmc_finalbiomassposteriorplot(data)
+```
+
+### MCMC posteror density 
+
+```{r echo=TRUE, include=TRUE}
+parameters <- extract_SS_parameters(ss_mcmc)[c(2:10,449),]
+data <- mcmc_posteriordensityplot_prep_SS(ss_mle, ss_mcmc,
+                                          scenario = 1, parameters)
+mcmc_posteriordensityplot(data)
+```
+
+### MCMC Rhat 
+
+```{r echo=TRUE, include=TRUE}
+data <- mcmc_rhatplot_prep_SS(ss_mle,
+           ss_mcmc,
+           parameters = extract_SS_parameters(ss_mle)[c(2:10),])
+mcmc_rhatplot(data)
+```
+
+### MCMC trace plot
+
+```{r echo=TRUE, include=TRUE}
+parameters <- extract_SS_parameters(ss_mcmc)[c(2:9),]
+data <- mcmc_posteriordensityplot_prep_SS(ss_mle,
+                                          ss_mcmc,
+                                          scenario = 1,
+                                          parameters,
+                                          show_objective_function=TRUE)
+mcmc_traceplot(data)
+```
+
+### Rec dev plot
+
+```{r echo=TRUE, include=TRUE}
+data <- recdevplot_prep_SS(ss_mle,ss_mcmc)
+recdevplot(data)
+recdevplot(data, mcmc_style = "banded")
+recdevplot(data, mcmc_style = "boxplot")
+```
+
+### Selectivity plot
+
+```{r echo=TRUE, include=TRUE}
+ss_mcmc_ens <- mcmc_ensemble_SS(ss_mcmc)
+data <- selectivityplot_prep_SS(ss_mle,ss_mcmc_ens,fleet = 1)
+selectivityplot(data)
+```
+
+### Sensitivity plot
+
+```{r echo=TRUE, include=TRUE}
+parm <- extract_SS_parameters(ss_mle)[c(3:6),]
+data <- sensitivityplot_prep_SS(ss_mle,
+                                ss_mcmc,
+                                show_MSY = TRUE,
+                                show_LL = TRUE,
+                                show_B_ratio = TRUE,
+                                parameters = parm)
+sensitivityplot(data)
+```
+
+## Communications package plots {.tabset .tabset-fade .tabset-pills}
+
+
+### Management plot
+
+```{r echo=TRUE, include=TRUE, eval=FALSE}
+management_text <- c(
+"1980: Management measure",
+"1988: Management measure",
+"2004: - Many things \n - happened in \n - this year",
+"2010: Management measure",
+"2021: - Many things \n - happened in \n - this year")
+
+management_pos <- c(0.8, 0.6, 1.0, 0.5, 0.2)
+
+data <- biomassplot_prep_SS(ss_mle)
+
+managementplot(data, management_text, management_pos, base_case = 1, show_result = TRUE, scenarios = 1)
+```
+
+![An example management plot, produced using managementplot()](fig/management_example.png)
+
+### Web catch plot
+
+```{r echo=TRUE, include=TRUE}
+data <- webcatchplot_prep_SS(ss_mle)
+webcatchplot(data)
+```
+
+## Additional plots {.tabset .tabset-fade .tabset-pills}
+
+### Generic plot
+
+```{r echo=TRUE, include=TRUE}
+data <- data.frame()
+for (scenario in 1:6) {
+  for (fleet in 1:2) {
+    tmp <- data.frame(year = 1980:2020,
+                      value = runif(41),
+                      fleet = fleet,
+                      scenario = scenario)
+    data <- rbind(data, tmp)
+  }
+}
+genericplot(data)
+genericplot(data, type = "line", show_points = TRUE)
+```
+
+
+## Maps {.tabset .tabset-fade .tabset-pills}
+
+The map() function has a lot of built-in functionality. Explore ?map() to see all function arguments and examples.
+
+The code relies on shapefiles which are by default located on the QDAF network drive. The locations of these shapefiles can be customised if not accessing from within QDAF. 
+
+Below are just some of the plots that can be made with map(). 
+
+```{r echo=TRUE, include=TRUE, eval=FALSE}
+# To generate a basic map with grids overlaid:
+map(region = "EC", show_grids=TRUE, show_cities = TRUE)
+```
+!(fig/map_grids.png)
+
+
+```{r echo=TRUE, include=TRUE, eval=FALSE}
+# To generate a heat map:
+heat_map <- data.frame(grid = c("E4", "Z8", "A33", "G29", "C19",
+                                "A32", "Y37", "T12", "S9", "F40",
+                                "J8", "J12", "Z40", "M5", "N23"),
+                       value= c(0.74, 0.14, 0.301, 1.172, 0.863,
+                                0.444, 1.044, 0.558, 0.31, 1.861,
+                                0.63, 0.682, 0.168, 0.82, 0.898))
+map(region = "EC", show_heat_map = TRUE, heat_map = heat_map,
+    legend_position = "right")
+```
+!(fig/map_heat.png)
+
+
+```{r echo=TRUE, include=TRUE, eval=FALSE}
+# To show GBRMP zoning
+map(region = "EC", show_gbrmp_zoning = TRUE,
+    labels = c("Green Zone",
+               "Yellow Zone",
+               "Dark Blue Zone",
+               "Olive Green Zone",
+               "Orange Zone",
+               "Pink Zone",
+               "Light Blue Zone",
+               "Commonwealth Island",
+               "Commonwealth Island Zone"),
+    colours = c("grey70","#41ba07", "#FFC000",
+                        "darkblue","#26590d", "#ff770f",
+                        "#ff0fd7", "#0fe3ff", "#340942", "#453d4d"))
+
+```
+!(fig/map_gbrmp.png)
+
+
+```{r echo=TRUE, include=TRUE, eval=FALSE}
+# To plot a map with latbands:
+map(show_latbands = TRUE, latbands_level = "bottom")
+```
+!(fig/map_latbands.png)
+
+```{r echo=TRUE, include=TRUE, eval=FALSE}
+# To plot a map with QLD and NSW grids:
+map(ylim = c(-30, -20),show_grids = TRUE,show_NSW_grids = TRUE)
+```
+!(fig/map_qld_nsw.png)
+
+
+## Auxiliary functions {.tabset .tabset-fade .tabset-pills}
+
+```{r echo=TRUE, include=TRUE}
+ss_mcmc_ens <- mcmc_ensemble_SS(ss_mcmc)
+ss_mcmc_ens <- mcmc_ensemble_SS(ss_mcmc,scenarios=c(1,2), weighting=c(3,1))
+
+# dd_mcmc_ens <- mcmc_ensemble_DD(dd_mcmc,dd_sim,scenarios=c(1,2))$dd_mcmc
+# dd_sim_ens <- mcmc_ensemble_DD(dd_mcmc,dd_sim,scenarios=c(1,2))$dd_sim
+```
+
+```{r echo=TRUE, include=TRUE}
+mcmc_median_position_SS(ss_mle, ss_mcmc)
+```
+
+```{r echo=TRUE, include=TRUE}
+head(extract_SS_parameters(ss_mle))
+head(extract_SS_parameters(ss_mcmc))
+```
+
+```{r echo=TRUE, include=TRUE}
+check_scenarios(ss_mle,"SS","MLE")
+check_scenarios(ss_mcmc[[1]],"SS","MCMC")
+check_scenarios(mcmc_ensemble_SS(ss_mcmc),"SS","MCMC")
+```
+
+
+## Report values and tables {.tabset .tabset-fade .tabset-pills}
+
+The report_values functions produce a list that contains all the numbers that are generally quoted within the text of a QDAF stock assessment report. 
+
+```{r echo=TRUE, include=TRUE}
+head(report_values_SS(ss_mle,ss_mcmc))
+```
+
+The table functions prepare the report values into a format that can be copy and pasted directly into an Rtex report. Note the commented out text in the examples below; this text will need to be uncommented in the Rtex document. 
+
+```{r echo=TRUE, include=TRUE}
+# <<table_summary, results='asis', echo=FALSE>>=
+ss_mcmc_ens <- mcmc_ensemble_SS(ss_mcmc,scenarios=c(1,2))
+data <- summarytable_prep_SS(ss_mle,ss_mcmc_ens)
+summarytable(data, label="tab:summary")
+# @
+
+
+# \rowcolors{2}{white}{light-gray}
+# <<table_mcmc1, results='asis', echo=FALSE>>=
+ss_mcmc_ens <- mcmc_ensemble_SS(ss_mcmc,scenarios=c(1,2))
+parameters <- extract_SS_parameters(ss_mle)[2:4,]
+data <- parametertable_prep_SS(ss_mcmc=ss_mcmc_ens, parameters=parameters, scenario=1)
+parametertable(data, label="tab:parameter")
+# @
+
+# \rowcolors{2}{white}{light-gray}
+# <<table_biomass, results='asis', echo=FALSE>>=
+data <- biomasstable_prep_SS(ss_mle,ss_mcmc)
+biomasstable(data, label="tab:biomass")
+# @
+```

@@ -1,0 +1,1210 @@
+\documentclass{class/SATclass}
+\usepackage{datetime}
+\title{Stock assessment of SPECIES (\textit{SCIENTIFIC NAME}) in STOCK, Queensland, Australia, with data to MONTH YEAR}
+\date{\monthname[\the\month] \the\year}
+\def\fishimage{report_cover} % in class folder
+\def\compiledby{AUTHORS of Fisheries Queensland, Department of Agriculture and Fisheries}
+\def\DAFfooter{Stock assessment of STOCK SPECIES \the\year}
+\bibliography{bib/references}
+
+% Copyright 2024 Fisheries Queensland
+
+% This file is part of SSAND.
+% SSAND is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+% SSAND is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+% You should have received a copy of the GNU General Public License along with SSAND. If not, see <https://www.gnu.org/licenses/>.
+
+
+<<init, include=FALSE>>=
+library(SSAND)
+library(knitr)
+library(xtable)
+
+%begin_SS
+# Load model objects here (e.g. ss_mle and ss_mcmc)
+%end_SS
+
+%begin_DD
+# Load model objects here (e.g. dd_mle, dd_mcmc, dd_sim)
+library(DDUST)
+simulate_DDUST <- function(dd_mle, dd_mcmc){
+
+  simulation_list <- list()
+  for (scenario in 1:length(dd_mle)){
+    fit <- as.matrix(dd_mcmc[[scenario]])
+    simulation_list[[scenario]] <- sapply(1:nrow(fit), function(i){list(dd_mle[[scenario]]$model$simulate(fit[i,1:ncol(fit)-1]))})
+  }
+  return(simulation_list)
+}
+dd_mle <- list(dd_mle[[1]],dd_mle[[2]])
+dd_mcmc <- list(dd_mcmc[[1]],dd_mcmc[[2]])
+dd_sim <- simulate_DDUST(dd_mle,dd_mcmc)
+%end_DD
+
+# load('objects.RData')
+
+# Load catch dataframe
+# e.g.
+catch <- rbind(data.frame(year = 1953:2022, sector = "Commercial",
+                          value = c(602,674,561,472,436,480,370,404,390,277)),
+               data.frame(year = 1953:2022, sector = "Recreational",
+                          value = c(750,705,570,535,495,390,506,448,383,303)))
+
+# Consolidate MCMC runs into ensemble
+%begin_SS
+%begin_MCMC
+ss_mcmc_ens <- mcmc_ensemble_SS(ss_mcmc)
+%end_MCMC
+%end_SS
+%begin_DD
+%begin_MCMC
+dd_mcmc_ens <- mcmc_ensemble_DD(dd_mcmc,dd_sim)$dd_mcmc
+dd_sim_ens <- mcmc_ensemble_DD(dd_mcmc,dd_sim)$dd_sim
+%end_MCMC
+%end_DD
+
+# Calculate report values
+%begin_SS
+%begin_MLE
+x <- report_values_SS(ss_mle,catch=catch)
+%end_MLE
+%end_SS
+%begin_SS
+%begin_MCMC
+x <- report_values_SS(ss_mle,ss_mcmc_ens,catch=catch)
+%end_MCMC
+%end_SS
+%begin_DD
+%begin_MLE
+x <- report_values_DD(dd_mle,catch=catch)
+%end_MLE
+%end_DD
+%begin_DD
+%begin_MCMC
+x <- report_values_DD(dd_mle,dd_mcmc_ens,dd_sim_ens,catch=catch)
+%end_MCMC
+%end_DD
+@
+
+%begin_SS
+<<generate_likelihood, include=FALSE>>=
+
+# Load likelihood profile object
+# r4ss::profile(dir = '.', # directory of 4 SS files
+#               oldctlfile = "control.ctl",
+#               newctlfile = "control.ctl",
+#               string = "steep",
+#               profilevec = c(0.4,0.5,0.6),
+#               exe = "C:/stocksynthesis/ss_3.30.22.exe")
+#
+# profile_input <- r4ss::SSsummarize(
+#   r4ss::SSgetoutput(dirvec = ".",
+#                     keyvec = 1:3, # 1:length(profilevec)
+#                     getcovar = FALSE,
+#                     getcomp = FALSE))
+@
+%end_SS
+
+\begin{document}
+
+\hyphenation{for-est-ry}
+\hyphenation{state-wide}
+
+\DAFtitlepage
+\copyrightpage
+\tableofcontents
+
+\newparagraphspacing
+
+\chapter*{Summary}
+\pagestyle{fancyplain}
+\thispagestyle{fancy} % ensures page number on chapter page
+\addcontentsline{toc}{chapter}{Summary}
+\pagenumbering{roman}
+
+This stock assessment indicates that the biomass of SPECIES in the STOCK declined from an assumed unfished state in \Sexpr{x$start_year_biomass} to potentially as low as \Sexpr{x$biomass_min_value}\% of this level in \Sexpr{x$biomass_min_year}. The stock level at the end of \Sexpr{x$end_year} was estimated to be between \Sexpr{x$biomass_summary_lower}\% and \Sexpr{x$biomass_summary_upper}\% of unfished biomass.
+
+SPECIES is a X fish species that is found in X. In Australia, its distribution extends from the X to X. It is a protandrous hermaphrodite, beginning as male and later changing to female between about X~cm to X~cm total length. It can grow to X~cm total length and X~kg in weight. The species lives to at least X~years of age.
+
+A previous assessment estimated the STOCK stock to be around X\% of the unfished level, using data through to MONTH YEAR.
+
+This assessment differs from the previous assessment in several respects...
+
+All assessment inputs and outputs are referenced on a calendar year basis (that is, `2022' means January 2022--December 2022).
+
+The assessment used an age-structured model with an annual time step, fitted to standardised catch rates, length composition data, and age-at-length composition data. The model incorporated data spanning the period \Sexpr{x$start_year_catch}--\Sexpr{x$end_year_catch} including mandatory daily commercial logbook data collected by Fisheries Queensland (1988--\Sexpr{x$end_year_catch}), OTHER DATA SOURCES.
+
+Over the last five years, \Sexpr{x$end_year_catch-5} to \Sexpr{x$end_year_catch}, total retained catch averaged \Sexpr{x$catch_5year_average}~tonnes per year in the STOCK (Figure \ref{fig:summary_catch}). Of the overall harvest, \Sexpr{x$catch_5year_average_percent_Commercial}\% was taken by the commercial sector and \Sexpr{x$catch_5year_average_percent_Recreational}\% by the recreational sector.
+
+%begin_SS
+<<summary_catch, echo=FALSE, fig.pos='H', fig.width=8,fig.height=4,out.width='0.85\\textwidth',fig.align='center',fig.cap=paste0('Estimated retained catch between ', x$start_year_catch, ' and ', x$end_year_catch, ' for SPECIES in the STOCK')>>=
+data <- catchplot_prep_SS(ss_mle)
+catchplot(data, fleet_names = "Commercial", scenarios = 1)
+@
+%end_SS
+%begin_DD
+<<summary_catch, echo=FALSE, fig.pos='H', fig.width=8,fig.height=4,out.width='0.85\\textwidth',fig.align='center',fig.cap=paste0('Estimated retained catch between ', x$start_year_catch, ' and ', x$end_year_catch, ' for SPECIES in the STOCK')>>=
+data <- catchplot_prep_DD(dd_mle)
+catchplot(data, fleet_names = "Commercial", scenarios = 1)
+@
+%end_DD
+
+The commercial catch rates were standardised to estimate an index of abundance of SPECIES through time (Figure \ref{fig:summary_cpue}). The unit of standardisation was kilograms of SPECIES per fisher per day, and included an adjustment for targeting. The catch rate standardisation model included terms for year, month, location, net mesh size, net length and fisher. Several different methods of spatial weighting were considered when constructing the final index.
+
+%begin_SS
+<<summary_cpue, echo=FALSE, fig.pos='H', fig.width=8,fig.height=4,out.width='0.85\\textwidth',fig.align='center',fig.cap='Annual standardised catch rates for SPECIES in the STOCK'>>=
+data <- cpueplot_prep_SS(ss_mle, scenarios=1)
+cpueplot(data,
+         fleets=1,
+         show_inputs = TRUE,
+         show_fits = FALSE,
+         show_CI_ribbon = FALSE,
+         show_error_bar = FALSE,
+         show_point = TRUE)
+@
+%end_SS
+
+%begin_DD
+<<summary_cpue, echo=FALSE, fig.pos='H', fig.width=8,fig.height=4,out.width='0.85\\textwidth',fig.align='center',fig.cap='Annual standardised catch rates for SPECIES in the STOCK'>>=
+data <- cpueplot_prep_DD(dd_mle, scenarios=1)
+cpueplot(data,
+         fleets=1,
+         show_inputs = TRUE,
+         show_fits = FALSE,
+         show_CI_ribbon = FALSE,
+         show_error_bar = FALSE,
+         show_point = TRUE)
+@
+%end_DD
+
+Several scenarios were run to explore different settings of XXX. From these exploratory scenarios a final ensemble of X scenarios were chosen for inclusion in summary reporting. This ensemble indicates that the biomass ratio at the beginning of \Sexpr{x$end_year} was between \Sexpr{x$biomass_summary_lower}\% and \Sexpr{x$biomass_summary_upper}\% of unfished levels (95\% credible interval). We also report the probability of the 2023 biomass ratio falling into each of the following four biomass ratio categories: below 20\%, between 20\% and 40\%, between 40\% and 60\%, and above 60\% (Table~\ref{tab:table_summary}; Figures~\ref{fig:summary_biomass} and \ref{fig:summary_pdf}).
+
+%begin_SS
+%begin_MLE
+<<summary_biomass, echo=FALSE, fig.pos='H', fig.width=8,fig.height=4,out.width='0.85\\textwidth',fig.align='center',fig.cap=paste0('Probability distribution of the biomass ratio at the beginning of ',x$end_year, ' across the full ensemble of scenarios with the credible interval and probability of biomass falling into the four categories indicated')>>=
+data <- biomassplot_prep_SS(ss_mle)
+biomassplot(data, scenarios=1)
+@
+%end_MLE
+
+%begin_MCMC
+<<summary_biomass, echo=FALSE, fig.pos='H', fig.width=8,fig.height=4,out.width='0.85\\textwidth',fig.align='center',fig.cap=paste0('Probability distribution of the biomass ratio at the beginning of ',x$end_year, ' across the full ensemble of scenarios with the credible interval and probability of biomass falling into the four categories indicated')>>=
+data <- biomassplot_prep_SS(ss_mle, ss_mcmc_ens)
+biomassplot(data, mcmc_style = "banded", show_median = c("none"))
+@
+
+<<summary_pdf, echo=FALSE, fig.pos='H', fig.width=8,fig.height=4,out.width='0.85\\textwidth',fig.align='center',fig.cap=paste0('Probability distribution of the biomass ratio at the beginning of ',x$end_year, ' across the full ensemble of scenarios with the credible interval and probability of biomass falling into the four categories indicated')>>=
+data <- mcmc_finalbiomassposterior_prep_SS(ss_mle,ss_mcmc_ens)
+mcmc_finalbiomassposteriorplot(data)
+@
+
+<<table_summary, results='asis', echo=FALSE>>=
+data <- summarytable_prep_SS(ss_mle,ss_mcmc_ens)
+summarytable(data, label="tab:summary",caption = "Stock status indicators for SPECIES in the STOCK")
+@
+%end_MCMC
+%end_SS
+
+
+%begin_DD
+%begin_MLE
+<<summary_biomass, echo=FALSE, fig.pos='H', fig.width=8,fig.height=4,out.width='0.85\\textwidth',fig.align='center',fig.cap=paste0('Probability distribution of the biomass ratio at the beginning of ',x$end_year, ' across the full ensemble of scenarios with the credible interval and probability of biomass falling into the four categories indicated')>>=
+data <- biomassplot_prep_DD(dd_mle)
+biomassplot(data, scenarios=1)
+@
+%end_MLE
+
+%begin_MCMC
+<<summary_biomass, echo=FALSE, fig.pos='H', fig.width=8,fig.height=4,out.width='0.85\\textwidth',fig.align='center',fig.cap=paste0('Probability distribution of the biomass ratio at the beginning of ',x$end_year, ' across the full ensemble of scenarios with the credible interval and probability of biomass falling into the four categories indicated')>>=
+data <- biomassplot_prep_DD(dd_mle, dd_mcmc_ens, dd_sim_ens)
+biomassplot(data, mcmc_style = "banded", show_median = c("none"))
+@
+
+<<summary_pdf, echo=FALSE, fig.pos='H', fig.width=8,fig.height=4,out.width='0.85\\textwidth',fig.align='center',fig.cap=paste0('Probability distribution of the biomass ratio at the beginning of ',x$end_year, ' across the full ensemble of scenarios with the credible interval and probability of biomass falling into the four categories indicated')>>=
+data <- mcmc_finalbiomassposterior_prep_DD(dd_mle,dd_mcmc_ens, dd_sim_ens)
+mcmc_finalbiomassposteriorplot(data)
+@
+
+<<table_summary, results='asis', echo=FALSE>>=
+data <- summarytable_prep_DD(dd_mle,dd_mcmc_ens, dd_sim_ens)
+summarytable(data, label="tab:summary",caption = "Stock status indicators for SPECIES in the STOCK")
+@
+%end_MCMC
+%end_DD
+
+\chapter*{Acknowledgements}
+\pagestyle{fancyplain}
+\thispagestyle{fancy} % Ensures page number on chapter page
+\addcontentsline{toc}{chapter}{Acknowledgements}
+
+% This stock assessment was guided by a project team with a wide range of skill sets. In addition to managers, scientists, monitoring and data specialists from within the Fisheries Queensland, the team included three fishing industry representatives. The project team operated under a terms of reference designed to ensure a transparent and evidence-based approach. The project team members were: ... The entire team is thanked for contributing their time and knowledge, and engaging constructively over the course of a X month-long project.
+%
+% The authors acknowledge the significant time commitment and deep operational and technical expertise of the industry representatives XXX. The project has benefited greatly from their input, which has provided a base for continued engagement with industry members to further enhance stock assessments and build collaboration between industry and government.
+%
+% We also thank external reviewers X for their in-depth and constructive feedback which greatly added to the robustness of the analyses and the comprehensiveness of the final report.
+%
+% We also wish to acknowledge and thank the many fishers, fish processors and scientists who have contributed to past and current research on SPECIES.
+%
+% We acknowledge X for giving permission to reproduce her artwork on the cover page of this report.
+%
+% This assessment was funded by the Department of Agriculture and Fisheries.
+
+\chapter*{Glossary}
+\addcontentsline{toc}{chapter}{Glossary}
+\pagestyle{fancyplain}
+\thispagestyle{fancy} % ensures page number on chapter page
+
+\rowcolors{1}{white}{white}
+\begin{table}[H]
+\begin{tabularx}{\textwidth}{p{2cm} >{\raggedright\arraybackslash}X }
+\textbf{CI} & Confidence interval or credible interval if from Markov chain Monte Carlo\\
+\textbf{CPUE} & Catch per unit effort\\
+\textbf{DAF} & Department of Agriculture and Fisheries, Queensland\\
+\textbf{Fisher--day} & A day of fishing by a fishing operator, which corresponds to a single daily logbook record (commercial) or a single fishing diary page (recreational)\\
+\textbf{FL} & Fork length, measured from the tip of fish's nose to the fork in its tail\\
+\textbf{Fleet} & A population modelling term used to distinguish types of fishing activity: typically a fleet will have its own selectivity curve which characterises the probability of capture of animals of various sizes (or ages)\\
+\textbf{FRDC} & Australian Government's Fisheries Research and Development Corporation\\
+\textbf{GLM} & Generalised linear model\\
+\textbf{MCMC} & Markov chain Monte Carlo - a statistical simulation method for approximating the final (`posterior') distribution of a quantity\\
+\textbf{MLS} & Minimum legal size\\
+\textbf{MSY} & Maximum sustainable yield\\
+\textbf{NRIFS} & National Recreational and Indigenous Fishing Survey, funded by the FRDC (2000--01)\\
+\textbf{QFB} & Queensland Fish Board, marketing authority until 1981\\
+\textbf{RFish} & Recreational fishing surveys conducted by Fisheries Queensland (1997, 1999, 2002, 2005)\\
+\textbf{SFS} & Queensland's Sustainable Fisheries Strategy, 2017--2027\\
+\textbf{SS} & Stock Synthesis software for fishery stock assessment\\
+\textbf{Stock} & A distinct population that breeds only within itself (rough definition)\\
+\textbf{SRFS} & Statewide Recreational Fishing Surveys conducted by Fisheries Queensland (2010--11, 2013--14, 2019--20)\\
+\textbf{TACC} & Total allowable commercial catch\\
+\textbf{TL} & Total length, measured from the tip of fish's nose to the end of its tail lying freely in its normal position\\
+\end{tabularx}
+\end{table}
+
+\chapter{Introduction} \label{sec:intro}
+
+\pagestyle{fancyplain}
+\thispagestyle{fancy} % ensures page number on chapter page
+\pagenumbering{arabic} % \setcounter{page}{1}
+
+\vskip -12pt \vskip 0pt
+\rowcolors{2}{white}{light-gray}
+\begin{center}
+\begin{longtable}[h]{p{2cm} p{13cm}}
+\caption[Management measures]{Management measures applied to SPECIES in Queensland waters \\
+\fignote{``Bag limit'' refers to in-possession limit for recreational fishers only.}}
+\label{tab:management} \\
+\hline
+\rowcolor{white} \textbf{Date} & \textbf{Fishery management measure} \\
+\hline
+\endfirsthead
+\endhead
+\endfoot
+\endlastfoot
+YEAR & MEASURE \\
+\hline
+\end{longtable}
+\end{center}
+
+
+\chapter{Methods}
+\thispagestyle{fancy}
+
+\section{Data sources}
+Data sources included in this assessment (Table~\ref{tab:data-table}) were used
+to determine catch rates, length compositions, and create annual harvests. The
+assessment period began in 1955 up until and including 2022 based on available
+information.
+
+\rowcolors{2}{white}{light-gray}
+\begin{table}[ht]
+\centering
+\caption{Data inputs for the assessment}
+\begin{tabular}{>{\raggedright\arraybackslash} p{0.17\textwidth}
+>{\raggedright\arraybackslash} p{0.2\textwidth} p{0.33\textwidth}
+>{\raggedright\arraybackslash} p{0.2\textwidth}}
+\hline
+\textbf{Data} & \textbf{Years} & \textbf{Source} & \textbf{References} \\
+\hline
+Commercial logbook & YEAR--YEAR & Compulsory commercial logbook database (CFISH) & \\
+\hline
+\end{tabular}
+\label{tab:data-table}
+\end{table}
+
+\section{Stock identification information}\label{sec:stock}
+
+\section{Retained catch estimates}
+
+<<catch_data_sources, echo=FALSE, fig.pos='H', fig.width=12,fig.height=4,out.width='0.85\\textwidth',fig.align='center',fig.cap='Overview of the methods used to reconstruct the history of SPECIES retained catch'>>=
+data <- data.frame(c('Queensland commercial'  , 'Hindcast (linear)', 1958, 1989, 'C', 1),
+                   c('Queensland commercial'  , 'Logbook records'  , 1989, 2021, 'B', 1),
+                   c('Queensland charter'     , 'Hindcast (linear)', 1958, 1995, 'C', 1),
+                   c('Queensland charter'     , 'Logbook records'  , 1995, 2021, 'B', 1),
+                   c('Queensland recreational', 'Hindcast'         , 1958, 2001, 'C', 1),
+                   c('Queensland recreational', 'NRIFS'            , 2001, 2002, 'B', 4),
+                   c('Queensland recreational', 'RFish'            , 2002, 2003, 'B', 4),
+                   c('Queensland recreational', 'Estimated'        , 2003, 2005, 'A', 0),
+                   c('Queensland recreational', 'RFish'            , 2005, 2006, 'B', 4),
+                   c('Queensland recreational', 'Estimated'        , 2006, 2011, 'A', 2),
+                   c('Queensland recreational', 'SRFS'             , 2011, 2012, 'B', 4),
+                   c('Queensland recreational', 'Estimated'        , 2012, 2014, 'A', 0),
+                   c('Queensland recreational', 'SRFS'             , 2014, 2015, 'B', 4),
+                   c('Queensland recreational', 'Estimated'        , 2015, 2020, 'A', 0),
+                   c('Queensland recreational', 'SRFS'             , 2020, 2021, 'B', 4),
+                   c('Queensland recreational', 'Estimated'        , 2021, 2021, 'B', 0),
+                   c('Queensland Indigenous'  , 'Equal to NRIFS'   , 1958, 2001, 'C', 1),
+                   c('Queensland Indigenous'  , 'NRIFS'            , 2001, 2002, 'B', 4),
+                   c('Queensland Indigenous'  , 'Equal to NRIFS'   , 2002, 2021, 'C', 1)) |>
+  t() |>
+  `rownames<-`(NULL) |>
+  `colnames<-`(c("sector","source","startyr","endyr","col","label")) |>
+  as.data.frame() |>
+  dplyr::mutate(startyr = as.numeric(startyr), endyr = as.numeric(endyr)) |>
+  dplyr::mutate(sector = as.factor(sector))
+
+data$sector <- factor(data$sector, levels = c('Queensland Indigenous',
+                                              'Queensland recreational',
+                                              'Queensland charter',
+                                              'Queensland commercial'))
+catchdatasourcesplot(data)
+@
+
+
+\subsection{Commercial} \label{sec:commercial-catch}
+
+\subsection{Recreational} \label{sec:recreational-catch}
+
+\section{Standardised indices of abundance}
+
+\section{Biological relationships}
+
+\subsection{Fork length and total length}
+
+\subsection{Fork length and jaw length}
+
+\subsection{Maturity and fecundity} \label{sec:maturity}
+
+\subsection{Weight and length}\label{sec:weightlength}
+
+\section{Length and age data} \label{sec:lengthage-methods}
+
+\subsection{DAF Fishery Monitoring program}
+
+\subsection{Input to the population model}
+
+\section{Population model}\label{sec:populationmodel}
+
+\subsection{Description}\label{sec:modeldescription}
+
+\subsection{Model assumptions}\label{sec:modelassumptions}
+
+\subsection{Model parameters}\label{sec:modelparameters}
+
+% \rowcolors{2}{white}{light-gray}
+% \begin{table}[H]
+% \centering
+% \caption[Parameters included in the population model]{Parameters included in the population model}
+% \begin{tabular}{p{0.08\textwidth} p{0.5\textwidth} p{0.4\textwidth} }
+% \hline
+% \textbf{Symbol} & \textbf{Description} & \textbf{Estimated or fixed} \\
+% \hline
+% $M$ & Natural mortality & Estimated (Scenarios 1--4) and Fixed at X (Scenarios 5--8) \\
+% $L_\mathrm{min}$ & Mean length of fish at minimum age (cm FL) & Estimated \\
+% $L_\mathrm{max}$ & Mean length of fish at maximum age (cm FL) & Estimated \\
+% $K$ & Von Bertalanffy growth coefficient ($\mathrm{yr}^{-1}$)& Estimated \\
+% $\mathrm{SD}_\mathrm{young}$ & Standard deviation of length at minimum age (cm FL) & Estimated \\
+% $\mathrm{SD}_\mathrm{old}$ & Standard deviation of length at maximum age (cm FL) & Estimated \\
+% $h$ & Steepness & Fixed at X (Scenarios 1,3,5,7) or X (Scenarios 2,4,6,8) \\
+% $\ln R_0$ & Log of number of recruits when unfished & Estimated \\
+% $\ln q$ & Log of catchability & Estimated \\
+% $\mathrm{QextraSD}$ & Extra standard deviation on catchability & Estimated \\
+% $L_{50}$ & Length at 50\% selectivity (cm FL) & Estimated \\
+% $L_\mathrm{95 width}$ & Difference in lengths at 50\% and 95\% selectivity (cm) & Estimated \\
+% $\mathrm{recdev}$ & Recruitment deviations between 1978 and 2022 & Estimated \\
+% \hline
+% \end{tabular}
+% \label{tab:model_params}
+% \end{table}
+
+\subsection{Sensitivity tests}
+X model runs were undertaken to determine the model's sensitivity to different parameter values and assumptions (Table~\ref{tab:sensitivity}).
+
+\rowcolors{2}{white}{light-gray}
+\begin{table}[H]
+\centering
+\caption{Scenarios tested to determine sensitivity to parameter values and assumptions}
+\begin{tabular}{m{0.10\textwidth} m{0.25\textwidth} m{0.15\textwidth} m{0.15\textwidth}}
+\hline
+\textbf{Scenario} & \textbf{$M$ ($\mathrm{yr}^{-1}$)}& \textbf{$h$} & \textbf{$q_\mathrm{inc}$ ($\mathrm{yr}^{-1}$)} \\
+\hline
+1 & Estimated  & X & X\% \\
+2 & Estimated  & X & X\% \\
+3 & Estimated  & X & X\% \\
+4 & Estimated  & X & X\% \\
+5 & Fixed at X & X & X\% \\
+6 & Fixed at X & X & X\% \\
+7 & Fixed at X & X & X\% \\
+8 & Fixed at X & X & X\% \\
+\hline
+\end{tabular}
+\label{tab:sensitivity}
+\end{table}
+
+\chapter{Results}
+\thispagestyle{fancy} % Ensures page number on chapter page
+
+\section{Model inputs}
+\subsection{Data availability}
+
+Model inputs are described for STOCK SPECIES. Model outputs in this section relate to Scenario X as a reference scenario (as defined in Table~\ref{tab:sensitivity}). Results from all scenarios are presented in Appendix~\ref{sec:appdetailedoutputs}.
+
+%begin_SS
+<<dataplot, echo=FALSE, fig.pos='H', fig.width=8,fig.height=6,out.width='0.85\\textwidth',fig.align='center',fig.cap='Data presence by year for each category of data type for SPECIES in the STOCK'>>=
+data <- dataplot_prep_SS(ss_mle)
+dataplot(data)
+@
+%end_SS
+%begin_DD
+<<dataplot, echo=FALSE, fig.pos='H', fig.width=8,fig.height=6,out.width='0.85\\textwidth',fig.align='center',fig.cap='Data presence by year for each category of data type for SPECIES in the STOCK'>>=
+data <- dataplot_prep_DD(dd_mle)
+dataplot(data)
+@
+%end_DD
+
+\subsection{Retained catch estimates}
+%begin_SS
+<<catch_results, echo=FALSE, fig.pos='H', fig.width=8,fig.height=4,out.width='0.85\\textwidth',fig.align='center',fig.cap=paste0('Estimated retained catch by sector between ', x$start_year_catch, ' and ', x$end_year_catch)>>=
+data <- catchplot_prep_SS(ss_mle)
+catchplot(data, fleet_names = "Commercial", scenarios=1)
+@
+%end_SS
+%begin_DD
+<<catch_results, echo=FALSE, fig.pos='H', fig.width=8,fig.height=4,out.width='0.85\\textwidth',fig.align='center',fig.cap=paste0('Estimated retained catch by sector between ', x$start_year_catch, ' and ', x$end_year_catch)>>=
+data <- catchplot_prep_DD(dd_mle)
+catchplot(data, fleet_names = "Commercial", scenarios=1)
+@
+%end_DD
+
+\subsection{Standardised indices of abundance}
+%begin_SS
+<<cpue_results, echo=FALSE, fig.pos='H', fig.width=8,fig.height=4,out.width='0.85\\textwidth',fig.align='center',fig.cap='Annual standardised catch rates for SPECIES in the STOCK'>>=
+data <- cpueplot_prep_SS(ss_mle, scenarios=1)
+cpueplot(data)
+@
+%end_SS
+%begin_DD
+<<cpue_results, echo=FALSE, fig.pos='H', fig.width=8,fig.height=4,out.width='0.85\\textwidth',fig.align='center',fig.cap='Annual standardised catch rates for SPECIES in the STOCK'>>=
+data <- cpueplot_prep_DD(dd_mle, scenarios=1)
+cpueplot(data)
+@
+%end_DD
+
+% Consider using SSAND::map() to produce a heat map of specific grids
+
+<<cpue_map, echo=FALSE, fig.pos='H', fig.width=8,fig.height=4,out.width='0.85\\textwidth',fig.align='center',fig.cap='Map of grids included in catch rate analysis'>>=
+# heat_map <- data.frame(grid = c("E4", "Z8", "A33", "G29", "C19",
+#                                 "A32", "Y37", "T12", "S9", "F40",
+#                                 "J8", "J12", "Z40", "M5", "N23"),
+#                        value= c(0.74, 0.14, 0.301, 1.172, 0.863,
+#                                 0.444, 1.044, 0.558, 0.31, 1.861,
+#                                 0.63, 0.682, 0.168, 0.82, 0.898))
+# map(region = "EC", show_heat_map = TRUE, heat_map = heat_map, legend_position = "right")
+@
+
+%begin_SS
+%begin_discard
+\subsection{Discards}
+<<discard_input, echo=FALSE, fig.pos='H', fig.width=8,fig.height=8,out.width='0.85\\textwidth',fig.align='center',fig.cap='Annual discards of SPECIES'>>=
+data <- discardplot_prep_SS(ss_mle)
+discardplot(data, scenarios = 1)
+@
+%end_discard
+%end_SS
+
+%begin_SS
+%begin_length
+\subsection{Length composition}
+<<length_input, echo=FALSE, fig.pos='H', fig.width=8,fig.height=8,out.width='0.85\\textwidth',fig.align='center',fig.cap='Annual length compositions of SPECIES'>>=
+data <- lengthplot_prep_SS(ss_mle)
+lengthplot(data, show_fits=FALSE)
+@
+%end_length
+%end_SS
+
+%begin_SS
+%begin_age
+\subsection{Age composition} \label{sec:agecomp}
+Figure~\ref{fig:age_input} show the age structures of the population. Age data were input to the model through the conditional age-at-length data sets.
+
+<<age_input, echo=FALSE, fig.pos='H', fig.width=8,fig.height=8,out.width='0.85\\textwidth',fig.align='center',fig.cap='Annual age compositions of SPECIES'>>=
+data <- caal_agefitplot_prep_SS(ss_mle)
+caal_agefitplot(data, scenario=1, show_fits=FALSE)
+
+# data <- ageplot_prep_SS(ss_mle)
+# ageplot(data, show_fits=FALSE)
+@
+%end_age
+%end_SS
+
+\subsection{Other model inputs}
+Fixed biological relationships are plotted in Appendix~\ref{sec:appmodelinputs} (section~\ref{sec:bio-app}, Figures~\ref{fig:weight}--\ref{fig:spawningoutputlength}).  These include the length--weight relationship, maturity at age, and individual spawning output (maturity multiplied by fecundity) by age and by length.
+
+\section{Model outputs}
+\subsection{Model parameters}
+
+Parameter estimates across the ensemble (see Table~\ref{tab:sensitivity}) are listed in Table~\ref{tab:param}.
+
+%begin_SS
+%begin_MLE
+\rowcolors{2}{white}{light-gray}
+<<table_mcmc1, results='asis', echo=FALSE>>=
+parameters <- extract_SS_parameters(ss_mle)[2:4,]
+data <- parametertable_prep_SS(ss_mle=ss_mle, parameters=parameters, scenario=1)
+parametertable(data, label="tab:param")
+@
+%end_MLE
+%begin_MCMC
+\rowcolors{2}{white}{light-gray}
+<<table_parm, results='asis', echo=FALSE>>=
+parameters <- extract_SS_parameters(ss_mle)[2:4,]
+data <- parametertable_prep_SS(ss_mcmc=ss_mcmc_ens, parameters=parameters, scenario=1)
+parametertable(data,
+               label="tab:param",
+               caption = "Summary of parameter estimates for SPECIES from the ensembled scenarios. MCMC
+            Median is median parameter value from robust MCMC scenarios. MCMC 2.5\\% and 97.5\\% indicates
+            95\\% credible interval.",
+            round = c(1,1,2))
+@
+%end_MCMC
+%end_SS
+%begin_DD
+%begin_MLE
+\rowcolors{2}{white}{light-gray}
+<<table_parm, results='asis', echo=FALSE>>=
+data <- parametertable_prep_DD(dd_mle=dd_mle)
+parametertable(data, label="tab:param")
+@
+%end_MLE
+%begin_MCMC
+\rowcolors{2}{white}{light-gray}
+<<table_parm, results='asis', echo=FALSE>>=
+# dd_mcmc_ens <- mcmc_ensemble_DD(dd_mcmc,dd_sim,scenarios=c(1,2))$dd_mcmc
+data <- parametertable_prep_DD(dd_mcmc=dd_mcmc_ens)
+parametertable(data, label="tab:param",
+               caption = "Summary of parameter estimates for SPECIES from the ensembled scenarios. MCMC
+            Median is median parameter value from robust MCMC scenarios. MCMC 2.5\\% and 97.5\\% indicates
+            95\\% credible interval.")
+@
+%end_MCMC
+%end_DD
+
+
+\subsection{Model fits}
+
+Plots of fit for the model to \hl{abundance indices, length compositions, age compositions and conditional age-at-length} are provided in Appendix~\ref{sec:appdetailedoutputs}.
+
+Tables~\ref{tab:rhat} and \ref{tab:neff} (Section~\ref{sec:mcmcdiag}) show diagnostics that indicate good model convergence for all scenarios.
+
+\subsection{Selectivity}
+
+Parameters for length-based selectivity to fishing were estimated within the model (Table~\ref{tab:table_sum}).  The resulting selectivity function (Figure~\ref{fig:selectivity}) represents the relative proportion of SPECIES of a given length that can be caught by the fishing gear deployed by a fleet (ranging from zero to 100\%).
+
+% The retention function for whether fishers retain the fish that they catch was fixed to a length of 50\% retention equal to the minimum legal size, with a small amount of variation about this length.  The only discards were assumed to be fish that were selected but not retained because fishers considered them to be smaller than the MLS.
+
+%begin_SS
+<<selectivity, echo=FALSE, fig.pos='H', fig.width=8,fig.height=4,out.width='0.85\\textwidth',fig.align='center',fig.cap=paste0('Model estimated length-based selectivity in ', x$end_year, ' for the representative MLE model---the dashed line shows the current minimum legal size')>>=
+data <- selectivityplot_prep_SS(ss_mle)
+selectivityplot(data, selectivity_type = "Selectivity (length)", MLS=60, scenarios = 1)
+@
+%end_SS
+
+\subsection{Growth curves}
+
+Parameters for the von Bertalanffy growth curve, including standard deviations about the mean length for both old and young fish, were estimated within the model (Table \ref{tab:table_sum}).
+
+The resulting curve, fitted inside the model, shows a high level of variation in the lengths of individual fish at a given age (Figure~\ref{fig:growth}). This variation may be partly due to fluctuation in annual environmental conditions  and food availability.
+
+%begin_SS
+<<growth, echo=FALSE, fig.pos='H', fig.width=8,fig.height=4,out.width='0.85\\textwidth',fig.align='center',fig.cap='Estimated growth of SPECIES (95\\% confidence intervals) for the representative MLE model (scenario X)'>>=
+data <- growthplot_prep_SS(ss_mle)
+growthplot(data, scenarios = 1)
+@
+%end_SS
+%begin_DD
+<<growth, echo=FALSE, fig.pos='H', fig.width=8,fig.height=4,out.width='0.85\\textwidth',fig.align='center',fig.cap='Estimated growth of SPECIES (95\\% confidence intervals) for the representative MLE model (scenario X)'>>=
+data <- growthplot_prep_DD(dd_mle)
+growthplot(data, scenarios = 1)
+@
+%end_DD
+
+\subsection{Biomass}\label{sec:biomass}
+
+The time series of estimated spawning biomass ratio from all the scenarios listed in Table~\ref{tab:sensitivity}, relative to the unfished state, are shown in Figures~\ref{fig:results_biomass} (Markov chain Monte Carlo results) and~\ref{fig:results_spaghetti} (maximum likelihood estimates and MCMC results) and Table~\ref{tab:summary2}.
+
+%begin_SS
+%begin_MLE
+<<results_biomass, echo=FALSE, fig.pos='H', fig.width=8,fig.height=4,out.width='0.85\\textwidth',fig.align='center',fig.cap='Predicted spawning biomass trajectory relative to unfished for SPECIES in the STOCK, from the base case scenario'>>=
+data <- biomassplot_prep_SS(ss_mle)
+biomassplot(data, scenarios =1)
+@
+
+<<results_spaghetti, echo=FALSE, fig.pos='H', fig.width=8,fig.height=4,out.width='0.85\\textwidth',fig.align='center',fig.cap=paste0('Estimated spawning biomass trajectory relative to unfished levels for SPECIES in the STOCK from ', x$start_year_catch, ' to ', x$end_year, ' for all scenarios')>>=
+data <- spaghettiplot_prep_SS(ss_mle)
+# spaghettiplot(data)
+# spaghettiplot(data, template = "greyscale", line_width = 0.5)
+spaghettiplot(data,
+              linetype_categories = c(1,2),
+              linetype_labels = c("Catch rate A", "Catch rate B"),
+              linetypes = c("solid", "dashed"),
+              colour_categories = c(1,2),
+              colour_labels = c("High M", "Medium M"),
+              colours = fq_palette("alisecolours")[1:2])
+@
+%end_MLE
+%begin_MCMC
+<<results_biomass, echo=FALSE, fig.pos='H', fig.width=8,fig.height=4,out.width='0.85\\textwidth',fig.align='center',fig.cap='Predicted spawning biomass trajectory relative to unfished for SPECIES in the STOCK, from MCMC ensemble scenarios'>>=
+data <- biomassplot_prep_SS(ss_mle, ss_mcmc_ens)
+biomassplot(data, mcmc_style = "banded", show_median = c("none"))
+@
+
+<<results_pdf, echo=FALSE, fig.pos='H', fig.width=8,fig.height=4,out.width='0.85\\textwidth',fig.align='center',fig.cap=paste0('Probability distribution of the biomass ratio at the beginning of ',x$end_year, ' across the full ensemble of scenarios with the credible interval and probability of biomass falling into the four categories indicated')>>=
+data <- mcmc_finalbiomassposterior_prep_SS(ss_mle,ss_mcmc_ens)
+mcmc_finalbiomassposteriorplot(data)
+@
+
+<<results_spaghetti, echo=FALSE, fig.pos='H', fig.width=8,fig.height=4,out.width='0.85\\textwidth',fig.align='center',fig.cap=paste0('Estimated spawning biomass trajectory relative to unfished levels for SPECIES in the STOCK from ', x$start_year_catch, ' to ', x$end_year, ' for all scenarios. The upper panel displays the \"MCMC median\" (i.e. iteration that produced the median value for biomass at the beginning of 2023) and the lower panel is the optimised maximum likelihood estimate')>>=
+
+data <- spaghettiplot_prep_SS(ss_mle, ss_mcmc)
+# spaghettiplot(data)
+# spaghettiplot(data, template = "greyscale", line_width = 0.5)
+spaghettiplot(data,
+              linetype_categories = c(1,2),
+              linetype_labels = c("Catch rate A", "Catch rate B"),
+              linetypes = c("solid", "dashed"),
+              colour_categories = c(1,2),
+              colour_labels = c("High M", "Medium M"),
+              colours = fq_palette("alisecolours")[1:2])
+@
+
+<<table_summary2, results='asis', echo=FALSE>>=
+data <- summarytable_prep_SS(ss_mle,ss_mcmc_ens)
+summarytable(data, label="tab:summary2",
+             caption = "Stock status indicators for SPECIES in the STOCK")
+@
+
+\rowcolors{2}{white}{light-gray}
+<<table_biomass, results='asis', echo=FALSE>>=
+data <- biomasstable_prep_SS(ss_mle,ss_mcmc)
+biomasstable(data, label="tab:biomass")
+@
+%end_MCMC
+%end_SS
+
+%begin_DD
+%begin_MLE
+<<results_biomass, echo=FALSE, fig.pos='H', fig.width=8,fig.height=4,out.width='0.85\\textwidth',fig.align='center',fig.cap='Predicted spawning biomass trajectory relative to unfished for SPECIES in the STOCK, from the base case scenario'>>=
+data <- biomassplot_prep_DD(dd_mle)
+biomassplot(data, scenarios =1)
+@
+
+<<results_spaghetti, echo=FALSE, fig.pos='H', fig.width=8,fig.height=4,out.width='0.85\\textwidth',fig.align='center',fig.cap=paste0('Estimated spawning biomass trajectory relative to unfished levels for SPECIES in the STOCK from ', x$start_year_catch, ' to ', x$end_year, ' for all scenarios')>>=
+data <- spaghettiplot_prep_DD(dd_mle)
+# spaghettiplot(data)
+# spaghettiplot(data, template = "greyscale", line_width = 0.5)
+spaghettiplot(data,
+              linetype_categories = c(1,2),
+              linetype_labels = c("Catch rate A", "Catch rate B"),
+              linetypes = c("solid", "dashed"),
+              colour_categories = c(1,2),
+              colour_labels = c("High M", "Medium M"),
+              colours = fq_palette("alisecolours")[1:2])
+@
+
+%end_MLE
+%begin_MCMC
+<<results_biomass, echo=FALSE, fig.pos='H', fig.width=8,fig.height=4,out.width='0.85\\textwidth',fig.align='center',fig.cap='Predicted spawning biomass trajectory relative to unfished for SPECIES in the STOCK, from MCMC ensemble scenarios'>>=
+data <- biomassplot_prep_DD(dd_mle, dd_mcmc_ens, dd_sim_ens)
+biomassplot(data, mcmc_style = "banded", show_median = c("none"))
+@
+
+<<results_pdf, echo=FALSE, fig.pos='H', fig.width=8,fig.height=4,out.width='0.85\\textwidth',fig.align='center',fig.cap=paste0('Probability distribution of the biomass ratio at the beginning of ',x$end_year, ' across the full ensemble of scenarios with the credible interval and probability of biomass falling into the four categories indicated')>>=
+data <- mcmc_finalbiomassposterior_prep_DD(dd_mle, dd_mcmc_ens, dd_sim_ens)
+mcmc_finalbiomassposteriorplot(data)
+@
+
+<<results_spaghetti, echo=FALSE, fig.pos='H', fig.width=8,fig.height=4,out.width='0.85\\textwidth',fig.align='center',fig.cap=paste0('Estimated spawning biomass trajectory relative to unfished levels for SPECIES in the STOCK from ', x$start_year_catch, ' to ', x$end_year, ' for all scenarios. The upper panel displays the \"MCMC median\" (i.e. iteration that produced the median value for biomass at the beginning of 2023) and the lower panel is the optimised maximum likelihood estimate')>>=
+data <- spaghettiplot_prep_DD(dd_mle, dd_mcmc_ens, dd_sim_ens)
+# spaghettiplot(data)
+# spaghettiplot(data, template = "greyscale", line_width = 0.5)
+spaghettiplot(data,
+              linetype_categories = c(1,2),
+              linetype_labels = c("Catch rate A", "Catch rate B"),
+              linetypes = c("solid", "dashed"),
+              colour_categories = c(1,2),
+              colour_labels = c("High M", "Medium M"),
+              colours = fq_palette("alisecolours")[1:2])
+@
+
+\rowcolors{2}{white}{light-gray}
+<<table_summary2, results='asis', echo=FALSE>>=
+data <- summarytable_prep_DD(dd_mle, dd_mcmc_ens, dd_sim_ens)
+summarytable(data, label="tab:summary2",
+             caption = "Stock status indicators for SPECIES in the STOCK")
+@
+
+\rowcolors{2}{white}{light-gray}
+<<table_biomass, results='asis', echo=FALSE>>=
+data <- biomasstable_prep_DD(dd_mle, dd_mcmc, dd_sim)
+biomasstable(data, label="tab:biomass")
+@
+%end_MCMC
+%end_DD
+
+\chapter{Discussion}\label{sec:disc}
+\thispagestyle{fancy} % Ensures page number on chapter page
+
+\section{Stock status}
+Stock status at the beginning of 2023 was estimated to be between \Sexpr{x$biomass_summary_lower}\% and \Sexpr{x$biomass_summary_upper}\% of unfished (95\% credible interval over the MCMC ensemble). The probability that the biomass was below 20\% at this time was estimated to be \Sexpr{x$biomass_risk20}\%.
+
+\section{Performance of the population model}
+
+\section{Unmodelled influences}
+
+\section{Recommendations}
+
+\subsection{Stock assessment}
+
+\subsection{Research}
+
+\subsection{Management}
+
+\section{Conclusions}
+This stock assessment was commissioned to establish the status of the STOCK SPECIES stock and inform the management of the FISHERY. Biomass was estimated to be between \Sexpr{x$biomass_summary_lower}\% and \Sexpr{x$biomass_summary_upper}\% at the beginning of \Sexpr{x$end_year}, relative to an assumed unfished state in \Sexpr{x$start_year_catch}. This interval was generated over an ensemble of X scenarios. Some recommendations for future assessment and monitoring have been made.
+
+\printbibliography[title=References]
+\thispagestyle{fancy}
+\addcontentsline{toc}{chapter}{References}
+\appendix
+
+\chapter{Project Team decisions and recommendations} \label{app:decisions}
+\thispagestyle{fancy}
+
+\chapter{Diagnostics for standardised indices of abundance}
+\thispagestyle{fancy}
+
+\chapter{Model inputs} \label{sec:appmodelinputs}
+\thispagestyle{fancy}
+
+%begin_SS
+\section{Initial weighting of length and age data} \label{sec:agelengthsamplesizes}
+Weighting of length and age data, as input into the model, are shown in Table~\ref{tab:sampleweight}.
+%end_SS
+
+%begin_SS
+%begin_caal
+\section{Conditional age-at-length} \label{sec:con-app}
+Age data were input to the population model in the form of conditional age-at-length data (Figure~\ref{fig:caal_inputs}).
+
+<<caal_inputs, echo=FALSE, fig.pos='H', fig.width=8,fig.height=8,out.width='0.85\\textwidth',fig.align='center',fig.cap='Conditional age-at-length compositions for SPECIES between X and Y---circle size is proportional to relative sample size in each bin across rows (i.e. for a given length bin)'>>=
+data <- conditionalageatlengthplot_prep_SS(ss_mle,sex_code=1)
+conditionalageatlengthplot(data, show_fits=FALSE)
+@
+%end_caal
+%end_SS
+
+\section{Biological data}\label{sec:bio-app}
+\subsection{Weight and length}
+
+%begin_SS
+<<weight, echo=FALSE, fig.pos='H', fig.width=8,fig.height=4,out.width='0.85\\textwidth',fig.align='center',fig.cap='Weight--length relationship for SPECIES in the STOCK'>>=
+data <- weightplot_prep_SS(ss_mle)
+weightplot(data, scenarios = 1)
+@
+%end_SS
+%begin_DD
+<<weight, echo=FALSE, fig.pos='H', fig.width=8,fig.height=4,out.width='0.85\\textwidth',fig.align='center',fig.cap='Weight--length relationship for SPECIES in the STOCK'>>=
+data <- weightplot_prep_DD(dd_mle, age_max=10, age_rec=2)
+weightplot(data, scenarios = 1)
+@
+%end_DD
+
+\subsection{Fecundity and maturity}
+
+%begin_SS
+<<maturity_length, echo=FALSE, fig.pos='H', fig.width=8,fig.height=4,out.width='0.85\\textwidth',fig.align='center',fig.cap='Maturity at length for SPECIES in the STOCK'>>=
+data <- maturityplot_prep_SS(ss_mle)
+maturityplot(data, scenarios = 1, maturity_type = "length")
+@
+
+<<maturity_age, echo=FALSE, fig.pos='H', fig.width=8,fig.height=4,out.width='0.85\\textwidth',fig.align='center',fig.cap='Maturity at age for SPECIES in the STOCK'>>=
+data <- maturityplot_prep_SS(ss_mle)
+maturityplot(data, scenarios = 1, maturity_type = "age")
+@
+
+<<spawningoutputplot_age, echo=FALSE, fig.pos='H', fig.width=8,fig.height=4,out.width='0.85\\textwidth',fig.align='center',fig.cap='Spawning output (maturity multiplied by fecundity) at age for SPECIES in the STOCK'>>=
+data <- spawningoutputplot_prep_SS(ss_mle)
+spawningoutputplot(data, xaxis="age", scenarios = 1)
+@
+
+<<spawningoutputplot_length, echo=FALSE, fig.pos='H', fig.width=8,fig.height=4,out.width='0.85\\textwidth',fig.align='center',fig.cap='Spawning output (maturity multiplied by fecundity) at length for SPECIES in the STOCK'>>=
+data <- spawningoutputplot_prep_SS(ss_mle)
+spawningoutputplot(data, xaxis="length", scenarios = 1)
+@
+%end_SS
+
+%begin_DD
+<<maturity, echo=FALSE, fig.pos='H', fig.width=8,fig.height=4,out.width='0.85\\textwidth',fig.align='center',fig.cap='Maturity at age for SPECIES in the STOCK'>>=
+data <- maturityplot_prep_DD(x_max=10,x_mat=2)
+maturityplot(data, scenarios = 1)
+@
+%end_DD
+
+\chapter{Model outputs} \label{sec:appmodeloutputs}
+\thispagestyle{fancy} % ensures page number on chapter page
+
+\section{MLE diagnostics}\label{sec:mlediag}
+
+Watch this space; SSAND plots are coming.
+
+\subsection{Likelihood profile}
+\label{app:likeprof}
+
+Likelihood profile on R0, steepness and natural mortality was conducted on scenario X as reference.
+
+<<likelihood_R0, echo=FALSE, fig.pos='H', fig.width=8,fig.height=4,out.width='0.85\\textwidth',fig.align='center',fig.cap='Likelihood profile for ln(R0)'>>=
+# See 'init' code chunk for guide on running likelihood profile
+# data <- likelihoodprofileplot_prep_SS(profile_input, parameter="SR_BH_steep")
+# likelihoodprofileplot(data)
+@
+
+<<piner_R0_length, echo=FALSE, fig.pos='H', fig.width=8,fig.height=4,out.width='0.85\\textwidth',fig.align='center',fig.cap='Piner plot of length-composition likelihoods by fleet for ln(R0)'>>=
+# pinerplot_component_options(profile_input)
+# data <- pinerplot_prep_SS(profile_input, component="Length_like")
+# pinerplot(data)
+@
+
+\section{MCMC diagnostics}\label{sec:mcmcdiag}
+
+Tables~\ref{tab:rhat} and \ref{tab:neff} show the potential scale reduction factor (R-hat) and effective sample sizes from the MCMC analysis for scenarios 1 to X.
+
+\section{Other outputs}
+
+%begin_SS
+\subsection{Stock-recruit curve}
+\label{app:stockrecruitcurve}
+<<srplot, echo=FALSE, fig.pos='H', fig.width=8,fig.height=4,out.width='0.85\\textwidth',fig.align='center',fig.cap='Stock-recruit curve for SPECIES in the STOCK based on the reference scenario X---point colors indicate year, with warmer colors indicating earlier years and cooler colors in showing later years'>>=
+data <- srplot_prep_SS(ss_mle)
+srplot(data, scenarios = 1)
+@
+
+%begin_MCMC
+\subsection{Fishing mortality}
+<<Fplot, echo=FALSE, fig.pos='H', fig.width=8,fig.height=4,out.width='0.85\\textwidth',fig.align='center',fig.cap='Time series of fishing mortality ratio ($F/F_{MSY}$) from the ensemble model'>>=
+data <- Fplot_prep_SS(ss_mle,ss_mcmc_ens)
+Fplot(data, mcmc_style="banded")
+@
+
+\subsection{Recruitment deviations} \label{app:recdevs}
+<<recdevplot, echo=FALSE, fig.pos='H', fig.width=8,fig.height=4,out.width='0.85\\textwidth',fig.align='center',fig.cap='Recruitment deviations from the ensemble model---whiskers represent 95\\% credible intervals, boxes represent 50\\% credible intervals, horizontal bars represent medians, and the points represent outliers'>>=
+data <- recdevplot_prep_SS(ss_mle,ss_mcmc_ens)
+recdevplot(data, mcmc_style = "boxplot")
+@
+
+\subsection{Sensitivity: parameter estimates and derived quantities} \label{app:sensitivity}
+<<sensitivity, echo=FALSE, fig.pos='H', fig.width=8,fig.height=12,out.width='0.85\\textwidth',fig.align='center',fig.cap='Comparison of parameter estimates and derived quantities among the X scenarios included in the ensemble model'>>=
+parm <- extract_SS_parameters(ss_mle)[c(3:6),]
+data <- sensitivityplot_prep_SS(ss_mle,
+                                ss_mcmc,
+                                show_MSY = TRUE,
+                                show_LL = TRUE,
+                                show_B_ratio = TRUE,
+                                parameters = parm)
+sensitivityplot(data)
+@
+%end_MCMC
+%begin_MLE
+\subsection{Fishing mortality}
+<<Fplot, echo=FALSE, fig.pos='H', fig.width=8,fig.height=4,out.width='0.85\\textwidth',fig.align='center',fig.cap='Time series of fishing mortality ratio ($F/F_{MSY}$) from the base case scenario'>>=
+data <- Fplot_prep_SS(ss_mle)
+Fplot(data)
+@
+
+\subsection{Recruitment deviations} \label{app:recdevs}
+<<recdevplot, echo=FALSE, fig.pos='H', fig.width=8,fig.height=4,out.width='0.85\\textwidth',fig.align='center',fig.cap='Recruitment deviations from the base case scenario'>>=
+data <- recdevplot_prep_SS(ss_mle)
+recdevplot(data)
+@
+
+\subsection{Sensitivity: parameter estimates and derived quantities} \label{app:sensitivity}
+<<sensitivity, echo=FALSE, fig.pos='H', fig.width=8,fig.height=12,out.width='0.85\\textwidth',fig.align='center',fig.cap='Comparison of parameter estimates and derived quantities among the X scenarios explored'>>=
+parm <- extract_SS_parameters(ss_mle)[c(3:6),]
+data <- sensitivityplot_prep_SS(ss_mle,
+                                show_MSY = TRUE,
+                                show_LL = TRUE,
+                                show_B_ratio = TRUE,
+                                parameters = parm)
+sensitivityplot(data)
+@
+%end_MLE
+%end_SS
+
+%begin_DD
+\subsection{Stock-recruit curve}
+\label{app:stockrecruitcurve}
+<<srplot, echo=FALSE, fig.pos='H', fig.width=8,fig.height=4,out.width='0.85\\textwidth',fig.align='center',fig.cap='Stock-recruit curve for SPECIES in the STOCK based on the reference scenario X---point colors indicate year, with warmer colors indicating earlier years and cooler colors in showing later years'>>=
+data <- srplot_prep_DD(dd_mle)
+srplot(data, scenarios = 1)
+@
+
+%begin_MCMC
+\subsection{Fishing mortality}
+<<Fplot, echo=FALSE, fig.pos='H', fig.width=8,fig.height=4,out.width='0.85\\textwidth',fig.align='center',fig.cap='Time series of fishing mortality ratio ($F/F_{MSY}$) from the ensemble model'>>=
+data <- Fplot_prep_DD(dd_mle,dd_mcmc_ens,dd_sim_ens)
+Fplot(data, mcmc_style="banded")
+@
+
+\subsection{Recruitment deviations} \label{app:recdevs}
+<<recdevplot, echo=FALSE, fig.pos='H', fig.width=8,fig.height=4,out.width='0.85\\textwidth',fig.align='center',fig.cap='Recruitment deviations from the ensemble model---whiskers represent 95\\% credible intervals, boxes represent 50\\% credible intervals, horizontal bars represent medians, and the points represent outliers'>>=
+data <- recdevplot_prep_DD(dd_mle,dd_mcmc_ens,dd_sim_ens)
+recdevplot(data, mcmc_style = "boxplot")
+@
+
+\subsection{Sensitivity: parameter estimates and derived quantities} \label{app:sensitivity}
+<<sensitivity, echo=FALSE, fig.pos='H', fig.width=8,fig.height=12,out.width='0.85\\textwidth',fig.align='center',fig.cap='Comparison of parameter estimates and derived quantities among the X scenarios included in the ensemble model'>>=
+data <- sensitivityplot_prep_DD(dd_mle,
+                                dd_mcmc,
+                                dd_sim,
+                                show_LL = TRUE,
+                                show_B_ratio = TRUE)
+sensitivityplot(data)
+@
+%end_MCMC
+%begin_MLE
+\subsection{Fishing mortality}
+<<Fplot, echo=FALSE, fig.pos='H', fig.width=8,fig.height=4,out.width='0.85\\textwidth',fig.align='center',fig.cap='Time series of fishing mortality ratio ($F/F_{MSY}$) from the base case scenario'>>=
+data <- Fplot_prep_DD(dd_mle)
+Fplot(data)
+@
+
+\subsection{Recruitment deviations} \label{app:recdevs}
+<<recdevplot, echo=FALSE, fig.pos='H', fig.width=8,fig.height=4,out.width='0.85\\textwidth',fig.align='center',fig.cap='Recruitment deviations from the base case scenario'>>=
+data <- recdevplot_prep_DD(dd_mle)
+recdevplot(data)
+@
+
+\subsection{Sensitivity: parameter estimates and derived quantities} \label{app:sensitivity}
+<<sensitivity, echo=FALSE, fig.pos='H', fig.width=8,fig.height=12,out.width='0.85\\textwidth',fig.align='center',fig.cap='Comparison of parameter estimates and derived quantities among the X scenarios explored'>>=
+data <- sensitivityplot_prep_DD(dd_mle,
+                                show_LL = TRUE,
+                                show_B_ratio = TRUE)
+sensitivityplot(data)
+@
+%end_MLE
+%end_DD
+
+
+\chapter{Detailed model outputs} \label{sec:appdetailedoutputs}
+\thispagestyle{fancy}
+
+%begin_scenarios
+%begin_SS
+\section{Scenario XXX}
+\rowcolors{2}{white}{light-gray}
+<<table_mleXXX, results='asis', echo=FALSE>>=
+parameters <- extract_SS_parameters(ss_mle)[2:4,]
+data <- parametertable_prep_SS(ss_mle=ss_mle, parameters=parameters, scenario=XXX)
+parametertable(data, label="tab:paramXXX_mle")
+@
+
+%begin_MCMC
+\rowcolors{2}{white}{light-gray}
+<<table_mcmcXXX, results='asis', echo=FALSE>>=
+parameters <- extract_SS_parameters(ss_mle)[2:4,]
+data <- parametertable_prep_SS(ss_mcmc=ss_mcmc, parameters=parameters, scenario=XXX)
+parametertable(data, label="tab:paramXXX_mcmc")
+@
+%end_MCMC
+
+<<cpue_fitsXXX, echo=FALSE, fig.pos='H', fig.width=8,fig.height=4,out.width='0.85\\textwidth',fig.align='center',fig.cap='Scenario XXX: Model predictions (blue line) to standardised catch rates for SPECIES in the STOCK, based on maximum likelihood estimation---grey line and error bars represent the model input and associated uncertainty'>>=
+data <- cpueplot_prep_SS(ss_mle)
+cpueplot(data, scenarios=XXX)
+@
+
+%begin_MCMC
+<<recdevsXXX, echo=FALSE, fig.pos='H', fig.width=8,fig.height=4,out.width='0.85\\textwidth',fig.align='center',fig.cap='Scenario XXX: Recruitment deviations---whiskers represent 95\\% credible intervals, boxes represent 50\\% credible intervals, horizontal bars represent medians, and the points represent outliers'>>=
+data <- recdevplot_prep_SS(ss_mle,ss_mcmc)
+recdevplot(data, scenarios=XXX)
+@
+%end_MCMC
+%begin_MLE
+<<recdevsXXX, echo=FALSE, fig.pos='H', fig.width=8,fig.height=4,out.width='0.85\\textwidth',fig.align='center',fig.cap='Scenario XXX: Recruitment deviations'>>=
+data <- recdevplot_prep_SS(ss_mle)
+recdevplot(data, scenarios=XXX)
+@
+%end_MLE
+
+%begin_length
+<<length_outputsXXX, echo=FALSE, fig.pos='H', fig.width=8,fig.height=8,out.width='0.85\\textwidth',fig.align='center',fig.cap='Weight--length relationship for SPECIES in the STOCK'>>=
+data <- lengthplot_prep_SS(ss_mle, scenarios=XXX)
+lengthplot(data)
+@
+%end_length
+
+%begin_age
+<<age_outputsXXX, echo=FALSE, fig.pos='H', fig.width=8,fig.height=8,out.width='0.85\\textwidth',fig.align='center',fig.cap='Scenario XXX: Fits to age structures, based on maximum likelihood estimation---grey bars represent input data and black line and points represent model fits'>>=
+data <- caal_agefitplot_prep_SS(ss_mle, sex_code=1, scenarios=XXX)
+caal_agefitplot(data,show_fits=FALSE, scenario=XXX)
+# data <- ageplot_prep_SS(ss_mle)
+# ageplot(data, show_fits=FALSE)
+@
+%end_age
+
+%begin_caal
+<<caal_outputsXXX, echo=FALSE, fig.pos='H', fig.width=8,fig.height=8,out.width='0.85\\textwidth',fig.align='center',fig.cap='Scenario XXX: Pearson residuals for age-at-length compositions, based on maximum likelihood estimation---circle size represents the magnitude of the Pearson residual'>>=
+data <- conditionalageatlengthplot_prep_SS(ss_mle,sex_code=1, scenarios=XXX)
+conditionalageatlengthplot(data, show_fits=FALSE)
+@
+%end_caal
+
+<<biomass_mleXXX, echo=FALSE, fig.pos='H', fig.width=8,fig.height=4,out.width='0.85\\textwidth',fig.align='center',fig.cap='Scenario XXX: Predicted spawning biomass trajectory relative to unfished for SPECIES in the STOCK, based on maximum likelihood estimation'>>=
+data <- biomassplot_prep_SS(ss_mle)
+biomassplot(data, mcmc_style = "banded", show_median = c("annual_biomass","trajectory"), scenarios=XXX)
+@
+
+%begin_MCMC
+<<biomass_mcmcXXX, echo=FALSE, fig.pos='H', fig.width=8,fig.height=4,out.width='0.85\\textwidth',fig.align='center',fig.cap='Scenario XXX: Predicted spawning biomass trajectory relative to unfished for SPECIES in the STOCK, based on MCMC'>>=
+data <- biomassplot_prep_SS(ss_mle, ss_mcmc)
+biomassplot(data, mcmc_style = "banded", show_median = c("annual_biomass","trajectory"), scenarios=XXX)
+@
+%end_MCMC
+
+<<phaseXXX, echo=FALSE, fig.pos='H', fig.width=8,fig.height=8,out.width='0.85\\textwidth',fig.align='center',fig.cap='Scenario XXX: Stock status indicator trajectory for SPECIES in the STOCK, based on maximum likelihood estimation'>>=
+data <- phaseplot_prep_SS(ss_mle)
+phaseplot(data, scenarios=XXX)
+@
+
+<<yieldXXX, echo=FALSE, fig.pos='H', fig.width=8,fig.height=4,out.width='0.85\\textwidth',fig.align='center',fig.cap='Scenario XXX: Equilibrium dead catch curve for SPECIES in the STOCK, based on maximum likelihood estimation'>>=
+data <- yieldplot_prep_SS(ss_mle)
+yieldplot(data, show_msy_line=TRUE, scenarios=XXX)
+@
+
+%begin_MCMC
+<<pdfXXX, echo=FALSE, fig.pos='H', fig.width=8,fig.height=10,out.width='0.85\\textwidth',fig.align='center',fig.cap='Scenario XXX: Posterior density of MCMC iterations. \"Median\" line shows median parameter value for MCMC iterations  \"Optimised\" shows the parameter value found from maximum likelihood estimates.'>>=
+parameters <- extract_SS_parameters(ss_mcmc)[c(2:10,449),]
+data <- mcmc_posteriordensityplot_prep_SS(ss_mle, ss_mcmc, scenario = XXX, parameters)
+mcmc_posteriordensityplot(data)
+@
+
+<<traceXXX, echo=FALSE, fig.pos='H', fig.width=8,fig.height=10,out.width='0.85\\textwidth',fig.align='center',fig.cap='Scenario XXX: Trace plot of MCMC iterations---\"Optimised\" shows the parameter value found from maximum likelihood estimates'>>=
+parameters <- extract_SS_parameters(ss_mcmc)[c(2:9),]
+data <- mcmc_posteriordensityplot_prep_SS(ss_mle,
+                                          ss_mcmc,
+                                          scenario = XXX,
+                                          parameters,
+                                          show_objective_function=TRUE)
+mcmc_traceplot(data)
+@
+
+<<mcmc_correlation_XXX, echo=FALSE, fig.pos='H', fig.width=12,fig.height=12,out.width='0.85\\textwidth',fig.align='center',fig.cap='Scenario XXX: Correlation plot of MCMC iterations'>>=
+parameters <- extract_SS_parameters(ss_mcmc)[c(2:9),]
+data <- correlationplot_prep_SS(ss_mle, ss_mcmc, scenario = XXX, parameters = parameters)
+correlationplot(data)
+@
+%end_MCMC
+
+%begin_MLE
+<<mcmc_correlation_XXX, echo=FALSE, fig.pos='H', fig.width=12,fig.height=12,out.width='0.85\\textwidth',fig.align='center',fig.cap='Scenario XXX: Correlation plot of MCMC iterations'>>=
+parameters <- extract_SS_parameters(ss_mle)[c(2,3,4,26),]
+data <- correlationplot_prep_SS(ss_mle, scenario = 1, parameters = parameters)
+correlationplot(data)
+@
+%end_MLE
+%end_SS
+
+
+%begin_DD
+\section{Scenario XXX}
+\rowcolors{2}{white}{light-gray}
+<<table_mleXXX, results='asis', echo=FALSE>>=
+data <- parametertable_prep_DD(dd_mle=dd_mle, scenario=XXX)
+parametertable(data, label="tab:paramXXX_mle")
+@
+
+%begin_MCMC
+\rowcolors{2}{white}{light-gray}
+<<table_mcmcXXX, results='asis', echo=FALSE>>=
+# dd_mcmc_ens <- mcmc_ensemble_DD(dd_mcmc,dd_sim,scenarios=c(1,2))$dd_mcmc
+data <- parametertable_prep_DD(dd_mcmc=dd_mcmc, scenario=XXX)
+parametertable(data, label="tab:paramXXX_mcmc")
+@
+%end_MCMC
+
+<<cpue_fitsXXX, echo=FALSE, fig.pos='H', fig.width=8,fig.height=4,out.width='0.85\\textwidth',fig.align='center',fig.cap='Scenario XXX: Model predictions (blue line) to standardised catch rates for SPECIES in the STOCK, based on maximum likelihood estimation---grey line and error bars represent the model input and associated uncertainty'>>=
+data <- cpueplot_prep_DD(dd_mle)
+cpueplot(data, scenarios=XXX)
+@
+
+%begin_MCMC
+<<recdevsXXX, echo=FALSE, fig.pos='H', fig.width=8,fig.height=4,out.width='0.85\\textwidth',fig.align='center',fig.cap='Scenario XXX: Recruitment deviations---whiskers represent 95\\% credible intervals, boxes represent 50\\% credible intervals, horizontal bars represent medians, and the points represent outliers'>>=
+data <- recdevplot_prep_DD(dd_mle,dd_mcmc,dd_sim)
+recdevplot(data, scenarios=XXX)
+@
+%end_MCMC
+%begin_MLE
+<<recdevsXXX, echo=FALSE, fig.pos='H', fig.width=8,fig.height=4,out.width='0.85\\textwidth',fig.align='center',fig.cap='Scenario XXX: Recruitment deviations'>>=
+data <- recdevplot_prep_DD(dd_mle)
+recdevplot(data, scenarios=XXX)
+@
+%end_MLE
+
+<<biomass_mleXXX, echo=FALSE, fig.pos='H', fig.width=8,fig.height=4,out.width='0.85\\textwidth',fig.align='center',fig.cap='Scenario XXX: Predicted spawning biomass trajectory relative to unfished for SPECIES in the STOCK, based on maximum likelihood estimation'>>=
+data <- biomassplot_prep_DD(dd_mle)
+biomassplot(data, scenarios=XXX)
+@
+
+%begin_MCMC
+<<biomass_mcmcXXX, echo=FALSE, fig.pos='H', fig.width=8,fig.height=4,out.width='0.85\\textwidth',fig.align='center',fig.cap='Scenario XXX: Predicted spawning biomass trajectory relative to unfished for SPECIES in the STOCK, based on MCMC'>>=
+data <- biomassplot_prep_DD(dd_mle, dd_mcmc, dd_sim)
+biomassplot(data, mcmc_style = "banded", show_median = c("annual_biomass","trajectory"), scenarios=XXX)
+@
+%end_MCMC
+
+<<phaseXXX, echo=FALSE, fig.pos='H', fig.width=8,fig.height=8,out.width='0.85\\textwidth',fig.align='center',fig.cap='Scenario XXX: Stock status indicator trajectory for SPECIES in the STOCK, based on maximum likelihood estimation'>>=
+data <- phaseplot_prep_DD(dd_mle)
+phaseplot(data, scenarios=XXX)
+@
+
+<<yieldXXX, echo=FALSE, fig.pos='H', fig.width=8,fig.height=4,out.width='0.85\\textwidth',fig.align='center',fig.cap='Scenario XXX: Equilibrium dead catch curve for SPECIES in the STOCK, based on maximum likelihood estimation'>>=
+data <- yieldplot_prep_DD(dd_mle)
+yieldplot(data, show_msy_line=TRUE, scenarios=XXX)
+@
+
+%begin_MCMC
+<<pdfXXX, echo=FALSE, fig.pos='H', fig.width=8,fig.height=10,out.width='0.85\\textwidth',fig.align='center',fig.cap='Scenario XXX: Posterior density of MCMC iterations. \"Median\" line shows median parameter value for MCMC iterations  \"Optimised\" shows the parameter value found from maximum likelihood estimates.'>>=
+data <- mcmc_posteriordensityplot_prep_DD(dd_mle, dd_mcmc, dd_sim, scenario = XXX)
+mcmc_posteriordensityplot(data)
+@
+
+<<traceXXX, echo=FALSE, fig.pos='H', fig.width=8,fig.height=10,out.width='0.85\\textwidth',fig.align='center',fig.cap='Scenario XXX: Trace plot of MCMC iterations---\"Optimised\" shows the parameter value found from maximum likelihood estimates'>>=
+data <- mcmc_posteriordensityplot_prep_DD(dd_mle, dd_mcmc, dd_sim, scenario = XXX)
+mcmc_traceplot(data)
+@
+
+<<mcmc_correlation_XXX, echo=FALSE, fig.pos='H', fig.width=12,fig.height=12,out.width='0.85\\textwidth',fig.align='center',fig.cap='Scenario XXX: Correlation plot of MCMC iterations'>>=
+# dd_sdr <- TMB::sdreport(dd_mle[[XXX]]$model)
+# data <- correlationplot_prep_DD(dd_mle, dd_mcmc, dd_sim, scenario = XXX)
+# correlationplot(data)
+@
+%end_MCMC
+
+%begin_MLE
+<<mcmc_correlation_XXX, echo=FALSE, fig.pos='H', fig.width=12,fig.height=12,out.width='0.85\\textwidth',fig.align='center',fig.cap='Scenario XXX: Correlation plot of MCMC iterations'>>=
+# data <- correlationplot_prep_DD(dd_mle, scenario = 1)
+# correlationplot(data)
+@
+%end_MLE
+%end_DD
+%end_scenarios
+
+
+\end{document}
