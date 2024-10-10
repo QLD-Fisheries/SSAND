@@ -23,8 +23,6 @@ caal_agefitplot_prep_SS <- function(ss_mle,
 
   if (check_scenarios(ss_mle,"SS","MLE")=="single scenario"){ss_mle <- list(ss_mle)}
   if (missing(scenarios)){scenarios <- 1:length(ss_mle)}
-  if (missing(sex_code)) {warning("Please specify sex code to plot"); sex_code = ss_mle[[scenarios[[1]]]]$condbase$Sex[[1]]}
-
 
   data <- data.frame()
   for (scenario in scenarios) {
