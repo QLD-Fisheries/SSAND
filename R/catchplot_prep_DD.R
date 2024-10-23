@@ -26,7 +26,7 @@ catchplot_prep_DD <- function(dd_mle,
   for (scenario in scenarios) {
     tmp <- data.frame(year = sort(rep(dd_mle[[scenario]]$data$first_year_catch:dd_mle[[scenario]]$data$last_year_catch,12/dd_mle[[scenario]]$data$Number_months_per_timestep)),
                       month = seq(1,12,dd_mle[[scenario]]$data$Number_months_per_timestep),
-                      value = dd_mle[[scenario]]$data$ctch/1000,
+                      value = dd_mle[[scenario]]$data$ctch,
                       fleet = as.factor(1))
     tmp <- dplyr::mutate(tmp, date = as.Date(paste0('01/',month,'/',year), format = '%d/%m/%Y'))
     tmp <- dplyr::select(tmp, !c(year, month))
