@@ -26,7 +26,7 @@ residual_boxplot <- function(model, covariate = 'fitted', log = FALSE, nbreaks =
   # 1. Extract model information
   if (covariate == 'fitted'){
     xdata <- fitted(model)
-    if (log) {xdata <- log(fitted)}
+    if (log) {xdata <- log(xdata)}
   } else {
     xdata <- unlist(model$data[covariate])
   }
