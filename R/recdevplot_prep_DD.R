@@ -56,10 +56,14 @@ recdevplot_prep_DD <- function(dd_mle,
 
     for (scenario in scenarios) {
 
+      years_before_recdevs <- dd_mle[[scenario]]$data$first_year_rec_devs - dd_mle[[scenario]]$data$first_year_catch + 1
+      estimated_recdevs <- dd_mle[[scenario]]$RecDev[years_before_recdevs:length(dd_mle[[scenario]]$RecDev)]
+      estimated_recdevs_sd <- dd_mle[[scenario]]$RecDev_sd[years_before_recdevs:length(dd_mle[[scenario]]$RecDev_sd)]
+
       tmp <- data.frame(year = dd_mle[[scenario]]$data$first_year_rec_devs:dd_mle[[scenario]]$data$last_year_catch,
-                        value = dd_mle[[scenario]]$RecDev,
-                        ub = dd_mle[[scenario]]$RecDev + 1.96*dd_mle[[scenario]]$RecDev_sd,
-                        lb = dd_mle[[scenario]]$RecDev - 1.96*dd_mle[[scenario]]$RecDev_sd)
+                        value = estimated_recdevs,
+                        ub = estimated_recdevs + 1.96*estimated_recdevs_sd,
+                        lb = estimated_recdevs - 1.96*estimated_recdevs_sd)
       tmp$scenario <- scenario
       tmp$method <- "MLE"
 
