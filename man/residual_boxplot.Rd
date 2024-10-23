@@ -6,6 +6,7 @@
 \usage{
 residual_boxplot(
   model,
+  covariate = "fitted",
   log = FALSE,
   nbreaks = 10,
   zero_line = TRUE,
@@ -14,6 +15,8 @@ residual_boxplot(
 }
 \arguments{
 \item{model}{A fitted \code{gam} or \code{glm} object as produced by \code{gam()} or \code{glm()}.}
+
+\item{covariate}{Character string indicating the covariate to be plotted on the x-axis. By default, residuals are plotted against fitted.}
 
 \item{log}{TRUE to log-transform fitted values.}
 
@@ -31,10 +34,10 @@ Identify heteroscedasticity arising from a fitted \code{glm()} or \code{gam()}.
 }
 \examples{
 raw_catch_rates <- data.frame(
-   year = seq(5,100,5),
-   effort = c(118,58,42,35,27,25,21,19,18,10,12,15,13,22,8,9,7,16,17,12),
-   kilograms = c(75,81,72,69,35,26,21,18,16,13,12,12,11,9,10,11,15,9,8,5))
+    year = seq(5,100,5),
+    effort = c(118,58,42,35,27,25,21,19,18,10,12,15,13,22,8,9,7,16,17,12),
+    kilograms = c(75,81,72,69,35,26,21,18,16,13,12,12,11,9,10,11,15,9,8,5))
 model <- glm(kilograms ~ year + effort, data = raw_catch_rates, family = Gamma)
 residual_boxplot(model, log = TRUE, nbreaks = 5)
-
+residual_boxplot(model, covariate = 'effort', nbreaks = 5)
 }
