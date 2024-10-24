@@ -34,6 +34,7 @@ residual_boxplot <- function(model, covariate = 'fitted', log = FALSE, nbreaks =
   residuals <- residuals(model, type = type)
 
   if (nbreaks > length(xdata)/2) {warning('Few observations per group. Recommend decreasing nbreaks')}
+  if (length(xdata) > length(residuals)) {stop("glm() has truncated input data to remove missing observations. Re-run glm() with non-missing data.")}
 
   # 2. Assemble data frame for plotting
   df <- data.frame(xdata = xdata, residuals = residuals) |> 
