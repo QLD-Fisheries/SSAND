@@ -60,7 +60,7 @@ flowchart TB
         C---c("investigate() and 
         functions in resulting investigate.Rmd"):::Functions
         c---D
-        E---e("In development \n influenceplot()"):::Functions
+        E---e("In development influenceplot()"):::Functions
         e---F
         G---g("In development.
         likelihoodplot(), pinerplot(), 
@@ -94,22 +94,5 @@ You can install the development version of SSAND from
 
 ``` r
 # install.packages("devtools")
-devtools::install_github("QLD-Fisheries/SSAND", auth_token = 'abcdef_123456_ghijklm_7890', build_vignettes = TRUE)
+devtools::install_github("QLD-Fisheries/SSAND", build_vignettes = TRUE)
 ```
-
-Currently the repo is private and you need a Personal
-Access Token (PAT) to access it. From your Github profile, go to
-**Settings** -\> **Developer Settings** -\> **Personal access tokens**
--\> **Tokens (classic)** -\> **Generate new token (classic)**. Add a
-note, choose an expiration length, check all the required scopes and
-Generate Token. Save your token. Configure SSO and select QLD-Fisheries
-to authorise the token. Now you can install the repository with:
-
-
-Installation of this package will enable you to load the package within an R session using `library(SSAND)` which will import all plotting functions for use in your R session.
-
-If you are using RStudio/Posit, consider writing a snippet to save yourself the trouble of digging up your auth_token every time your want to update the package. You can write a snippet in RStudio by clicking Tools > Edit code snippets and adding one at the bottom of the list within the R tab. Ensure the tab spacing is correct and you have an empty line following it.  
-
-![image](https://github.com/QLD-Fisheries/FQplots/assets/128432879/dba2ae28-bb33-446f-81ae-e953e1bb70b5)
-
-Now when you type the word 'ssand' into RStudio then press Shift+Tab, it will autocomplete with the entire line. You can then press enter to update the package. 
