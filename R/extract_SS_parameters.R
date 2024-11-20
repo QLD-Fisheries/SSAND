@@ -7,7 +7,7 @@
 
 #' Extract Stock Synthesis parameter names
 #'
-#' @param ss_dat A list of outputs from r4ss::SS_output() or r4ss::SSgetMCMC(), one element per scenario. Will automatically reformat as a list if a single scenario is entered.
+#' @param ss_dat A list of outputs from r4ss::SS_output() or r4ss::SSgetMCMC(), one element per scenario.
 #'
 #' @return A vector of parameters estimated or fixed in your Stock Synthesis models
 #' @export
@@ -18,6 +18,8 @@
 extract_SS_parameters <- function(ss_dat) {
 
   if (length(ss_dat)>75){ss_dat <- list(ss_dat)}
+  if (!is.list(ss_dat)) {stop("Please enter data as a list of outputs, one elemenet per scenario.")}
+
   MCMC <- is.data.frame(ss_dat[[1]])
 
   if (!MCMC) {
@@ -34,7 +36,7 @@ extract_SS_parameters <- function(ss_dat) {
   if (MCMC) {
     names <- NULL
     for (i in 1:length(ss_dat)) {
-      tmp <- data.frame(name = names(ss_mcmc[[1]])) |>
+      tmp <- data.frame(name = names(ss_mcmc[[i]])) |>
         dplyr::filter(!grepl("Main_RecrDev", name)) |>
         dplyr::filter(!grepl("ForeRecr", name))
       names <- rbind(names, tmp)

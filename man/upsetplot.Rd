@@ -17,8 +17,6 @@ upsetplot(
   ylab_upset = "",
   xlab_method = "",
   ylab_method = "",
-  show_region = FALSE,
-  show_region_coarse = FALSE,
   ncol = 2,
   scales = "free",
   extract_data = FALSE
@@ -47,10 +45,6 @@ If using a different source, ensure columns called species, SiteID, method are i
 \item{xlab_method}{Label for x-axis of fishing method plot (character). Default is "".}
 
 \item{ylab_method}{Label for y-axis of fishing method plot (character). Default is "".}
-
-\item{show_region}{Set to TRUE to display by region}
-
-\item{show_region_coarse}{Set to TRUE to display by coarse region}
 
 \item{ncol}{Number of columns for facet wrap. Default is 2.}
 

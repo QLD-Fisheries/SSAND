@@ -44,6 +44,9 @@ template <- function(dir = NULL,
                      discard = FALSE,
                      class_dir = NULL
 ) {
+
+  if (!length && !age && !caal && !discard) {stop("Please set at least one of the following to TRUE: length, age, caal, discard. You can always delete these sections of the report later.")}
+
   # ____________________________________
   # Customise the template
   # ____________________________________

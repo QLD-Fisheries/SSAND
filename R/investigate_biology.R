@@ -15,42 +15,47 @@
 #' @param render Set to TRUE to render report. Set to FALSE to only produce Rmd file.
 #' @param year_var The name of the year variable used. Default is 'year'
 #' @param month_var  The name of the month variable used. Default is 'month'
-#' @param length_var  The name of the length variable used. Default is 'fl'
+#' @param length_var  The name of the length variable used. Default is 'length'
 #' @param length_label The label for the length variable. Default is "Fork length (cm)"
-#' @param age_var  The name of the age variable used. Default is 'agegrp'
+#' @param age_var  The name of the age variable used. Default is 'age'
 #' @param age_label The label for the age variable. Default is "Age group (years)"
 #' @param region_var  The name of the region variable used. Default is 'region'
-#' @param sex_var  The name of the sex variable used. Default is 'sexcode'
-#' @param method_var  The name of the fishing method variable used. Default is 'FishingMethodCode'
+#' @param sex_var  The name of the sex variable used. Default is 'sex'
+#' @param method_var  The name of the fishing method variable used. Default is 'method'
 #' @param sector_var  The name of the sector variable used. Default is 'sector'
 #' @param MLS Optional. The value of the minimum legal size. Numeric
 #' @param show_length Logical. Set to TRUE to show length plots. Default is TRUE.
 #' @param show_age Logical. Set to TRUE to show length plots. Default is TRUE.
 #' @param show_age_at_length Logical. Set to TRUE to show length plots. Default is TRUE.
-#' @param male Label given to male fish in the sex_var column (default is "1 - Male")
-#' @param female Label given to female fish in the sex_var column (default is "2 - Female")
-#' @param unknown_sex Label given to fish of unknown sex in the sex_var column (default is "= "5 - Unknown")
+#' @param male Label given to male fish in the sex_var column (default is "Male")
+#' @param female Label given to female fish in the sex_var column (default is "Female")
+#' @param unknown_sex Label given to fish of unknown sex in the sex_var column (default is = "Unknown")
 #'
 #' @return If render==FALSE, returns investigate.Rmd at the specified directory. If render==TRUE, this Rmd is compiled and investigation.html and a folder called "investigate", containing all produced plots and tables, are generated in the specified directory.
 #' @export
+#'
+#'@examples
+#' \dontrun{
+#' investigate_biology(biological_data, render=TRUE)
+#' }
 investigate_biology <- function(data,
                                 year_var = 'year',
                                 month_var = 'month',
-                                length_var = 'fl',
+                                length_var = 'length',
                                 length_label = "Fork length (cm)",
-                                age_var = 'agegrp',
+                                age_var = 'age',
                                 age_label = "Age group (years)",
                                 region_var = 'region',
-                                sex_var = 'sexcode',
-                                method_var = 'FishingMethodCode',
+                                sex_var = 'sex',
+                                method_var = 'method',
                                 sector_var = 'sector',
                                 MLS = NULL,
                                 show_length = TRUE,
                                 show_age = TRUE,
                                 show_age_at_length = TRUE,
-                                male = "1 - Male",
-                                female = "2 - Female",
-                                unknown_sex = "5 - Unknown",
+                                male = "Male",
+                                female = "Female",
+                                unknown_sex = "Unknown",
                                 dir = getwd(),
                                 render = FALSE) {
 

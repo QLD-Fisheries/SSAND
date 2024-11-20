@@ -37,12 +37,18 @@
 #' @param metadata (Optional) A character string that will be entered into the Metadata tab
 #' @param upset_n_trips Cut off value for tail end of upset plot. Do not plot species combinations who frequency is below this value. Default is 25. Depending on the dataset, a lower number might mean the plot takes a very long time, or renders with unreadable dimensions. A higher number might mean that no combinations are shown and the plot may break.
 #' @param coast_directory (Optional) A file path for a shapefile containing a coastline to be used in maps.
+#' @param filter_days_lower A minimum number of days to be included on the heat plot for identifying potential misreporting. Default is 10.
 #'
 #' @return If render==FALSE, returns investigate.Rmd at the specified directory. If render==TRUE, this Rmd is compiled and investigation.html and a folder called "investigate", containing all produced plots and tables, are generated in the specified directory.
 #' @export
 #'
 #' @examples
-#' \dontrun{investigate(data = format_logbooks(raw_data))}
+#' \dontrun{
+#' investigate(format_logbooks(logbooks),
+#' species_of_interest = "Glitterfin snapper",
+#' filter_days_lower = 1,
+#' upset_n_trips = 1)
+#' }
 investigate <- function(data,
                         dir = getwd(),
                         species_of_interest = NULL,
@@ -68,7 +74,8 @@ investigate <- function(data,
                         show_method_maps = FALSE,
                         metadata = NULL,
                         upset_n_trips = 25,
-                        coast_directory = NULL
+                        coast_directory = NULL,
+                        filter_days_lower = 10
 ) {
 
   if (show_maps && missing(coast_directory)) {
@@ -586,13 +593,8 @@ output:
 
       # Upset ----
       add_text("### Upset plot {.tabset .tabset-fade .tabset-pills}")
-      add_text("#### All {.tabset .tabset-fade .tabset-pills}")
       add_text("Below is an upset plot. It groups data by unique ACN-fisherday and plots frequency of co-caught species. The plot shows the frequency of different combinations of species caught on the same interview ACN-day, ranked by the most common combination.")
-      add_plot(paste0("upsetplot(data, source = 'CFISH', species_of_interest = '",species_of_interest,"', min_records=",upset_n_trips,")"), name="cocaught_species_upset", height = 12, width = 14)
-
-      add_text("#### By coarse region {.tabset .tabset-fade .tabset-pills}")
-      add_text("Below is an upset plot. It groups data by unique ACN-fisherday and plots frequency of co-caught species. The plot shows the frequency of different combinations of species caught on the same interview ACN-day, ranked by the most common combination.")
-      add_plot(paste0("upsetplot(data, source = 'CFISH', show_region_coarse = TRUE, species_of_interest = '",species_of_interest,"', min_records=",upset_n_trips,")"), name="cocaught_species_upset_region_coarse", height = 12, width = 14)
+      add_plot(paste0("upsetplot(data, source = 'CFISH', species_of_interest = '",species_of_interest,"', min_records=",upset_n_trips,")"), name="cocaught_species_upset", height = 12, width = 20)
     }
   }
 
@@ -681,35 +683,35 @@ output:
     add_text("### Summary {.tabset .tabset-fade .tabset-pills}")
     add_text("Fishers are shown on the x-axis and ranked by total catch over time. For easier interpretability, this plot may have been split into multiple plots, grouping fishers by total catch. The first plot shows the most prominent fishers, the last plot shows the least prominent fishers.")
     add_text("#### Days fished {.tabset .tabset-fade .tabset-pills}")
-    add_plot(paste0("heatplot(data, species_of_interest = '",species_of_interest,"', fill='days', filter_days_lower = 10)"), name="heatplot_days", height = 10, width = 12)
+    add_plot(paste0("heatplot(data, species_of_interest = '",species_of_interest,"', fill='days', filter_days_lower = ",filter_days_lower,")"), name="heatplot_days", height = 10, width = 12)
     add_text("#### Weight {.tabset .tabset-fade .tabset-pills}")
-    add_plot(paste0("heatplot(data, species_of_interest = '",species_of_interest,"', fill='weight', filter_days_lower = 10)"), name="heatplot_weight", height = 10, width = 12)
+    add_plot(paste0("heatplot(data, species_of_interest = '",species_of_interest,"', fill='weight', filter_days_lower = ",filter_days_lower,")"), name="heatplot_weight", height = 10, width = 12)
 
     ## By stock area region ----
     if ("stock_area" %in% names(data)) {
       add_text("### By stock area region {.tabset .tabset-fade .tabset-pills}")
       add_text("Fishers are shown on the x-axis and ranked by total catch over time. For easier interpretability, this plot may have been split into multiple plots, grouping fishers by total catch. The first plot shows the most prominent fishers, the last plot shows the least prominent fishers.")
       add_text("#### Days fished {.tabset .tabset-fade .tabset-pills}")
-      add_plot(paste0("heatplot(data, species_of_interest = '",species_of_interest,"', fill='days', filter_days_lower = 10, facet_var = 'stock_area')"), name="heatplot_stock_area_days", height = facet_stock_area_height_heatmap, width = 12)
+      add_plot(paste0("heatplot(data, species_of_interest = '",species_of_interest,"', fill='days', filter_days_lower = ",filter_days_lower,", facet_var = 'stock_area')"), name="heatplot_stock_area_days", height = facet_stock_area_height_heatmap, width = 12)
       add_text("#### Weight {.tabset .tabset-fade .tabset-pills}")
-      add_plot(paste0("heatplot(data, species_of_interest = '",species_of_interest,"', fill='weight', filter_days_lower = 10, facet_var = 'stock_area')"), name="heatplot_stock_area_weight", height = facet_stock_area_height_heatmap, width = 12)
+      add_plot(paste0("heatplot(data, species_of_interest = '",species_of_interest,"', fill='weight', filter_days_lower = ",filter_days_lower,", facet_var = 'stock_area')"), name="heatplot_stock_area_weight", height = facet_stock_area_height_heatmap, width = 12)
     }
 
     ## By coarse region ----
     add_text("### By coarse region {.tabset .tabset-fade .tabset-pills}")
     add_text("Fishers are shown on the x-axis and ranked by total catch over time. For easier interpretability, this plot may have been split into multiple plots, grouping fishers by total catch. The first plot shows the most prominent fishers, the last plot shows the least prominent fishers.")
     add_text("#### Days fished {.tabset .tabset-fade .tabset-pills}")
-    add_plot(paste0("heatplot(data, species_of_interest = '",species_of_interest,"', fill='days', filter_days_lower = 10, facet_var = 'region_coarse')"), name="heatplot_region_coarse_days", height = facet_coarse_region_height_heatmap, width = 12)
+    add_plot(paste0("heatplot(data, species_of_interest = '",species_of_interest,"', fill='days', filter_days_lower = ",filter_days_lower,", facet_var = 'region_coarse')"), name="heatplot_region_coarse_days", height = facet_coarse_region_height_heatmap, width = 12)
     add_text("#### Weight {.tabset .tabset-fade .tabset-pills}")
-    add_plot(paste0("heatplot(data, species_of_interest = '",species_of_interest,"', fill='weight', filter_days_lower = 10, facet_var = 'region_coarse')"), name="heatplot_region_coarse_weight", height = facet_coarse_region_height_heatmap, width = 12)
+    add_plot(paste0("heatplot(data, species_of_interest = '",species_of_interest,"', fill='weight', filter_days_lower = ",filter_days_lower,", facet_var = 'region_coarse')"), name="heatplot_region_coarse_weight", height = facet_coarse_region_height_heatmap, width = 12)
 
     ## By region ----
     add_text("### By region {.tabset .tabset-fade .tabset-pills}")
     add_text("Fishers are shown on the x-axis and ranked by total catch over time. For easier interpretability, this plot may have been split into multiple plots, grouping fishers by total catch. The first plot shows the most prominent fishers, the last plot shows the least prominent fishers.")
     add_text("#### Days fished {.tabset .tabset-fade .tabset-pills}")
-    add_plot(paste0("heatplot(data, species_of_interest = '",species_of_interest,"', fill='days', filter_days_lower = 10, facet_var = 'region')"), name="heatplot_region_days", height = facet_region_height_heatmap, width = 12)
+    add_plot(paste0("heatplot(data, species_of_interest = '",species_of_interest,"', fill='days', filter_days_lower = ",filter_days_lower,", facet_var = 'region')"), name="heatplot_region_days", height = facet_region_height_heatmap, width = 12)
     add_text("#### Weight {.tabset .tabset-fade .tabset-pills}")
-    add_plot(paste0("heatplot(data, species_of_interest = '",species_of_interest,"', fill='weight', filter_days_lower = 10, facet_var = 'region')"), name="heatplot_region_weight", height = facet_region_height_heatmap, width = 12)
+    add_plot(paste0("heatplot(data, species_of_interest = '",species_of_interest,"', fill='weight', filter_days_lower = ",filter_days_lower,", facet_var = 'region')"), name="heatplot_region_weight", height = facet_region_height_heatmap, width = 12)
 
     ## High catch ----
     add_text("### For high catch {.tabset .tabset-fade .tabset-pills}")

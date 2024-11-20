@@ -26,8 +26,13 @@ library(SSAND)
 catalogue()
 template()
 
-# To look at raw logbook data
-investigate(data = format_logbooks(raw_data))
+# To look at raw logbook data (using example logbook data)
+SSAND::investigate(SSAND::format_logbooks(logbooks), 
+                   species_of_interest = "Glitterfin snapper",
+                   filter_days_lower = 1,
+                   upset_n_trips = 1)
+
+
 
 # To look at model outputs (using Stock Synthesis as an example)
 ss_mle <- list(r4ss::SS_output(dir1), r4ss::SS_output(dir2), r4ss::SS_output(dir3))

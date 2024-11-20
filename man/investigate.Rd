@@ -34,7 +34,8 @@ investigate(
   show_method_maps = FALSE,
   metadata = NULL,
   upset_n_trips = 25,
-  coast_directory = NULL
+  coast_directory = NULL,
+  filter_days_lower = 10
 )
 }
 \arguments{
@@ -89,6 +90,8 @@ investigate(
 \item{upset_n_trips}{Cut off value for tail end of upset plot. Do not plot species combinations who frequency is below this value. Default is 25. Depending on the dataset, a lower number might mean the plot takes a very long time, or renders with unreadable dimensions. A higher number might mean that no combinations are shown and the plot may break.}
 
 \item{coast_directory}{(Optional) A file path for a shapefile containing a coastline to be used in maps.}
+
+\item{filter_days_lower}{A minimum number of days to be included on the heat plot for identifying potential misreporting. Default is 10.}
 }
 \value{
 If render==FALSE, returns investigate.Rmd at the specified directory. If render==TRUE, this Rmd is compiled and investigation.html and a folder called "investigate", containing all produced plots and tables, are generated in the specified directory.
@@ -101,5 +104,10 @@ Sections can be toggled on and off in order to save compilation time.
 Takes approximately 8 minutes to compile.
 }
 \examples{
-\dontrun{investigate(data = format_logbooks(raw_data))}
+\dontrun{
+investigate(format_logbooks(logbooks),
+species_of_interest = "Glitterfin snapper",
+filter_days_lower = 1,
+upset_n_trips = 1)
+}
 }

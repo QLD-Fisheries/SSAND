@@ -7,7 +7,7 @@
 extract_SS_parameters(ss_dat)
 }
 \arguments{
-\item{ss_dat}{A list of outputs from r4ss::SS_output() or r4ss::SSgetMCMC(), one element per scenario. Will automatically reformat as a list if a single scenario is entered.}
+\item{ss_dat}{A list of outputs from r4ss::SS_output() or r4ss::SSgetMCMC(), one element per scenario.}
 }
 \value{
 A vector of parameters estimated or fixed in your Stock Synthesis models
