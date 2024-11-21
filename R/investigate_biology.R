@@ -66,10 +66,6 @@ investigate_biology <- function(data,
 
   if (nrow(data)>10000) {print("For large datasets, this can take a long time to run. You might want to test on a smaller dataset to ensure you are producing what you want.")}
 
-  if (!requireNamespace("DT", quietly = TRUE)) {
-    stop("The 'DT' package is required but not installed. Please install it to use this function.")
-  }
-
   # ____________ ----
   # DATA AND FUNCTION SET UP----
   add_header <- function(string, rmd_file_name = "investigation_biology.Rmd") {

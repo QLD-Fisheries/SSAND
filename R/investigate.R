@@ -87,14 +87,6 @@ investigate <- function(data,
     stop("You have set show_maps to TRUE but not specified a directory for a coast line shapefile in coast_directory. Please enter a directory for coast_directory or set show_maps to FALSE.")
   }
 
-  if (!requireNamespace("DT", quietly = TRUE)) {
-    stop("The 'DT' package is required but not installed. Please install it to use this function.")
-  }
-
-  if (!requireNamespace("ggupset", quietly = TRUE)) {
-    stop("The 'ggupset' package is required but not installed. Please install it to use this function.")
-  }
-
   # Check upset plot will produce something:
   interviews_with_species <- data |>
     dplyr::filter(species == species_of_interest) |>
