@@ -47,7 +47,6 @@ Depends:
 LazyData: true
 LazyDataCompression: xz
 Suggests: 
-    DDUST,
     DT,
     ggupset,
     r4ss,
