@@ -27,7 +27,7 @@ mcmc_posteriordensityplot(
 
 \item{parameter_labels}{Vector of customised parameter labels for facet wrap, e.g. expression(xi)}
 
-\item{xmax}{Named vector of maximum x-axis limit, e.g. c('R\link{0}' = 50).}
+\item{xmax}{Named vector of maximum x-axis limit, e.g. c('R\[0\]' = 50).}
 }
 \value{
 Posterior density plot

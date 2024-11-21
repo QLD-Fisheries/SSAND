@@ -35,6 +35,8 @@ biological_data <- data.frame(id = 1:nrow) |>
                 region = sample(c("Region A","Region B","Region C","Region D"), nrow, replace = TRUE),
                 method = sample(c("Line","Net"), nrow, replace = TRUE),
                 sector = sample(c("Commercial","Recreational"), nrow, replace = TRUE)) |>
-  dplyr::mutate(length = jitter(100*(1-exp(-0.2*(age-0))),1000))
+  dplyr::mutate(length = jitter(100*(1-exp(-0.2*(age-0))),1000)) |>
+  dplyr::mutate(length = round(length),
+                age = round(age))
 
 usethis::use_data(biological_data, overwrite = TRUE, compress = "xz")

@@ -13,8 +13,8 @@
 #' @param xlab Label for x-axis (character). Default is "".
 #' @param ylab Label for y-axis (character). Default is "Density".
 #' @param parameter_labels Vector of customised parameter labels for facet wrap, e.g. expression(xi)
-#' @param xmax Named vector of maximum x-axis limit, e.g. c('R[0]' = 50).
-#' 
+#' @param xmax Named vector of maximum x-axis limit, e.g. c('R\\[0\\]' = 50).
+#'
 #' @return Posterior density plot
 #' @export
 #'

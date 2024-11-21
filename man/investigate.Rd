@@ -2,16 +2,12 @@
 % Please edit documentation in R/investigate.R
 \name{investigate}
 \alias{investigate}
-\title{Investigate raw catch and effort data
-Produces a document (Rmd, complies to a HTML) that shows various data summaries and investigations.
-Plots and tables are saved to a folder called "investigate" within the specified directory.
-Sections can be toggled on and off in order to save compilation time.
-Takes approximately 8 minutes to compile.}
+\title{Investigate raw catch and effort data}
 \usage{
 investigate(
   data,
   dir = getwd(),
-  species_of_interest = NULL,
+  species_of_interest,
   financial_year = FALSE,
   render = TRUE,
   anonymous = FALSE,
@@ -43,11 +39,11 @@ investigate(
 
 \item{dir}{Directory of file outputs (.Rmd, .html, and plots and tables). Default is working directory.}
 
-\item{species_of_interest}{The name of the species of interest, as listed in the 'species' column of data.}
+\item{species_of_interest}{The name of the species of interest, as listed in the 'species' column of data. Can use a vector of species to duplicate plots for each species.}
 
 \item{financial_year}{Set to TRUE to display as financial year}
 
-\item{render}{Set to TRUE to render report. Set to FALSE to only produce Rmd file.}
+\item{render}{Set to TRUE to render report. Set to FALSE to only produce Rmd file. If render = FALSE, you will need to manually load your data set into the first chunk of the Rmd file, ensuring it is called 'data' to feed into the subsequent chunks.}
 
 \item{anonymous}{Set to TRUE to remove fisher/operator names.}
 
@@ -97,11 +93,12 @@ investigate(
 If render==FALSE, returns investigate.Rmd at the specified directory. If render==TRUE, this Rmd is compiled and investigation.html and a folder called "investigate", containing all produced plots and tables, are generated in the specified directory.
 }
 \description{
-Investigate raw catch and effort data
-Produces a document (Rmd, complies to a HTML) that shows various data summaries and investigations.
-Plots and tables are saved to a folder called "investigate" within the specified directory.
+This function produces a dashboard to visualise raw catch and effort data.
+It produces a document (Rmd, which complies to a HTML) that shows various data summaries and investigations.
+If render = FALSE, you will produce just the Rmd (not HTML). This allows you to then tweak the document before rendering. Note that you will need to manually load your data set into the first chunk of the Rmd file, ensuring it is called 'data' to feed into the subsequent chunks.
+This function can take a long time to run if using a large dataset. We suggest you test the function on a smaller dataset to ensure it is configured and operating how you intend it to.
 Sections can be toggled on and off in order to save compilation time.
-Takes approximately 8 minutes to compile.
+Plots and tables are saved to a folder called "investigate" within the specified directory.
 }
 \examples{
 \dontrun{

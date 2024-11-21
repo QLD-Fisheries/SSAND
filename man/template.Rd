@@ -2,13 +2,12 @@
 % Please edit documentation in R/template.R
 \name{template}
 \alias{template}
-\title{Copy an example report file into your working directory (or other directory of choosing)
-Template can be customised to the model, presence of MCMC and data types, and jurisdiction style guides}
+\title{Generate a stock assessment report template, configured to your model requirements.}
 \usage{
 template(
   dir = NULL,
   species = "ssand fish",
-  filename = "ssand_fish",
+  filename = "sandfish",
   stock = "east coast",
   model = "SS",
   MCMC = TRUE,
@@ -23,7 +22,7 @@ template(
 \arguments{
 \item{dir}{Directory where template will be saved. Defaults to Desktop.}
 
-\item{species}{Name of species, to populate template}
+\item{species}{Name of species (plain language), to populate template}
 
 \item{filename}{Name of species, as one word with underscores, to populate file name and Makefile}
 
@@ -49,14 +48,23 @@ template(
 A folder containing an Rtex file containing a report template, and the associated files, copied to your directory of choice
 }
 \description{
-Copy an example report file into your working directory (or other directory of choosing)
+A report file (.Rtex) will be save into your working directory (or other directory of choosing), as well as any associated files required for it to run.
+}
+\details{
 Template can be customised to the model, presence of MCMC and data types, and jurisdiction style guides
 }
 \examples{
 \dontrun{
 template(dir=paste0(getwd(),"/ssandfish/"),
-         species = "ssandfish", stock = "east coast", model = "SS",
-         MCMC = TRUE, scenarios = 1:2,
-         length = TRUE, age = FALSE, caal = TRUE, discard = FALSE)
+         species = "ssand fish",
+         filename = "sandfish",
+         stock = "east coast",
+         model = "SS",
+         MCMC = TRUE,
+         scenarios = 1:2,
+         length = TRUE,
+         age = FALSE,
+         caal = FALSE,
+         discard = FALSE)
 }
 }

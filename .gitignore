@@ -20,6 +20,7 @@
 
 # RStudio files
 .Rproj.user/
+*.Rproj
 
 # produced vignettes
 vignettes/*.html
@@ -57,3 +58,7 @@ docs
 investigation.Rmd
 investigation.html
 investigate/
+
+investigation_biology.Rmd
+investigation_biology.html
+investigate_biology/

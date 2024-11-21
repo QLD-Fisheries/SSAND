@@ -2,9 +2,7 @@
 % Please edit documentation in R/investigate_upset.R
 \name{upsetplot}
 \alias{upsetplot}
-\title{Upset plot to display co-caught species
-Groups data by interview (BRS) or unique ACN-fisherday (CFISH) and plots frequency of co-caught species
-The plot shows the frequency of different combinations of species caught on the same interview (BRS) or ACN-day, ranked by the most common combination.}
+\title{Upset plot to display co-caught species}
 \usage{
 upsetplot(
   data,
@@ -56,16 +54,12 @@ If using a different source, ensure columns called species, SiteID, method are i
 An upset plot to display co-caught species
 }
 \description{
-Upset plot to display co-caught species
-Groups data by interview (BRS) or unique ACN-fisherday (CFISH) and plots frequency of co-caught species
+Groups data by TripID or interview and plots frequency of co-caught species.
 The plot shows the frequency of different combinations of species caught on the same interview (BRS) or ACN-day, ranked by the most common combination.
 }
 \examples{
-head(upset) # View sample data
-upsetplot(upset, species_of_interest = "Glitterfin snapper")
-
-\dontrun{
-data <- format_logbooks(raw_data)
-upsetplot(data, source = "CFISH", species_of_interest = "Prawn - tiger", min_records=100)
-}
+upsetplot(format_logbooks(logbooks),
+          source = 'CFISH',
+          species_of_interest = 'Glitterfin snapper',
+          min_records=1)
 }

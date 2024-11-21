@@ -6,16 +6,19 @@
 # You should have received a copy of the GNU General Public License along with SSAND. If not, see <https://www.gnu.org/licenses/>.
 
 #' Investigate raw catch and effort data
-#' Produces a document (Rmd, complies to a HTML) that shows various data summaries and investigations.
-#' Plots and tables are saved to a folder called "investigate" within the specified directory.
+#'
+#' This function produces a dashboard to visualise raw catch and effort data.
+#' It produces a document (Rmd, which complies to a HTML) that shows various data summaries and investigations.
+#' If render = FALSE, you will produce just the Rmd (not HTML). This allows you to then tweak the document before rendering. Note that you will need to manually load your data set into the first chunk of the Rmd file, ensuring it is called 'data' to feed into the subsequent chunks.
+#' This function can take a long time to run if using a large dataset. We suggest you test the function on a smaller dataset to ensure it is configured and operating how you intend it to.
 #' Sections can be toggled on and off in order to save compilation time.
-#' Takes approximately 8 minutes to compile.
+#' Plots and tables are saved to a folder called "investigate" within the specified directory.
 #'
 #' @param data Output from format_logbooks() applied to raw logbook data.
 #' @param dir Directory of file outputs (.Rmd, .html, and plots and tables). Default is working directory.
-#' @param species_of_interest The name of the species of interest, as listed in the 'species' column of data.
+#' @param species_of_interest The name of the species of interest, as listed in the 'species' column of data. Can use a vector of species to duplicate plots for each species.
 #' @param financial_year Set to TRUE to display as financial year
-#' @param render Set to TRUE to render report. Set to FALSE to only produce Rmd file.
+#' @param render Set to TRUE to render report. Set to FALSE to only produce Rmd file. If render = FALSE, you will need to manually load your data set into the first chunk of the Rmd file, ensuring it is called 'data' to feed into the subsequent chunks.
 #' @param anonymous Set to TRUE to remove fisher/operator names.
 #' @param maximum_fishing_day_count Default is 1. Filters data for trips of this maximum number of days, for all plots except those that explore the range of maximum number of fishing days.
 #' @param interesting_years Optional. A vector of years to highlight in additional plots.
@@ -51,7 +54,7 @@
 #' }
 investigate <- function(data,
                         dir = getwd(),
-                        species_of_interest = NULL,
+                        species_of_interest,
                         financial_year = FALSE,
                         render = TRUE,
                         anonymous = FALSE,
@@ -78,9 +81,38 @@ investigate <- function(data,
                         filter_days_lower = 10
 ) {
 
+  if (nrow(data)>10000) {print("For large datasets, this can take a long time to run. You might want to test on a smaller dataset to ensure you are producing what you want.")}
+
   if (show_maps && missing(coast_directory)) {
     stop("You have set show_maps to TRUE but not specified a directory for a coast line shapefile in coast_directory. Please enter a directory for coast_directory or set show_maps to FALSE.")
   }
+
+  if (!requireNamespace("DT", quietly = TRUE)) {
+    stop("The 'DT' package is required but not installed. Please install it to use this function.")
+  }
+
+  if (!requireNamespace("ggupset", quietly = TRUE)) {
+    stop("The 'ggupset' package is required but not installed. Please install it to use this function.")
+  }
+
+  # Check upset plot will produce something:
+  interviews_with_species <- data |>
+    dplyr::filter(species == species_of_interest) |>
+    dplyr::pull(TripID) |>
+    unique()
+
+  upset_prep <- data |>
+    dplyr::filter(TripID %in% interviews_with_species) |>
+    dplyr::arrange(species) |> dplyr::group_by(TripID) |>
+    dplyr::summarise(SpeciesName = list(species), .groups='drop') |>
+    dplyr::group_by(SpeciesName) |>
+    dplyr::mutate(n_trips = dplyr::n()) |>
+    dplyr::ungroup() |>
+    dplyr::filter(n_trips >= upset_n_trips)
+
+  if (nrow(upset_prep)==0) {stop("Please decrease 'upset_n_trips' as the threshold is too high and no plots will be produced.")}
+  rm(interviews_with_species,upset_prep)
+
 
   # ____________ ----
   # DATA AND FUNCTION SET UP ----
@@ -161,7 +193,7 @@ output:
 
   write(yaml_header, rmd_file_name, append=FALSE)
 
-  write("```{r, echo=TRUE, results='asis'}\nlibrary(SSAND)\n```\n", rmd_file_name, append=TRUE)
+  write("```{r, echo=TRUE, results='asis'}\nlibrary(SSAND)\n# data <- load('formatted_data.Rdata') # load data here if compiling from Rmd\n```\n", rmd_file_name, append=TRUE)
 
   write("# {.tabset}", rmd_file_name, append=TRUE)
 
@@ -921,6 +953,11 @@ output:
                       clean = TRUE)
 
     system2("open",paste0(dir,"/investigation.html"))
+  }
+
+
+  if (!render) {
+    print("investigation.Rmd has been produced in the directory specified (default is working directory). To compile investigation.Rmd, you will need to load your data in at line 8. Note that the dataset should be called 'data' for subsequent code chunks to work.")
   }
 }
 

@@ -2,10 +2,7 @@
 % Please edit documentation in R/investigate_biology.R
 \name{investigate_biology}
 \alias{investigate_biology}
-\title{Investigate raw and worked-up biological data
-Produces a document (Rmd, complies to a HTML) that shows various data summaries and investigations.
-Plots and tables are saved to a folder called "investigate_biology" within the specified directory.
-Sections can be toggled on and off in order to save compilation time.}
+\title{Investigate biological data}
 \usage{
 investigate_biology(
   data,
@@ -69,16 +66,18 @@ investigate_biology(
 
 \item{dir}{Directory of file outputs (.Rmd, .html, and plots and tables). Default is working directory.}
 
-\item{render}{Set to TRUE to render report. Set to FALSE to only produce Rmd file.}
+\item{render}{Set to TRUE to render report. Set to FALSE to only produce Rmd file. If render = FALSE, you will need to manually load your data set into the first chunk of the Rmd file, ensuring it is called 'data' to feed into the subsequent chunks.}
 }
 \value{
-If render==FALSE, returns investigate.Rmd at the specified directory. If render==TRUE, this Rmd is compiled and investigation.html and a folder called "investigate", containing all produced plots and tables, are generated in the specified directory.
+If render==FALSE, returns investigate_biology.Rmd at the specified directory. If render==TRUE, this Rmd is compiled and investigation.html and a folder called "investigate_biology", containing all produced plots and tables, are generated in the specified directory.
 }
 \description{
-Investigate raw and worked-up biological data
-Produces a document (Rmd, complies to a HTML) that shows various data summaries and investigations.
-Plots and tables are saved to a folder called "investigate_biology" within the specified directory.
+This function produces a dashboard to visualise biological data. Data should be grouped into length and/or age bins for appropriate visualisation.
+It produces a document (Rmd, which complies to a HTML) that shows various data summaries and investigations.
+If render = FALSE, you will produce just the Rmd (not HTML). This allows you to then tweak the document before rendering. Note that you will need to manually load your data set into the first chunk of the Rmd file, ensuring it is called 'data' to feed into the subsequent chunks.
+This function can take a long time to run if using a large dataset. We suggest you test the function on a smaller dataset to ensure it is configured and operating how you intend it to.
 Sections can be toggled on and off in order to save compilation time.
+Plots and tables are saved to a folder called "investigate_biology" within the specified directory.
 }
 \examples{
 \dontrun{
