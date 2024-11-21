@@ -2,9 +2,7 @@
 % Please edit documentation in R/investigate_upset.R
 \name{upsetplot}
 \alias{upsetplot}
-\title{Upset plot to display co-caught species
-Groups data by interview (BRS) or unique ACN-fisherday (CFISH) and plots frequency of co-caught species
-The plot shows the frequency of different combinations of species caught on the same interview (BRS) or ACN-day, ranked by the most common combination.}
+\title{Upset plot to display co-caught species}
 \usage{
 upsetplot(
   data,
@@ -17,8 +15,6 @@ upsetplot(
   ylab_upset = "",
   xlab_method = "",
   ylab_method = "",
-  show_region = FALSE,
-  show_region_coarse = FALSE,
   ncol = 2,
   scales = "free",
   extract_data = FALSE
@@ -48,10 +44,6 @@ If using a different source, ensure columns called species, SiteID, method are i
 
 \item{ylab_method}{Label for y-axis of fishing method plot (character). Default is "".}
 
-\item{show_region}{Set to TRUE to display by region}
-
-\item{show_region_coarse}{Set to TRUE to display by coarse region}
-
 \item{ncol}{Number of columns for facet wrap. Default is 2.}
 
 \item{scales}{Scales for facet wrap. Default is 'free'}
@@ -62,16 +54,12 @@ If using a different source, ensure columns called species, SiteID, method are i
 An upset plot to display co-caught species
 }
 \description{
-Upset plot to display co-caught species
-Groups data by interview (BRS) or unique ACN-fisherday (CFISH) and plots frequency of co-caught species
+Groups data by TripID or interview and plots frequency of co-caught species.
 The plot shows the frequency of different combinations of species caught on the same interview (BRS) or ACN-day, ranked by the most common combination.
 }
 \examples{
-head(upset) # View sample data
-upsetplot(upset, species_of_interest = "Glitterfin snapper")
-
-\dontrun{
-data <- format_logbooks(raw_data)
-upsetplot(data, source = "CFISH", species_of_interest = "Prawn - tiger", min_records=100)
-}
+upsetplot(format_logbooks(logbooks),
+          source = 'CFISH',
+          species_of_interest = 'Glitterfin snapper',
+          min_records=1)
 }

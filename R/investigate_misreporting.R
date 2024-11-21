@@ -73,83 +73,87 @@ heatplot <- function(data,
     data <- data |> dplyr::group_by(operator,year)
   }
 
-  # `Effort (days)`
-  # `Retained catch (kg)`
-
   data <- data |>
-    # dplyr::select(operator,year,date,latband,weight,region) |>
-    # dplyr::group_by(operator,year,latband,region) |>
     dplyr::summarise(days = dplyr::n_distinct(date),
                      weight = sum(weight), .groups='drop')  |>
     dplyr::mutate(weight = round(weight, digits = 0))
 
-  if (!missing(filter_weight_lower)) {data <- data |> dplyr::filter(weight >= filter_weight_lower)}
-  if (!missing(filter_weight_upper)) {data <- data |> dplyr::filter(weight <= filter_weight_upper)}
-  if (!missing(filter_days_lower)) {data <- data |> dplyr::filter(days >= filter_days_lower)}
-  if (!missing(filter_days_upper)) {data <- data |> dplyr::filter(days <= filter_days_upper)}
-
-  ranked_fishers <- rank_fishers(data, show_year=FALSE)$operator
-  number_of_plots <- ceiling(length(unique(data$operator)) / max_fishers)
-  plots <- list()
-
-  for (i in 1:number_of_plots) {
-
-    # Determine which fishers to display on this plot
-    start <- (i-1)*max_fishers+1 ; end <-  (i-1)*max_fishers+max_fishers
-    fishers_for_this_plot <- ranked_fishers[start:end]
-    # Filter data for those fishers
-    data_subset <- data |> dplyr::filter(operator %in% fishers_for_this_plot)
-
-    if (fill_var == "days") {
-      p <- ggplot2::ggplot(data_subset, ggplot2::aes(x = operator, y = year, fill = days))
-    } else {
-      p <- ggplot2::ggplot(data_subset, ggplot2::aes(x = operator, y = year, fill = weight))
-    }
-
-    p <- p +
-      ggplot2::geom_tile()+
-      ggplot2::scale_fill_gradient(low = "lightblue", high = "red") +
-      ggplot2::theme_bw() +
-      ggplot2::ylab(ylab) +
-      ggplot2::xlab(xlab) +
-      ggplot2::theme(axis.text.x = ggplot2::element_blank()) +
-      ggplot2::theme_bw() +
-      ggplot2::theme(legend.position = legend_position)  +
-      ggplot2::theme(legend.key.height = ggplot2::unit(legend_height, 'cm'),
-                     legend.key.width  = ggplot2::unit(legend_width, 'cm'))
-
-    if (show_values) {
-      if (fill_var == "days") {
-        p <- p + ggplot2::geom_text(ggplot2::aes(label=days), colour="white", size = text_size)
-      } else {
-        p <- p + ggplot2::geom_text(ggplot2::aes(label=weight), colour="white", size = text_size)
-      }
-    }
-
-    if (!show_operators) {
-      p <- p + ggplot2::theme(axis.text.x=ggplot2::element_blank())
-    }
-
-    if (clean_up_plots) {
-      p <- p +
-        ggplot2::theme(axis.ticks.x =ggplot2::element_blank(),
-                       panel.grid.major = ggplot2::element_blank(),
-                       panel.grid.minor = ggplot2::element_blank())
-    }
-
-    # if (show_region) {p <- p + ggplot2::facet_wrap(~region,ncol=ncol)}
-
-    if (!missing(facet_var)) {p <- p + ggplot2::facet_wrap(~.data[[facet_var]], scales=scales, ncol = ncol, dir='v')}
-
-    plots[[i]] <- p
+  if (!missing(filter_weight_lower)) {
+    data <- data |> dplyr::filter(weight >= filter_weight_lower)
+    if (nrow(data)==0) {print("The filter_weight_lower threshold is too high so no plot was produced.")}
+  }
+  if (!missing(filter_weight_upper)) {
+    data <- data |> dplyr::filter(weight <= filter_weight_upper)
+    if (nrow(data)==0) {print("The filter_weight_upper threshold is too low so no plot was produced.")}
+  }
+  if (!missing(filter_days_lower)) {
+    data <- data |> dplyr::filter(days >= filter_days_lower)
+    if (nrow(data)==0) {print("The filter_days_lower threshold is too high so no plot was produced.")}
+  }
+  if (!missing(filter_days_upper)) {
+    data <- data |> dplyr::filter(days <= filter_days_upper)
+    if (nrow(data)==0) {print("The filter_days_upper threshold is too low so no plot was produced.")}
   }
 
-  if (length(plots)==1) {plots <- plots[[1]]}
+  if (nrow(data)>0) {
+    ranked_fishers <- rank_fishers(data, show_year=FALSE)$operator
+    number_of_plots <- ceiling(length(unique(data$operator)) / max_fishers)
+    plots <- list()
 
-  # return(plots)
+    for (i in 1:number_of_plots) {
 
-  if (extract_data) {return(data)} else {return(plots)}
+      # Determine which fishers to display on this plot
+      start <- (i-1)*max_fishers+1 ; end <-  (i-1)*max_fishers+max_fishers
+      fishers_for_this_plot <- ranked_fishers[start:end]
+      # Filter data for those fishers
+      data_subset <- data |> dplyr::filter(operator %in% fishers_for_this_plot)
 
+      if (fill_var == "days") {
+        p <- ggplot2::ggplot(data_subset, ggplot2::aes(x = operator, y = year, fill = days))
+      } else {
+        p <- ggplot2::ggplot(data_subset, ggplot2::aes(x = operator, y = year, fill = weight))
+      }
+
+      p <- p +
+        ggplot2::geom_tile()+
+        ggplot2::scale_fill_gradient(low = "lightblue", high = "red") +
+        ggplot2::theme_bw() +
+        ggplot2::ylab(ylab) +
+        ggplot2::xlab(xlab) +
+        ggplot2::theme(axis.text.x = ggplot2::element_blank()) +
+        ggplot2::theme_bw() +
+        ggplot2::theme(legend.position = legend_position)  +
+        ggplot2::theme(legend.key.height = ggplot2::unit(legend_height, 'cm'),
+                       legend.key.width  = ggplot2::unit(legend_width, 'cm'))
+
+      if (show_values) {
+        if (fill_var == "days") {
+          p <- p + ggplot2::geom_text(ggplot2::aes(label=days), colour="white", size = text_size)
+        } else {
+          p <- p + ggplot2::geom_text(ggplot2::aes(label=weight), colour="white", size = text_size)
+        }
+      }
+
+      if (!show_operators) {
+        p <- p + ggplot2::theme(axis.text.x=ggplot2::element_blank())
+      }
+
+      if (clean_up_plots) {
+        p <- p +
+          ggplot2::theme(axis.ticks.x =ggplot2::element_blank(),
+                         panel.grid.major = ggplot2::element_blank(),
+                         panel.grid.minor = ggplot2::element_blank())
+      }
+
+      if (!missing(facet_var)) {p <- p + ggplot2::facet_wrap(~.data[[facet_var]], scales=scales, ncol = ncol, dir='v')}
+
+      plots[[i]] <- p
+    }
+
+    if (length(plots)==1) {plots <- plots[[1]]}
+
+    if (extract_data) {return(data)} else {return(plots)}
+  }
 }
 
 #' Unusual catch table
@@ -208,7 +212,7 @@ unusualcatchplot <- function(data,
                              max_days = 1,
                              interesting_fishers = NULL,
                              extract_data = FALSE
-                             ) {
+) {
 
 
   if (!missing(interesting_fishers)) {

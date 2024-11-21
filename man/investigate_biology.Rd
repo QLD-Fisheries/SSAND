@@ -2,30 +2,27 @@
 % Please edit documentation in R/investigate_biology.R
 \name{investigate_biology}
 \alias{investigate_biology}
-\title{Investigate raw and worked-up biological data
-Produces a document (Rmd, complies to a HTML) that shows various data summaries and investigations.
-Plots and tables are saved to a folder called "investigate_biology" within the specified directory.
-Sections can be toggled on and off in order to save compilation time.}
+\title{Investigate biological data}
 \usage{
 investigate_biology(
   data,
   year_var = "year",
   month_var = "month",
-  length_var = "fl",
+  length_var = "length",
   length_label = "Fork length (cm)",
-  age_var = "agegrp",
+  age_var = "age",
   age_label = "Age group (years)",
   region_var = "region",
-  sex_var = "sexcode",
-  method_var = "FishingMethodCode",
+  sex_var = "sex",
+  method_var = "method",
   sector_var = "sector",
   MLS = NULL,
   show_length = TRUE,
   show_age = TRUE,
   show_age_at_length = TRUE,
-  male = "1 - Male",
-  female = "2 - Female",
-  unknown_sex = "5 - Unknown",
+  male = "Male",
+  female = "Female",
+  unknown_sex = "Unknown",
   dir = getwd(),
   render = FALSE
 )
@@ -37,19 +34,19 @@ investigate_biology(
 
 \item{month_var}{The name of the month variable used. Default is 'month'}
 
-\item{length_var}{The name of the length variable used. Default is 'fl'}
+\item{length_var}{The name of the length variable used. Default is 'length'}
 
 \item{length_label}{The label for the length variable. Default is "Fork length (cm)"}
 
-\item{age_var}{The name of the age variable used. Default is 'agegrp'}
+\item{age_var}{The name of the age variable used. Default is 'age'}
 
 \item{age_label}{The label for the age variable. Default is "Age group (years)"}
 
 \item{region_var}{The name of the region variable used. Default is 'region'}
 
-\item{sex_var}{The name of the sex variable used. Default is 'sexcode'}
+\item{sex_var}{The name of the sex variable used. Default is 'sex'}
 
-\item{method_var}{The name of the fishing method variable used. Default is 'FishingMethodCode'}
+\item{method_var}{The name of the fishing method variable used. Default is 'method'}
 
 \item{sector_var}{The name of the sector variable used. Default is 'sector'}
 
@@ -61,22 +58,29 @@ investigate_biology(
 
 \item{show_age_at_length}{Logical. Set to TRUE to show length plots. Default is TRUE.}
 
-\item{male}{Label given to male fish in the sex_var column (default is "1 - Male")}
+\item{male}{Label given to male fish in the sex_var column (default is "Male")}
 
-\item{female}{Label given to female fish in the sex_var column (default is "2 - Female")}
+\item{female}{Label given to female fish in the sex_var column (default is "Female")}
 
-\item{unknown_sex}{Label given to fish of unknown sex in the sex_var column (default is "= "5 - Unknown")}
+\item{unknown_sex}{Label given to fish of unknown sex in the sex_var column (default is = "Unknown")}
 
 \item{dir}{Directory of file outputs (.Rmd, .html, and plots and tables). Default is working directory.}
 
-\item{render}{Set to TRUE to render report. Set to FALSE to only produce Rmd file.}
+\item{render}{Set to TRUE to render report. Set to FALSE to only produce Rmd file. If render = FALSE, you will need to manually load your data set into the first chunk of the Rmd file, ensuring it is called 'data' to feed into the subsequent chunks.}
 }
 \value{
-If render==FALSE, returns investigate.Rmd at the specified directory. If render==TRUE, this Rmd is compiled and investigation.html and a folder called "investigate", containing all produced plots and tables, are generated in the specified directory.
+If render==FALSE, returns investigate_biology.Rmd at the specified directory. If render==TRUE, this Rmd is compiled and investigation.html and a folder called "investigate_biology", containing all produced plots and tables, are generated in the specified directory.
 }
 \description{
-Investigate raw and worked-up biological data
-Produces a document (Rmd, complies to a HTML) that shows various data summaries and investigations.
-Plots and tables are saved to a folder called "investigate_biology" within the specified directory.
+This function produces a dashboard to visualise biological data. Data should be grouped into length and/or age bins for appropriate visualisation.
+It produces a document (Rmd, which complies to a HTML) that shows various data summaries and investigations.
+If render = FALSE, you will produce just the Rmd (not HTML). This allows you to then tweak the document before rendering. Note that you will need to manually load your data set into the first chunk of the Rmd file, ensuring it is called 'data' to feed into the subsequent chunks.
+This function can take a long time to run if using a large dataset. We suggest you test the function on a smaller dataset to ensure it is configured and operating how you intend it to.
 Sections can be toggled on and off in order to save compilation time.
+Plots and tables are saved to a folder called "investigate_biology" within the specified directory.
+}
+\examples{
+\dontrun{
+investigate_biology(biological_data, render=TRUE)
+}
 }

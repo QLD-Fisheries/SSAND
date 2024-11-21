@@ -55,6 +55,6 @@ globalVariables(c("Active_Cnt", "Age_Beg", "Biomass", "Exp", "Fleet", "Fleet_Nam
                   "maximum_fishing_day_count", "n", "operator", "p", "proportion", "quant", "rate",
                   "region", "species", "species_code", "Days fished",
                   "Estimate", "Std. Error", "as.formula", "cm", "fit", "nls", "nls.control", "param", "total",
-                  "region_coarse", "season", "x_var", "method_type", "CalendarYear", "MonthMM", "site", "observation_number"
+                  "region_coarse", "season", "x_var", "method_type", "CalendarYear", "MonthMM", "site", "observation_number", "fitted", "TripID"
                   ))
 

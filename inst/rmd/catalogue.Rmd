@@ -33,20 +33,52 @@ The purpose of this document is to showcase some of the plots available within S
 ## Pre-model plots {.tabset .tabset-fade .tabset-pills}
 
 ### Logbook data investigation
-```{r include=FALSE, eval=FALSE}
-data <- format_logbooks(raw_logbook_data) # format logbooks for investigation plots
-investigate(data) # produce an Rmd and HTML to view logbook data
+```{r include=TRUE, eval=FALSE}
+# Format logbooks for investigation plots
+data <- format_logbooks(logbooks) 
+
+# Produce an Rmd and HTML to view logbook data
+investigate(format_logbooks(logbooks),
+            species_of_interest = "Glitterfin snapper",
+            filter_days_lower = 1,
+            upset_n_trips = 1)
+```
+
+```{r include=TRUE, eval=TRUE}
+data <- format_logbooks(logbooks) 
+
+rawcatcheffortplot(data, y_var = 'catch', annual = TRUE, boxplot = TRUE, species_of_interest = 'Glitterfin snapper', scales='free')
+rawcatcheffortplot(data, y_var = 'catch', annual = FALSE, boxplot = TRUE, species_of_interest = 'Glitterfin snapper')
+rawcatcheffortplot(data, y_var = 'catch', species_of_interest = 'Glitterfin snapper')
+rawcatcheffortplot(data, y_var = 'effort', species_of_interest = 'Glitterfin snapper')
+rawcpueplot(data, species_of_interest = 'Glitterfin snapper')
+rawcpueplot(data, species_of_interest = 'Glitterfin snapper', colour_var = 'month',facet_var = 'month',scales='fixed')
+rawcatcheffortplot(data, y_var = 'catch', species_of_interest = 'Glitterfin snapper', fill_var = 'method',show_proportion=TRUE, scales='free')
+rawcatcheffortplot(data, y_var = 'catch', species_of_interest = 'Glitterfin snapper', fill_var = 'species',show_proportion=TRUE, scales='free')
+upsetplot(data, source = 'CFISH', species_of_interest = 'Glitterfin snapper', min_records=1)
+seasonalityplot(data, species_of_interest = 'Glitterfin snapper', daily=FALSE, show_cpue=TRUE)
+heatplot(data, species_of_interest = 'Glitterfin snapper', fill='days', filter_days_lower = 1)
+nfishersplot(data, species_of_interest = 'Glitterfin snapper')
+topfishersplot(data, species_of_interest = 'Glitterfin snapper', show_daily=FALSE, n_top_fishers = 10)
 ```
 
 ### Biological data investigation
-```{r include=FALSE, eval=FALSE}
-investigate_biology(data) # produce an Rmd and HTML to view biological data
+```{r include=TRUE, eval=FALSE}
+investigate_biology(biological_data, render=TRUE) # produce an Rmd and HTML to view biological data
+```
+
+```{r include=TRUE, eval=TRUE}
+rawbiological_boxplot(biological_data, x_var = 'year', xlab='Year', y_var = 'length', ylab = 'Fork length (cm)')
+rawbiological_barplot(biological_data, x_var = 'region', xlab='Region', y_var = 'n', ylab = 'Number of samples', axis_angle = 90)
+rawbiological_barplot(biological_data, x_var = 'year', xlab='Year', y_var = 'n', ylab = 'Number of samples', fill_var = 'region')
+rawbiological_heatplot(biological_data, x_var = 'month', xlab='Month', y_var = 'year', ylab = 'Year', facet_var = 'region')
+rawbiological_boxplot(biological_data |> dplyr::filter(!is.na(age)), x_var = 'year', xlab='Year', y_var = 'age', ylab = 'Age group (years)')
 ```
 
 ### Upset plot
-```{r echo=TRUE, include=TRUE}
-head(upset) # View sample data
-upsetplot(upset, species = "Glitterfin snapper")
+```{r include=TRUE, eval=TRUE}
+data <- format_logbooks(logbooks) 
+upsetplot(data, source = 'CFISH', species_of_interest = 'Glitterfin snapper', min_records=1)
 ```
 
 ### Life history plot
@@ -372,8 +404,6 @@ for (i in 1:length(Rinit)){
 likelihoodprofileplot(profile)
 ```
 
-![An example likelihood profile plot, produced using likelihoodprofileplot()](fig/likelihood_example.png)
-
 ### Maturity plot
 
 ```{r echo=TRUE, include=TRUE}
@@ -636,8 +666,6 @@ data <- biomassplot_prep_SS(ss_mle)
 
 managementplot(data, management_text, management_pos, base_case = 1, show_result = TRUE, scenarios = 1)
 ```
-
-![An example management plot, produced using managementplot()](fig/management_example.png)
 
 ### Web catch plot
 

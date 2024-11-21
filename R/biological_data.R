@@ -5,10 +5,10 @@
 # SSAND is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 # You should have received a copy of the GNU General Public License along with SSAND. If not, see <https://www.gnu.org/licenses/>.
 
-#' Fake data to be used in upsetplot() function.
+#' Fake data to be used in investigate_biology functions.
 #'
-#' Fabricated data showing sample logbook data with columns species, SiteID and method
+#' A sample set of length and age data
 #'
-#' @format ## `upset`
-#' A data frame of fabricated logbook data.
-"upset"
+#' @format ## `biological_data`
+#' A sample set of length and age data
+"biological_data"

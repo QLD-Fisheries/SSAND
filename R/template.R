@@ -5,11 +5,14 @@
 # SSAND is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 # You should have received a copy of the GNU General Public License along with SSAND. If not, see <https://www.gnu.org/licenses/>.
 
-#' Copy an example report file into your working directory (or other directory of choosing)
+#' Generate a stock assessment report template, configured to your model requirements.
+#'
+#' A report file (.Rtex) will be save into your working directory (or other directory of choosing), as well as any associated files required for it to run.
+#'
 #' Template can be customised to the model, presence of MCMC and data types, and jurisdiction style guides
 #'
 #' @param dir Directory where template will be saved. Defaults to Desktop.
-#' @param species Name of species, to populate template
+#' @param species Name of species (plain language), to populate template
 #' @param filename Name of species, as one word with underscores, to populate file name and Makefile
 #' @param stock Name of stock, to populate template
 #' @param model "SS" or "DD" for Stock Synthesis or DDUST respectively. Will populate the relevant content
@@ -27,13 +30,20 @@
 #' @examples
 #' \dontrun{
 #' template(dir=paste0(getwd(),"/ssandfish/"),
-#'          species = "ssandfish", stock = "east coast", model = "SS",
-#'          MCMC = TRUE, scenarios = 1:2,
-#'          length = TRUE, age = FALSE, caal = TRUE, discard = FALSE)
+#'          species = "ssand fish",
+#'          filename = "sandfish",
+#'          stock = "east coast",
+#'          model = "SS",
+#'          MCMC = TRUE,
+#'          scenarios = 1:2,
+#'          length = TRUE,
+#'          age = FALSE,
+#'          caal = FALSE,
+#'          discard = FALSE)
 #' }
 template <- function(dir = NULL,
                      species = "ssand fish",
-                     filename = "ssand_fish",
+                     filename = "sandfish",
                      stock = "east coast",
                      model = "SS",
                      MCMC = TRUE,
@@ -44,6 +54,11 @@ template <- function(dir = NULL,
                      discard = FALSE,
                      class_dir = NULL
 ) {
+
+  if (!length && !age && !caal && !discard) {stop("Please set at least one of the following to TRUE: length, age, caal, discard. You can always delete these sections of the report later.")}
+  if (grepl(" ", filename)) {stop("You have a space in your filename. Please replace spaces with underscores or change to one word.")}
+  if (grepl("_", filename)) {stop("You have an underscore in your species. The 'species' argument is used to populate report text, and LaTeX won't be able to render an underscore. Please replace with underscores with spaces.")}
+
   # ____________________________________
   # Customise the template
   # ____________________________________
@@ -441,4 +456,6 @@ add_scenarios <- function(filename = paste0(getwd(),"/scenarios_appendix.txt"),
   file <- gsub(pattern = "textwidth", replacement = "\\\\\\\\textwidth", x = file)
   file <- gsub(pattern = "%", replacement = "\\\\\\\\%", x = file)
   writeLines(file, con=filename)
+
+  print("Files have been copied into the specified directory (default is Desktop/template). To compile these documents, you will likely need a LaTex engine (e.g. MikTex), RTools and Pandoc. The report can be generated using the Makefile. This can be done by typing 'make' in CMD from the folder that contains the Makefile, or by configuring RStudio/Posit using the Build Tools in Project Options.")
 }

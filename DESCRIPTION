@@ -1,6 +1,6 @@
 Package: SSAND
 Title: Standardised Stock Assessment Numerical Displays
-Version: 1.0.0
+Version: 1.0.1
 Authors@R: 
   c(
     person("Alise", "Fox", , "fisheriesassessment@daf.qld.gov.au", role = c("aut", "cre"), comment = c(ORCID = "0009-0002-5634-0963")),
@@ -19,38 +19,38 @@ Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.2
 Imports: 
+    cowplot,
     dplyr,
+    GGally,
     ggplot2,
+    ggrepel,
+    ggridges,
+    ggspatial,
+    gridExtra,
+    htmltools (>= 0.5.8),
     knitr,
     lubridate,
+    magick,
+    purrr,
     rmarkdown,
     scales,
+    sf,
     stringr,
     tibble,
     tidyr,
     tidyselect,
     TMB,
+    xfun (>= 0.44),
     xtable
 Depends: 
     R (>= 2.10)
 LazyData: true
 LazyDataCompression: xz
 Suggests: 
-    cowplot,
     DT,
-    GGally,
-    ggrepel,
-    ggridges,
-    ggspatial,
     ggupset,
-    gridExtra,
-    htmltools (>= 0.5.8),
-    magick,
     r4ss,
     rstan,
-    sf,
-    testthat (>= 3.0.0),
-    purrr,
-    xfun (>= 0.44)
+    testthat (>= 3.0.0)
 VignetteBuilder: knitr
 Config/testthat/edition: 3

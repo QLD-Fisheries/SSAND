@@ -6,7 +6,8 @@
 # You should have received a copy of the GNU General Public License along with SSAND. If not, see <https://www.gnu.org/licenses/>.
 
 #' Upset plot to display co-caught species
-#' Groups data by interview (BRS) or unique ACN-fisherday (CFISH) and plots frequency of co-caught species
+#'
+#' Groups data by TripID or interview and plots frequency of co-caught species.
 #' The plot shows the frequency of different combinations of species caught on the same interview (BRS) or ACN-day, ranked by the most common combination.
 #'
 #' @param data A raw data file of catch, either from the Boat Ramp Survey or CFISH logbooks.
@@ -22,8 +23,6 @@
 #' @param ylab_upset Label for y-axis of upset plot (character). Default is "".
 #' @param xlab_method Label for x-axis of fishing method plot (character). Default is "".
 #' @param ylab_method Label for y-axis of fishing method plot (character). Default is "".
-#' @param show_region Set to TRUE to display by region
-#' @param show_region_coarse Set to TRUE to display by coarse region
 #' @param ncol Number of columns for facet wrap. Default is 2.
 #' @param scales Scales for facet wrap. Default is 'free'
 #' @param extract_data Set to TRUE to return data instead of plot. Default is FALSE.
@@ -32,13 +31,10 @@
 #' @export
 #'
 #' @examples
-#' head(upset) # View sample data
-#' upsetplot(upset, species_of_interest = "Glitterfin snapper")
-#'
-#' \dontrun{
-#' data <- format_logbooks(raw_data)
-#' upsetplot(data, source = "CFISH", species_of_interest = "Prawn - tiger", min_records=100)
-#' }
+#' upsetplot(format_logbooks(logbooks),
+#'           source = 'CFISH',
+#'           species_of_interest = 'Glitterfin snapper',
+#'           min_records=1)
 upsetplot <- function(data,
                       source = "BRS",
                       species_of_interest = NULL,
@@ -49,13 +45,13 @@ upsetplot <- function(data,
                       ylab_upset = "",
                       xlab_method = "",
                       ylab_method = "",
-                      show_region = FALSE,
-                      show_region_coarse = FALSE,
                       ncol = 2,
                       scales = 'free',
                       extract_data = FALSE) {
 
-  if ("region" %in% names(data) && "region_coarse" %in% names(data) && show_region_coarse) {data <- data |> dplyr::mutate(region = region_coarse); show_region <- TRUE}
+  if (!requireNamespace("ggupset", quietly = TRUE)) {
+    stop("The 'ggupset' package is required but not installed. Please install it to use this function.")
+  }
 
   if (length(species_of_interest)>1) {species_of_interest <- species_of_interest[[1]]}
 
@@ -94,27 +90,14 @@ upsetplot <- function(data,
 
       upset_prep <- data |>
         dplyr::filter(SiteID %in% interviews_with_species) |>
-        dplyr::arrange(species) # sort species names so that duplicates aren't created by the change in order species are listed below.
-
-      if (show_region) {
-        upset_prep <- upset_prep |> dplyr::group_by(SiteID, region)
-      } else {
-        upset_prep <- upset_prep |> dplyr::group_by(SiteID)
-      }
-
-      upset_prep <- upset_prep |>
-        dplyr::summarise(SpeciesName = list(species), .groups='drop')
-
-      if (show_region) {
-        upset_prep <- upset_prep |> dplyr::group_by(SpeciesName, region)
-      } else {
-        upset_prep <- upset_prep |> dplyr::group_by(SpeciesName)
-      }
-
-      upset_prep <- upset_prep |>
+        dplyr::arrange(species) |>  # sort species names so that duplicates aren't created by the change in order species are listed below.
+        dplyr::group_by(SiteID) |>
+        dplyr::summarise(SpeciesName = list(species), .groups='drop') |> dplyr::group_by(SpeciesName) |>
         dplyr::mutate(n_trips = dplyr::n()) |>
         dplyr::ungroup() |>
         dplyr::filter(n_trips >= min_records)
+
+      if (nrow(upset_prep)==0) {stop("Please decrease 'upset_n_trips' as the threshold is too high and no plots will be produced.")}
     }
 
     p <- ggplot2::ggplot(upset_prep) +
@@ -124,11 +107,8 @@ upsetplot <- function(data,
       ggupset::theme_combmatrix(combmatrix.label.make_space = TRUE) +
       ggplot2::xlab(xlab_upset) +
       ggplot2::ylab(ylab_upset) +
-      ggplot2::ggtitle(paste0("Fishing trips that contained a ",tolower(species_of_interest)))
-
-    if (show_region) {
-      p <- p + ggplot2::facet_wrap(~region, scales=scales, ncol=ncol)
-    }
+      ggplot2::ggtitle(paste0("Fishing trips that contained a ",tolower(species_of_interest))) +
+      ggplot2::theme(plot.margin = ggplot2::margin(1,1,1,4, "cm"))
   }
 
   # FishingMethodType plot
@@ -158,17 +138,14 @@ upsetplot <- function(data,
     }
 
     if (source=="CFISH") {
-      data <- data |>
-        dplyr::mutate(SiteID = paste0(operator,date))
-
       interviews_with_species <- data |>
         dplyr::filter(species == species_of_interest) |>
-        dplyr::pull(SiteID) |>
+        dplyr::pull(TripID) |>
         unique()
 
       upset_prep <- data |>
-        dplyr::filter(SiteID %in% interviews_with_species) |>
-        dplyr::group_by(SiteID) |>
+        dplyr::filter(TripID %in% interviews_with_species) |>
+        dplyr::group_by(TripID) |>
         dplyr::summarise(SpeciesName = list(species),
                          nFishingMethodCode = length(unique(method)),
                          FishingMethodCode = list(method),

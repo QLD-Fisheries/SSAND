@@ -5,55 +5,66 @@
 # SSAND is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 # You should have received a copy of the GNU General Public License along with SSAND. If not, see <https://www.gnu.org/licenses/>.
 
-#' Investigate raw and worked-up biological data
-#' Produces a document (Rmd, complies to a HTML) that shows various data summaries and investigations.
-#' Plots and tables are saved to a folder called "investigate_biology" within the specified directory.
+#' Investigate biological data
+#'
+#' This function produces a dashboard to visualise biological data. Data should be grouped into length and/or age bins for appropriate visualisation.
+#' It produces a document (Rmd, which complies to a HTML) that shows various data summaries and investigations.
+#' If render = FALSE, you will produce just the Rmd (not HTML). This allows you to then tweak the document before rendering. Note that you will need to manually load your data set into the first chunk of the Rmd file, ensuring it is called 'data' to feed into the subsequent chunks.
+#' This function can take a long time to run if using a large dataset. We suggest you test the function on a smaller dataset to ensure it is configured and operating how you intend it to.
 #' Sections can be toggled on and off in order to save compilation time.
+#' Plots and tables are saved to a folder called "investigate_biology" within the specified directory.
 #'
 #' @param data A table of raw length and age data. Each row is a different sample. Columns are labelled according to your set up in the "_var" arguments of this function.
 #' @param dir Directory of file outputs (.Rmd, .html, and plots and tables). Default is working directory.
-#' @param render Set to TRUE to render report. Set to FALSE to only produce Rmd file.
+#' @param render Set to TRUE to render report. Set to FALSE to only produce Rmd file. If render = FALSE, you will need to manually load your data set into the first chunk of the Rmd file, ensuring it is called 'data' to feed into the subsequent chunks.
 #' @param year_var The name of the year variable used. Default is 'year'
 #' @param month_var  The name of the month variable used. Default is 'month'
-#' @param length_var  The name of the length variable used. Default is 'fl'
+#' @param length_var  The name of the length variable used. Default is 'length'
 #' @param length_label The label for the length variable. Default is "Fork length (cm)"
-#' @param age_var  The name of the age variable used. Default is 'agegrp'
+#' @param age_var  The name of the age variable used. Default is 'age'
 #' @param age_label The label for the age variable. Default is "Age group (years)"
 #' @param region_var  The name of the region variable used. Default is 'region'
-#' @param sex_var  The name of the sex variable used. Default is 'sexcode'
-#' @param method_var  The name of the fishing method variable used. Default is 'FishingMethodCode'
+#' @param sex_var  The name of the sex variable used. Default is 'sex'
+#' @param method_var  The name of the fishing method variable used. Default is 'method'
 #' @param sector_var  The name of the sector variable used. Default is 'sector'
 #' @param MLS Optional. The value of the minimum legal size. Numeric
 #' @param show_length Logical. Set to TRUE to show length plots. Default is TRUE.
 #' @param show_age Logical. Set to TRUE to show length plots. Default is TRUE.
 #' @param show_age_at_length Logical. Set to TRUE to show length plots. Default is TRUE.
-#' @param male Label given to male fish in the sex_var column (default is "1 - Male")
-#' @param female Label given to female fish in the sex_var column (default is "2 - Female")
-#' @param unknown_sex Label given to fish of unknown sex in the sex_var column (default is "= "5 - Unknown")
+#' @param male Label given to male fish in the sex_var column (default is "Male")
+#' @param female Label given to female fish in the sex_var column (default is "Female")
+#' @param unknown_sex Label given to fish of unknown sex in the sex_var column (default is = "Unknown")
 #'
-#' @return If render==FALSE, returns investigate.Rmd at the specified directory. If render==TRUE, this Rmd is compiled and investigation.html and a folder called "investigate", containing all produced plots and tables, are generated in the specified directory.
+#' @return If render==FALSE, returns investigate_biology.Rmd at the specified directory. If render==TRUE, this Rmd is compiled and investigation.html and a folder called "investigate_biology", containing all produced plots and tables, are generated in the specified directory.
 #' @export
+#'
+#'@examples
+#' \dontrun{
+#' investigate_biology(biological_data, render=TRUE)
+#' }
 investigate_biology <- function(data,
                                 year_var = 'year',
                                 month_var = 'month',
-                                length_var = 'fl',
+                                length_var = 'length',
                                 length_label = "Fork length (cm)",
-                                age_var = 'agegrp',
+                                age_var = 'age',
                                 age_label = "Age group (years)",
                                 region_var = 'region',
-                                sex_var = 'sexcode',
-                                method_var = 'FishingMethodCode',
+                                sex_var = 'sex',
+                                method_var = 'method',
                                 sector_var = 'sector',
                                 MLS = NULL,
                                 show_length = TRUE,
                                 show_age = TRUE,
                                 show_age_at_length = TRUE,
-                                male = "1 - Male",
-                                female = "2 - Female",
-                                unknown_sex = "5 - Unknown",
+                                male = "Male",
+                                female = "Female",
+                                unknown_sex = "Unknown",
                                 dir = getwd(),
                                 render = FALSE) {
 
+
+  if (nrow(data)>10000) {print("For large datasets, this can take a long time to run. You might want to test on a smaller dataset to ensure you are producing what you want.")}
 
   # ____________ ----
   # DATA AND FUNCTION SET UP----
@@ -97,7 +108,7 @@ output:
 ---"
 
   write(yaml_header, rmd_file_name, append=FALSE)
-  write("```{r, echo=TRUE, results='asis'}\nlibrary(SSAND)\n```\n", rmd_file_name, append=TRUE)
+  write("```{r, echo=TRUE, results='asis'}\nlibrary(SSAND)\n# data <- load('biological_data.Rdata') # load data here if compiling from Rmd\n```\n", rmd_file_name, append=TRUE)
   write("# {.tabset}", rmd_file_name, append=TRUE)
 
 
@@ -123,8 +134,19 @@ output:
     add_plot(paste0("rawbiological_barplot(data, x_var = '",region_var,"', xlab='Region', y_var = 'n', ylab = 'Number of samples', axis_angle = 90)"), width=8, height=4, name="length_nsamp_region")
     add_plot(paste0("rawbiological_barplot(data, x_var = '",year_var,"', xlab='Year', y_var = 'n', ylab = 'Number of samples', fill_var = '",region_var,"')"), width=8, height=4, name="length_nsamp_region_year")
     add_plot(paste0("rawbiological_barplot(data, x_var = '",year_var,"', xlab='Year', y_var = 'p', ylab = 'Proportion of samples', fill_var = '",region_var,"')"), width=8, height=4, name="length_psamp_region_year")
-    add_plot(paste0("rawbiological_barplot(data, x_var = '",length_var,"', xlab='",length_label,"', y_var = 'n', ylab = 'Number of samples', fill_var = '",region_var,"', MLS_x = ",MLS,")"), width=8, height=4, name="length_freq_region")
-    add_plot(paste0("rawbiological_barplot(data, x_var = '",length_var,"', xlab='",length_label,"', y_var = 'n', ylab = 'Number of samples', fill_var = '",region_var,"', dodge=TRUE, MLS_x = ",MLS,")"), width=8, height=4, name="length_nsamp_region_dodge")
+
+    if (missing(MLS)) {
+      add_plot(paste0("rawbiological_barplot(data, x_var = '",length_var,"', xlab='",length_label,"', y_var = 'n', ylab = 'Number of samples', fill_var = '",region_var,"')"), width=8, height=4, name="length_freq_region")
+    } else {
+      add_plot(paste0("rawbiological_barplot(data, x_var = '",length_var,"', xlab='",length_label,"', y_var = 'n', ylab = 'Number of samples', fill_var = '",region_var,"', MLS_x = ",MLS,")"), width=8, height=4, name="length_freq_region")
+    }
+
+    if (missing(MLS)) {
+      add_plot(paste0("rawbiological_barplot(data, x_var = '",length_var,"', xlab='",length_label,"', y_var = 'n', ylab = 'Number of samples', fill_var = '",region_var,"', dodge=TRUE)"), width=8, height=4, name="length_nsamp_region_dodge")
+    } else {
+      add_plot(paste0("rawbiological_barplot(data, x_var = '",length_var,"', xlab='",length_label,"', y_var = 'n', ylab = 'Number of samples', fill_var = '",region_var,"', dodge=TRUE, MLS_x = ",MLS,")"), width=8, height=4, name="length_nsamp_region_dodge")
+    }
+
     add_plot(paste0("rawbiological_barplot(data, x_var = '",length_var,"', xlab='",length_label,"', y_var = 'n', ylab = 'Number of samples', facet_var = '",region_var,"')"), width=8, height=8, name="length_nsamp_region_facet")
     add_plot(paste0("rawbiological_barplot(data, x_var = '",length_var,"', xlab='",length_label,"', y_var = 'n', ylab = 'Number of samples', facet_var = c('",year_var,"','",region_var,"'))"), height=24,width=12, name="length_freq_region_year")
 
@@ -133,8 +155,18 @@ output:
     add_plot(paste0("rawbiological_barplot(data, x_var = '",sector_var,"', xlab='Region', y_var = 'n', ylab = 'Number of samples')"), width=8, height=4, name="length_nsamp_sector")
     add_plot(paste0("rawbiological_barplot(data, x_var = '",year_var,"', xlab='Year', y_var = 'n', ylab = 'Number of samples', fill_var = '",sector_var,"')"), width=8, height=4, name="length_nsamp_sector_year")
     add_plot(paste0("rawbiological_barplot(data, x_var = '",year_var,"', xlab='Year', y_var = 'p', ylab = 'Proportion of samples', fill_var = '",sector_var,"')"), width=8, height=4, name="length_psamp_sector_year")
-    add_plot(paste0("rawbiological_barplot(data, x_var = '",length_var,"', xlab='",length_label,"', y_var = 'n', ylab = 'Number of samples', fill_var = '",sector_var,"', MLS_x = ",MLS,")"), width=8, height=4, name="length_freq_sector")
-    add_plot(paste0("rawbiological_barplot(data, x_var = '",length_var,"', xlab='",length_label,"', y_var = 'n', ylab = 'Number of samples', fill_var = '",sector_var,"', dodge=TRUE, MLS_x = ",MLS,")"), width=8, height=4, name="length_nsamp_sector_dodge")
+    if (missing(MLS)) {
+      add_plot(paste0("rawbiological_barplot(data, x_var = '",length_var,"', xlab='",length_label,"', y_var = 'n', ylab = 'Number of samples', fill_var = '",sector_var,"')"), width=8, height=4, name="length_freq_sector")
+    } else {
+      add_plot(paste0("rawbiological_barplot(data, x_var = '",length_var,"', xlab='",length_label,"', y_var = 'n', ylab = 'Number of samples', fill_var = '",sector_var,"', MLS_x = ",MLS,")"), width=8, height=4, name="length_freq_sector")
+    }
+
+    if (missing(MLS)) {
+      add_plot(paste0("rawbiological_barplot(data, x_var = '",length_var,"', xlab='",length_label,"', y_var = 'n', ylab = 'Number of samples', fill_var = '",sector_var,"', dodge=TRUE)"), width=8, height=4, name="length_nsamp_sector_dodge")
+    } else {
+      add_plot(paste0("rawbiological_barplot(data, x_var = '",length_var,"', xlab='",length_label,"', y_var = 'n', ylab = 'Number of samples', fill_var = '",sector_var,"', dodge=TRUE, MLS_x = ",MLS,")"), width=8, height=4, name="length_nsamp_sector_dodge")
+    }
+
     add_plot(paste0("rawbiological_barplot(data, x_var = '",length_var,"', xlab='",length_label,"', y_var = 'n', ylab = 'Number of samples', facet_var = '",sector_var,"')"), width=8, height=4, name="length_freq_sector_facet")
     add_plot(paste0("rawbiological_barplot(data, x_var = '",length_var,"', xlab='",length_label,"', y_var = 'n', ylab = 'Number of samples', facet_var = c('",year_var,"','",sector_var,"'))"), height=24,width=12, name="length_freq_sector_year")
 
@@ -152,8 +184,19 @@ output:
     add_plot(paste0("rawbiological_barplot(data, x_var = '",sex_var,"', xlab='Sex', y_var = 'n', ylab = 'Number of samples')"), width=8, height=4, name="length_nsamp_sex")
     add_plot(paste0("rawbiological_barplot(data, x_var = '",year_var,"', xlab='Year', y_var = 'n', ylab = 'Number of samples', fill_var = '",sex_var,"')"), width=8, height=4, name="length_nsamp_sex_year")
     add_plot(paste0("rawbiological_barplot(data, x_var = '",year_var,"', xlab='Year', y_var = 'p', ylab = 'Proportion of samples', fill_var = '",sex_var,"')"), width=8, height=4, name="length_psamp_sex_year")
-    add_plot(paste0("rawbiological_barplot(data, x_var = '",length_var,"', xlab='",length_label,"', y_var = 'n', ylab = 'Number of samples', fill_var = '",sex_var,"', MLS_x = ",MLS,")"), width=8, height=4, name="length_freq_sex")
-    add_plot(paste0("rawbiological_barplot(data, x_var = '",length_var,"', xlab='",length_label,"', y_var = 'n', ylab = 'Number of samples', fill_var = '",sex_var,"', dodge=TRUE, MLS_x = ",MLS,")"), width=8, height=4, name="length_freq_sex_year_dodge")
+
+    if (missing(MLS)) {
+      add_plot(paste0("rawbiological_barplot(data, x_var = '",length_var,"', xlab='",length_label,"', y_var = 'n', ylab = 'Number of samples', fill_var = '",sex_var,"')"), width=8, height=4, name="length_freq_sex")
+    } else {
+      add_plot(paste0("rawbiological_barplot(data, x_var = '",length_var,"', xlab='",length_label,"', y_var = 'n', ylab = 'Number of samples', fill_var = '",sex_var,"', MLS_x = ",MLS,")"), width=8, height=4, name="length_freq_sex")
+    }
+
+    if (missing(MLS)) {
+      add_plot(paste0("rawbiological_barplot(data, x_var = '",length_var,"', xlab='",length_label,"', y_var = 'n', ylab = 'Number of samples', fill_var = '",sex_var,"', dodge=TRUE)"), width=8, height=4, name="length_freq_sex_year_dodge")
+    } else {
+      add_plot(paste0("rawbiological_barplot(data, x_var = '",length_var,"', xlab='",length_label,"', y_var = 'n', ylab = 'Number of samples', fill_var = '",sex_var,"', dodge=TRUE, MLS_x = ",MLS,")"), width=8, height=4, name="length_freq_sex_year_dodge")
+    }
+
     add_plot(paste0("rawbiological_barplot(data, x_var = '",length_var,"', xlab='",length_label,"', y_var = 'n', ylab = 'Number of samples', facet_var = '",sex_var,"')"), width=8, height=4, name="length_freq_sex_facet")
     add_plot(paste0("rawbiological_barplot(data, x_var = '",length_var,"', xlab='",length_label,"', y_var = 'n', ylab = 'Number of samples', facet_var = c('",year_var,"','",sex_var,"'))"), height=24,width=12, name="length_freq_sex_year_grid")
 
@@ -238,27 +281,61 @@ output:
     add_header("Age and length")
 
     add_text("### Age-at-length {.tabset .tabset-fade .tabset-pills}")
-    add_plot(paste0("rawbiological_boxplot(data |> dplyr::filter(!is.na(",length_var,")), x_var = '",length_var,"', xlab='",length_label,"', y_var = '",age_var,"', ylab = '",age_label,"', MLS_x=",MLS,")"), width=8, height=4, name="aal_box")
-    add_plot(paste0("rawbiological_boxplot(data |> dplyr::filter(!is.na(",length_var,")), x_var = '",length_var,"', xlab='",length_label,"', y_var = '",age_var,"', ylab = '",age_label,"', facet_var = '",region_var,"', MLS_x=",MLS,")"), width=8, height=8, name="aal_box_region")
-    add_plot(paste0("rawbiological_boxplot(data |> dplyr::filter(!is.na(",length_var,")), x_var = '",length_var,"', xlab='",length_label,"', y_var = '",age_var,"', ylab = '",age_label,"', facet_var = '",sex_var,"', MLS_x=",MLS,")"), width=8, height=4, name="aal_box_sex")
-    add_plot(paste0("rawbiological_boxplot(data |> dplyr::filter(!is.na(",length_var,")), x_var = '",length_var,"', xlab='",length_label,"', y_var = '",age_var,"', ylab = '",age_label,"', facet_var = c('",region_var,"','",sex_var,"'), MLS_x=",MLS,")"), width=12, height=24, name="aal_box_sex_region")
+
+    if (missing(MLS)) {
+      add_plot(paste0("rawbiological_boxplot(data |> dplyr::filter(!is.na(",length_var,")), x_var = '",length_var,"', xlab='",length_label,"', y_var = '",age_var,"', ylab = '",age_label,"')"), width=8, height=4, name="aal_box")
+    } else {
+      add_plot(paste0("rawbiological_boxplot(data |> dplyr::filter(!is.na(",length_var,")), x_var = '",length_var,"', xlab='",length_label,"', y_var = '",age_var,"', ylab = '",age_label,"', MLS_x=",MLS,")"), width=8, height=4, name="aal_box")
+    }
+
+    if (missing(MLS)) {
+      add_plot(paste0("rawbiological_boxplot(data |> dplyr::filter(!is.na(",length_var,")), x_var = '",length_var,"', xlab='",length_label,"', y_var = '",age_var,"', ylab = '",age_label,"', facet_var = '",region_var,"')"), width=8, height=8, name="aal_box_region")
+    } else {
+      add_plot(paste0("rawbiological_boxplot(data |> dplyr::filter(!is.na(",length_var,")), x_var = '",length_var,"', xlab='",length_label,"', y_var = '",age_var,"', ylab = '",age_label,"', facet_var = '",region_var,"', MLS_x=",MLS,")"), width=8, height=8, name="aal_box_region")
+    }
+
+    if (missing(MLS)) {
+      add_plot(paste0("rawbiological_boxplot(data |> dplyr::filter(!is.na(",length_var,")), x_var = '",length_var,"', xlab='",length_label,"', y_var = '",age_var,"', ylab = '",age_label,"', facet_var = '",sex_var,"')"), width=8, height=4, name="aal_box_sex")
+    } else {
+      add_plot(paste0("rawbiological_boxplot(data |> dplyr::filter(!is.na(",length_var,")), x_var = '",length_var,"', xlab='",length_label,"', y_var = '",age_var,"', ylab = '",age_label,"', facet_var = '",sex_var,"', MLS_x=",MLS,")"), width=8, height=4, name="aal_box_sex")
+    }
+
+    if (missing(MLS)) {
+      add_plot(paste0("rawbiological_boxplot(data |> dplyr::filter(!is.na(",length_var,")), x_var = '",length_var,"', xlab='",length_label,"', y_var = '",age_var,"', ylab = '",age_label,"', facet_var = c('",region_var,"','",sex_var,"'))"), width=12, height=24, name="aal_box_sex_region")
+    } else {
+      add_plot(paste0("rawbiological_boxplot(data |> dplyr::filter(!is.na(",length_var,")), x_var = '",length_var,"', xlab='",length_label,"', y_var = '",age_var,"', ylab = '",age_label,"', facet_var = c('",region_var,"','",sex_var,"'), MLS_x=",MLS,")"), width=12, height=24, name="aal_box_sex_region")
+    }
 
     add_text("### Length-at-age {.tabset .tabset-fade .tabset-pills}")
-    add_plot(paste0("rawbiological_boxplot(data |> dplyr::filter(!is.na(",age_var,")), x_var = '",age_var,"', xlab='",age_label,"', y_var = '",length_var,"', ylab = '",length_label,"', MLS_y=",MLS,")"), width=8, height=4, name="laa_box")
-    add_plot(paste0("rawbiological_boxplot(data |> dplyr::filter(!is.na(",age_var,")), x_var = '",age_var,"', xlab='",age_label,"', y_var = '",length_var,"', ylab = '",length_label,"', facet_var = '",region_var,"', MLS_y=",MLS,")"), width=8, height=8, name="laa_box_region")
-    add_plot(paste0("rawbiological_boxplot(data |> dplyr::filter(!is.na(",age_var,")), x_var = '",age_var,"', xlab='",age_label,"', y_var = '",length_var,"', ylab = '",length_label,"', facet_var = '",sex_var,"', MLS_y=",MLS,")"), width=8, height=4, name="laa_box_sex")
-    add_plot(paste0("rawbiological_boxplot(data |> dplyr::filter(!is.na(",age_var,")), x_var = '",age_var,"', xlab='",age_label,"', y_var = '",length_var,"', ylab = '",length_label,"', facet_var = c('",region_var,"','",sex_var,"'), MLS_y=",MLS,")"), width=12, height=24, name="laa_box_sex_region")
+
+    if (missing(MLS)) {
+      add_plot(paste0("rawbiological_boxplot(data |> dplyr::filter(!is.na(",age_var,")), x_var = '",age_var,"', xlab='",age_label,"', y_var = '",length_var,"', ylab = '",length_label,"')"), width=8, height=4, name="laa_box")
+    } else {
+      add_plot(paste0("rawbiological_boxplot(data |> dplyr::filter(!is.na(",age_var,")), x_var = '",age_var,"', xlab='",age_label,"', y_var = '",length_var,"', ylab = '",length_label,"', MLS_y=",MLS,")"), width=8, height=4, name="laa_box")
+    }
+
+    if (missing(MLS)) {
+      add_plot(paste0("rawbiological_boxplot(data |> dplyr::filter(!is.na(",age_var,")), x_var = '",age_var,"', xlab='",age_label,"', y_var = '",length_var,"', ylab = '",length_label,"', facet_var = '",region_var,"')"), width=8, height=8, name="laa_box_region")
+    } else {
+      add_plot(paste0("rawbiological_boxplot(data |> dplyr::filter(!is.na(",age_var,")), x_var = '",age_var,"', xlab='",age_label,"', y_var = '",length_var,"', ylab = '",length_label,"', facet_var = '",region_var,"', MLS_y=",MLS,")"), width=8, height=8, name="laa_box_region")
+    }
+
+    if (missing(MLS)) {
+      add_plot(paste0("rawbiological_boxplot(data |> dplyr::filter(!is.na(",age_var,")), x_var = '",age_var,"', xlab='",age_label,"', y_var = '",length_var,"', ylab = '",length_label,"', facet_var = '",sex_var,"')"), width=8, height=4, name="laa_box_sex")
+    } else {
+      add_plot(paste0("rawbiological_boxplot(data |> dplyr::filter(!is.na(",age_var,")), x_var = '",age_var,"', xlab='",age_label,"', y_var = '",length_var,"', ylab = '",length_label,"', facet_var = '",sex_var,"', MLS_y=",MLS,")"), width=8, height=4, name="laa_box_sex")
+    }
+
+    if (missing(MLS)) {
+      add_plot(paste0("rawbiological_boxplot(data |> dplyr::filter(!is.na(",age_var,")), x_var = '",age_var,"', xlab='",age_label,"', y_var = '",length_var,"', ylab = '",length_label,"', facet_var = c('",region_var,"','",sex_var,"'))"), width=12, height=24, name="laa_box_sex_region")
+    } else {
+      add_plot(paste0("rawbiological_boxplot(data |> dplyr::filter(!is.na(",age_var,")), x_var = '",age_var,"', xlab='",age_label,"', y_var = '",length_var,"', ylab = '",length_label,"', facet_var = c('",region_var,"','",sex_var,"'), MLS_y=",MLS,")"), width=12, height=24, name="laa_box_sex_region")
+    }
 
     add_text("### von Bertalanffy curves {.tabset .tabset-fade .tabset-pills}")
     add_text("The following plots can show von Bertalanffy curves fitted to the data if show_vonBert is set to TRUE. This feature is in development and may not always work. This is not an output of a stock assessment model and is to be used as an indication of trend only. ")
     add_plot(paste0("# rawbiological_scatterplot(data, x_var = '",age_var,"', xlab = '",age_label,"', y_var = '",length_var,"', ylab = '",length_label,"', facet_var='",region_var,"', show_vonBert=FALSE) \n# rawbiological_scatterplot(data, x_var = '",age_var,"', xlab = '",age_label,"', y_var = '",length_var,"', ylab = '",length_label,"', facet_var='",region_var,"', show_vonBert=FALSE, show_vonBert_only=FALSE, legend_position='top')"), width=8, height=16, name="ageatlength_vonBert_region")
-    # add_plot(paste0("rawbiological_scatterplot(data, x_var = '",age_var,"', xlab = '",age_label,"', y_var = '",length_var,"', ylab = '",length_label,"', facet_var='",region_var,"', show_vonBert=FALSE, show_vonBert_only=FALSE, legend_position='top')"), width=12, height=6, name="ageatlength_vonBert_region_combined")
   }
-
-  # ____________ ----
-  # MAP ----
-  # add_header("Map")
-  # add_plot(paste0("map(show_monitoring_regions = TRUE, show_latbands = TRUE, latbands_level = 'top')"), width=14,height=14, name="map")
 
 
   # ____________ ----
@@ -270,6 +347,10 @@ output:
                       clean = TRUE)
 
     system2("open",paste0(dir,"/investigation_biology.html"))
+  }
+
+  if (!render) {
+    print("investigation_biology.Rmd has been produced in the directory specified (default is working directory). To compile investigation_biology.Rmd, you will need to load your data in at line 8. Note that the dataset should be called 'data' for subsequent code chunks to work.")
   }
 }
 

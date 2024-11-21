@@ -6,16 +6,19 @@
 # You should have received a copy of the GNU General Public License along with SSAND. If not, see <https://www.gnu.org/licenses/>.
 
 #' Investigate raw catch and effort data
-#' Produces a document (Rmd, complies to a HTML) that shows various data summaries and investigations.
-#' Plots and tables are saved to a folder called "investigate" within the specified directory.
+#'
+#' This function produces a dashboard to visualise raw catch and effort data.
+#' It produces a document (Rmd, which complies to a HTML) that shows various data summaries and investigations.
+#' If render = FALSE, you will produce just the Rmd (not HTML). This allows you to then tweak the document before rendering. Note that you will need to manually load your data set into the first chunk of the Rmd file, ensuring it is called 'data' to feed into the subsequent chunks.
+#' This function can take a long time to run if using a large dataset. We suggest you test the function on a smaller dataset to ensure it is configured and operating how you intend it to.
 #' Sections can be toggled on and off in order to save compilation time.
-#' Takes approximately 8 minutes to compile.
+#' Plots and tables are saved to a folder called "investigate" within the specified directory.
 #'
 #' @param data Output from format_logbooks() applied to raw logbook data.
 #' @param dir Directory of file outputs (.Rmd, .html, and plots and tables). Default is working directory.
-#' @param species_of_interest The name of the species of interest, as listed in the 'species' column of data.
+#' @param species_of_interest The name of the species of interest, as listed in the 'species' column of data. Can use a vector of species to duplicate plots for each species.
 #' @param financial_year Set to TRUE to display as financial year
-#' @param render Set to TRUE to render report. Set to FALSE to only produce Rmd file.
+#' @param render Set to TRUE to render report. Set to FALSE to only produce Rmd file. If render = FALSE, you will need to manually load your data set into the first chunk of the Rmd file, ensuring it is called 'data' to feed into the subsequent chunks.
 #' @param anonymous Set to TRUE to remove fisher/operator names.
 #' @param maximum_fishing_day_count Default is 1. Filters data for trips of this maximum number of days, for all plots except those that explore the range of maximum number of fishing days.
 #' @param interesting_years Optional. A vector of years to highlight in additional plots.
@@ -37,15 +40,21 @@
 #' @param metadata (Optional) A character string that will be entered into the Metadata tab
 #' @param upset_n_trips Cut off value for tail end of upset plot. Do not plot species combinations who frequency is below this value. Default is 25. Depending on the dataset, a lower number might mean the plot takes a very long time, or renders with unreadable dimensions. A higher number might mean that no combinations are shown and the plot may break.
 #' @param coast_directory (Optional) A file path for a shapefile containing a coastline to be used in maps.
+#' @param filter_days_lower A minimum number of days to be included on the heat plot for identifying potential misreporting. Default is 10.
 #'
 #' @return If render==FALSE, returns investigate.Rmd at the specified directory. If render==TRUE, this Rmd is compiled and investigation.html and a folder called "investigate", containing all produced plots and tables, are generated in the specified directory.
 #' @export
 #'
 #' @examples
-#' \dontrun{investigate(data = format_logbooks(raw_data))}
+#' \dontrun{
+#' investigate(format_logbooks(logbooks),
+#' species_of_interest = "Glitterfin snapper",
+#' filter_days_lower = 1,
+#' upset_n_trips = 1)
+#' }
 investigate <- function(data,
                         dir = getwd(),
-                        species_of_interest = NULL,
+                        species_of_interest,
                         financial_year = FALSE,
                         render = TRUE,
                         anonymous = FALSE,
@@ -68,12 +77,34 @@ investigate <- function(data,
                         show_method_maps = FALSE,
                         metadata = NULL,
                         upset_n_trips = 25,
-                        coast_directory = NULL
+                        coast_directory = NULL,
+                        filter_days_lower = 10
 ) {
+
+  if (nrow(data)>10000) {print("For large datasets, this can take a long time to run. You might want to test on a smaller dataset to ensure you are producing what you want.")}
 
   if (show_maps && missing(coast_directory)) {
     stop("You have set show_maps to TRUE but not specified a directory for a coast line shapefile in coast_directory. Please enter a directory for coast_directory or set show_maps to FALSE.")
   }
+
+  # Check upset plot will produce something:
+  interviews_with_species <- data |>
+    dplyr::filter(species == species_of_interest) |>
+    dplyr::pull(TripID) |>
+    unique()
+
+  upset_prep <- data |>
+    dplyr::filter(TripID %in% interviews_with_species) |>
+    dplyr::arrange(species) |> dplyr::group_by(TripID) |>
+    dplyr::summarise(SpeciesName = list(species), .groups='drop') |>
+    dplyr::group_by(SpeciesName) |>
+    dplyr::mutate(n_trips = dplyr::n()) |>
+    dplyr::ungroup() |>
+    dplyr::filter(n_trips >= upset_n_trips)
+
+  if (nrow(upset_prep)==0) {stop("Please decrease 'upset_n_trips' as the threshold is too high and no plots will be produced.")}
+  rm(interviews_with_species,upset_prep)
+
 
   # ____________ ----
   # DATA AND FUNCTION SET UP ----
@@ -154,7 +185,7 @@ output:
 
   write(yaml_header, rmd_file_name, append=FALSE)
 
-  write("```{r, echo=TRUE, results='asis'}\nlibrary(SSAND)\n```\n", rmd_file_name, append=TRUE)
+  write("```{r, echo=TRUE, results='asis'}\nlibrary(SSAND)\n# data <- load('formatted_data.Rdata') # load data here if compiling from Rmd\n```\n", rmd_file_name, append=TRUE)
 
   write("# {.tabset}", rmd_file_name, append=TRUE)
 
@@ -586,13 +617,8 @@ output:
 
       # Upset ----
       add_text("### Upset plot {.tabset .tabset-fade .tabset-pills}")
-      add_text("#### All {.tabset .tabset-fade .tabset-pills}")
       add_text("Below is an upset plot. It groups data by unique ACN-fisherday and plots frequency of co-caught species. The plot shows the frequency of different combinations of species caught on the same interview ACN-day, ranked by the most common combination.")
-      add_plot(paste0("upsetplot(data, source = 'CFISH', species_of_interest = '",species_of_interest,"', min_records=",upset_n_trips,")"), name="cocaught_species_upset", height = 12, width = 14)
-
-      add_text("#### By coarse region {.tabset .tabset-fade .tabset-pills}")
-      add_text("Below is an upset plot. It groups data by unique ACN-fisherday and plots frequency of co-caught species. The plot shows the frequency of different combinations of species caught on the same interview ACN-day, ranked by the most common combination.")
-      add_plot(paste0("upsetplot(data, source = 'CFISH', show_region_coarse = TRUE, species_of_interest = '",species_of_interest,"', min_records=",upset_n_trips,")"), name="cocaught_species_upset_region_coarse", height = 12, width = 14)
+      add_plot(paste0("upsetplot(data, source = 'CFISH', species_of_interest = '",species_of_interest,"', min_records=",upset_n_trips,")"), name="cocaught_species_upset", height = 12, width = 20)
     }
   }
 
@@ -681,35 +707,35 @@ output:
     add_text("### Summary {.tabset .tabset-fade .tabset-pills}")
     add_text("Fishers are shown on the x-axis and ranked by total catch over time. For easier interpretability, this plot may have been split into multiple plots, grouping fishers by total catch. The first plot shows the most prominent fishers, the last plot shows the least prominent fishers.")
     add_text("#### Days fished {.tabset .tabset-fade .tabset-pills}")
-    add_plot(paste0("heatplot(data, species_of_interest = '",species_of_interest,"', fill='days', filter_days_lower = 10)"), name="heatplot_days", height = 10, width = 12)
+    add_plot(paste0("heatplot(data, species_of_interest = '",species_of_interest,"', fill='days', filter_days_lower = ",filter_days_lower,")"), name="heatplot_days", height = 10, width = 12)
     add_text("#### Weight {.tabset .tabset-fade .tabset-pills}")
-    add_plot(paste0("heatplot(data, species_of_interest = '",species_of_interest,"', fill='weight', filter_days_lower = 10)"), name="heatplot_weight", height = 10, width = 12)
+    add_plot(paste0("heatplot(data, species_of_interest = '",species_of_interest,"', fill='weight', filter_days_lower = ",filter_days_lower,")"), name="heatplot_weight", height = 10, width = 12)
 
     ## By stock area region ----
     if ("stock_area" %in% names(data)) {
       add_text("### By stock area region {.tabset .tabset-fade .tabset-pills}")
       add_text("Fishers are shown on the x-axis and ranked by total catch over time. For easier interpretability, this plot may have been split into multiple plots, grouping fishers by total catch. The first plot shows the most prominent fishers, the last plot shows the least prominent fishers.")
       add_text("#### Days fished {.tabset .tabset-fade .tabset-pills}")
-      add_plot(paste0("heatplot(data, species_of_interest = '",species_of_interest,"', fill='days', filter_days_lower = 10, facet_var = 'stock_area')"), name="heatplot_stock_area_days", height = facet_stock_area_height_heatmap, width = 12)
+      add_plot(paste0("heatplot(data, species_of_interest = '",species_of_interest,"', fill='days', filter_days_lower = ",filter_days_lower,", facet_var = 'stock_area')"), name="heatplot_stock_area_days", height = facet_stock_area_height_heatmap, width = 12)
       add_text("#### Weight {.tabset .tabset-fade .tabset-pills}")
-      add_plot(paste0("heatplot(data, species_of_interest = '",species_of_interest,"', fill='weight', filter_days_lower = 10, facet_var = 'stock_area')"), name="heatplot_stock_area_weight", height = facet_stock_area_height_heatmap, width = 12)
+      add_plot(paste0("heatplot(data, species_of_interest = '",species_of_interest,"', fill='weight', filter_days_lower = ",filter_days_lower,", facet_var = 'stock_area')"), name="heatplot_stock_area_weight", height = facet_stock_area_height_heatmap, width = 12)
     }
 
     ## By coarse region ----
     add_text("### By coarse region {.tabset .tabset-fade .tabset-pills}")
     add_text("Fishers are shown on the x-axis and ranked by total catch over time. For easier interpretability, this plot may have been split into multiple plots, grouping fishers by total catch. The first plot shows the most prominent fishers, the last plot shows the least prominent fishers.")
     add_text("#### Days fished {.tabset .tabset-fade .tabset-pills}")
-    add_plot(paste0("heatplot(data, species_of_interest = '",species_of_interest,"', fill='days', filter_days_lower = 10, facet_var = 'region_coarse')"), name="heatplot_region_coarse_days", height = facet_coarse_region_height_heatmap, width = 12)
+    add_plot(paste0("heatplot(data, species_of_interest = '",species_of_interest,"', fill='days', filter_days_lower = ",filter_days_lower,", facet_var = 'region_coarse')"), name="heatplot_region_coarse_days", height = facet_coarse_region_height_heatmap, width = 12)
     add_text("#### Weight {.tabset .tabset-fade .tabset-pills}")
-    add_plot(paste0("heatplot(data, species_of_interest = '",species_of_interest,"', fill='weight', filter_days_lower = 10, facet_var = 'region_coarse')"), name="heatplot_region_coarse_weight", height = facet_coarse_region_height_heatmap, width = 12)
+    add_plot(paste0("heatplot(data, species_of_interest = '",species_of_interest,"', fill='weight', filter_days_lower = ",filter_days_lower,", facet_var = 'region_coarse')"), name="heatplot_region_coarse_weight", height = facet_coarse_region_height_heatmap, width = 12)
 
     ## By region ----
     add_text("### By region {.tabset .tabset-fade .tabset-pills}")
     add_text("Fishers are shown on the x-axis and ranked by total catch over time. For easier interpretability, this plot may have been split into multiple plots, grouping fishers by total catch. The first plot shows the most prominent fishers, the last plot shows the least prominent fishers.")
     add_text("#### Days fished {.tabset .tabset-fade .tabset-pills}")
-    add_plot(paste0("heatplot(data, species_of_interest = '",species_of_interest,"', fill='days', filter_days_lower = 10, facet_var = 'region')"), name="heatplot_region_days", height = facet_region_height_heatmap, width = 12)
+    add_plot(paste0("heatplot(data, species_of_interest = '",species_of_interest,"', fill='days', filter_days_lower = ",filter_days_lower,", facet_var = 'region')"), name="heatplot_region_days", height = facet_region_height_heatmap, width = 12)
     add_text("#### Weight {.tabset .tabset-fade .tabset-pills}")
-    add_plot(paste0("heatplot(data, species_of_interest = '",species_of_interest,"', fill='weight', filter_days_lower = 10, facet_var = 'region')"), name="heatplot_region_weight", height = facet_region_height_heatmap, width = 12)
+    add_plot(paste0("heatplot(data, species_of_interest = '",species_of_interest,"', fill='weight', filter_days_lower = ",filter_days_lower,", facet_var = 'region')"), name="heatplot_region_weight", height = facet_region_height_heatmap, width = 12)
 
     ## High catch ----
     add_text("### For high catch {.tabset .tabset-fade .tabset-pills}")
@@ -919,6 +945,11 @@ output:
                       clean = TRUE)
 
     system2("open",paste0(dir,"/investigation.html"))
+  }
+
+
+  if (!render) {
+    print("investigation.Rmd has been produced in the directory specified (default is working directory). To compile investigation.Rmd, you will need to load your data in at line 8. Note that the dataset should be called 'data' for subsequent code chunks to work.")
   }
 }
 
