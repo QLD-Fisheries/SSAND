@@ -18,7 +18,7 @@
 extract_SS_parameters <- function(ss_dat) {
 
   if (length(ss_dat)>75){ss_dat <- list(ss_dat)}
-  if (!is.list(ss_dat)) {stop("Please enter data as a list of outputs, one elemenet per scenario.")}
+  if (!is.list(ss_dat)) {stop("Please enter data as a list of outputs, one element per scenario.")}
 
   MCMC <- is.data.frame(ss_dat[[1]])
 
