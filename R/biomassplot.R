@@ -378,14 +378,14 @@ biomassplot <- function(data,
 
       if (show_target_line) {
         p <- p +
-          ggplot2::geom_hline(data=data, ggplot2::aes(yintercept = target_value), color="#127B06", linetype="solid",alpha=0.5) +
-          ggplot2::geom_text(data=data, ggplot2::aes(x = annotation_position, y = target_value), color="#127B06", label = "Target reference point", size=3,hjust = 0,vjust = 0, nudge_y = 0.5)
+          ggplot2::geom_hline(data=data[1,], ggplot2::aes(yintercept = target_value), color="#127B06", linetype="solid",alpha=0.5) +
+          ggplot2::geom_text(data=data[1,], ggplot2::aes(x = annotation_position, y = target_value), color="#127B06", label = "Target reference point", size=3,hjust = 0,vjust = 0, nudge_y = 0.5)
       }
 
       if (show_limit_line) {
         p <- p +
-          ggplot2::geom_hline(data=data, ggplot2::aes(yintercept = limit_value), color="#AD3D25",linetype="solid",alpha=0.5) +
-          ggplot2::geom_text(data=data, ggplot2::aes(x = annotation_position, y = limit_value), color="#AD3D25", label = "Limit reference point", size=3,hjust = 0,vjust = 0, nudge_y = 0.5)
+          ggplot2::geom_hline(data=data[1,], ggplot2::aes(yintercept = limit_value), color="#AD3D25",linetype="solid",alpha=0.5) +
+          ggplot2::geom_text(data=data[1,], ggplot2::aes(x = annotation_position, y = limit_value), color="#AD3D25", label = "Limit reference point", size=3,hjust = 0,vjust = 0, nudge_y = 0.5)
       }
     }
 
