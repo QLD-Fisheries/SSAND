@@ -4,12 +4,14 @@
 \alias{catchplot_prep_SS}
 \title{Prepare Stock Synthesis data for catchplot()}
 \usage{
-catchplot_prep_SS(ss_mle, scenarios = NULL)
+catchplot_prep_SS(ss_mle, scenarios = NULL, partition = "retained")
 }
 \arguments{
 \item{ss_mle}{A list of outputs from r4ss::SS_output() with one element per scenario. Will automatically reformat as a list if a single r4ss::SS_output() output (i.e. one scenario) is entered.}
 
 \item{scenarios}{A vector of scenarios to plot (numeric). Shows all scenarios if left blank. Can be overridden in the plotting function.}
+
+\item{partition}{Type of catch to plot. Options are "selected" (all catch including retained and discarded), "dead" (retained catch plus dead discarded) and "retained" (retained catch ignoring discards)}
 }
 \value{
 A dataframe with date, value, sector, scenario

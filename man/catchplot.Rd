@@ -7,7 +7,7 @@
 catchplot(
   data,
   xlab = "Year",
-  ylab = "Retained catch (t)",
+  ylab = NULL,
   xbreaks = NULL,
   ybreaks = NULL,
   xlabels = NULL,
@@ -35,7 +35,7 @@ catchplot(
 
 \item{xlab}{Label for x-axis (character). Default is "Year".}
 
-\item{ylab}{Label for y-axis (character). Default is "Retained catch (t)".}
+\item{ylab}{Label for y-axis (character). Default is "Retained catch (t)" for DDUST models. Default is determined by catchplot_prep_SS partition setting for SS models.}
 
 \item{xbreaks}{A vector of breaks between x-axis labels, used in ggplot2::scale_x_continous() (numeric).}
 
