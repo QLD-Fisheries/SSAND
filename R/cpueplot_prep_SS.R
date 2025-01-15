@@ -31,9 +31,13 @@ cpueplot_prep_SS <- function(ss_mle,
 
   if (missing(scenarios)){scenarios <- 1:length(ss_mle)}
 
+
+
   if (!MCMC) {
     data <- data.frame()
     for (scenario in scenarios) {
+
+      if (month_override) {ss_mle[[scenario]]$cpue$Month <- 1}
 
       if (any(ss_mle[[scenario]]$survey_error) != 0) {
         warning('Data preparation assumed error distribution is lognormal, but SS output indicates your fleet uses normal error or Students t-distrubtion. ')
