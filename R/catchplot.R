@@ -9,7 +9,7 @@
 #'
 #' @param data Output from catchplot_prep(). A dataframe with date (date), value (int), fleet (fac), scenario (int)
 #' @param xlab Label for x-axis (character). Default is "Year".
-#' @param ylab Label for y-axis (character). Default is "Retained catch (t)".
+#' @param ylab Label for y-axis (character). Default is "Retained catch (t)" for DDUST models. Default is determined by catchplot_prep_SS partition setting for SS models.
 #' @param fleet_names A vector of customised fleet names for legend (character).
 #' @param xbreaks A vector of breaks between x-axis labels, used in ggplot2::scale_x_continous() (numeric).
 #' @param ybreaks A vector of breaks between y-axis labels, used in ggplot2::scale_y_continous() (numeric).
@@ -45,7 +45,7 @@
 #' catchplot(data)
 catchplot <- function(data,
                       xlab = "Year",
-                      ylab = "Retained catch (t)",
+                      ylab = NULL,
                       xbreaks = NULL,
                       ybreaks = NULL,
                       xlabels = NULL,
@@ -73,6 +73,16 @@ catchplot <- function(data,
   if (!"fleet" %in% names(data)) {warning("Input data is missing fleet column")}
   if (!"scenario" %in% names(data)) {warning("Input data is missing scenario column")}
 
+  if (missing(ylab)) {
+    if ("partition" %in% names(data)) {
+      if (data$partition[1]=="sel") {ylab = "Catch (retained and total discarded) (t)"}
+      if (data$partition[1]=="retain") {ylab = "Retained catch (t)"}
+      if (data$partition[1]=="dead") {ylab = "Dead catch (t)"}
+    } else {
+      ylab = "Retained catch (t)"
+    }
+  }
+
   if (!missing(scenarios)){data <- data |> dplyr::filter(scenario %in% scenarios)}
 
   if (missing(scenario_labels)) {
@@ -93,7 +103,7 @@ catchplot <- function(data,
 
   if (!missing(fleet_names)) {
     fleet_names.lookup <- data.frame(fleet = unique(data$fleet),
-                                    fleet_names = fleet_names)
+                                     fleet_names = fleet_names)
     data <- data |>
       dplyr::left_join(fleet_names.lookup, by="fleet") |>
       dplyr::select(-fleet) |>
