@@ -1,19 +1,18 @@
 # SSAND <img src="man/figures/logo.png" align="right" height="138" alt="" />
-This package (pronounced "sand") aims to consolidate the code used to generate plots and tables for stock assessments and associated documentation. 
+This package (pronounced "sand") strives to provide universal code that can provide consistent outputs (such as plots and tables) for multiple stock assessment models. SSAND currently works with Stock Synthesis and DDUST, and could be extended to include more models. SSAND may be incompatible with updates to Stock Synthesis and r4ss (after V3.30.22.00 and v1.50.0 respectively) although we hope to improve compatiblity soon.
 
-This package strives to provide universal code that can provide consistent outputs for multiple stock assessment models. SSAND currently works with Stock Synthesis and DDUST, but can be extended to more models. 
+You can install the development version of SSAND from GitHub with:
 
-There are generally two kinds of functions you will find in here:
+``` r
+# install.packages("devtools")
+devtools::install_github("QLD-Fisheries/SSAND")
+```
+
+There are generally two kinds of functions you will find in SSAND:
 * Data preparation functions, specific to the stock assessment model used (e.g. Stock Synthesis or DDUST)
 * Plotting functions, agnostic to the model that is used
 
 There are also a series of plots that can be used to explore raw catch and effort data.
-
-Most of the documentation for using this package can be found in the vignettes.
-``` r
-library(SSAND)
-vignette("Introduction", package = "SSAND")
-```
 
 Calling `catalogue()` will produce a guide of all the plots on offer within the package. 
 
@@ -90,14 +89,4 @@ flowchart TB
 linkStyle default stroke:black
 linkStyle 11,13,15,17,19,21,23 stroke-width:2px,stroke:#e0a54e
 linkStyle 12,14,16,18,20,22,24 stroke-width:0px,stroke:white
-```
-
-## Installation
-
-You can install the development version of SSAND from
-[GitHub](https://github.com/) with:
-
-``` r
-# install.packages("devtools")
-devtools::install_github("QLD-Fisheries/SSAND", build_vignettes = TRUE)
 ```
