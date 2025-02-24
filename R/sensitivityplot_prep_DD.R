@@ -100,8 +100,8 @@ sensitivityplot_prep_DD <- function(dd_mle,
       LL <- data.frame(scenario = i,
                        name = "LL",
                        value = dd_mle[[i]]$LL,
-                       ub = dd_mle[[i]]$LL,
-                       lb = dd_mle[[i]]$LL)
+                       ub = dd_mle[[i]]$LL + 1.96*dd_mle[[i]]$LL_sd,
+                       lb = dd_mle[[i]]$LL - 1.96*dd_mle[[i]]$LL_sd)
 
       dq <- dq |> rbind(b_ratio, b_abs, F_final, LL)
     }
