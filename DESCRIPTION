@@ -41,7 +41,8 @@ Imports:
     tidyselect,
     TMB,
     xfun (>= 0.44),
-    xtable
+    xtable,
+    gganimate
 Depends: 
     R (>= 2.10)
 LazyData: true
@@ -51,6 +52,7 @@ Suggests:
     ggupset,
     r4ss,
     rstan,
-    testthat (>= 3.0.0)
+    testthat (>= 3.0.0),
+    extrafont
 VignetteBuilder: knitr
 Config/testthat/edition: 3
