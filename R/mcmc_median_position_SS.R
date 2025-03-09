@@ -34,13 +34,13 @@ mcmc_median_position_SS <- function(ss_mle,
   for (scenario in scenarios) {
 
     startyr <- ss_mle[[scenario]]$startyr
-    endyr <- ss_mle[[scenario]]$endyr
-    years <- startyr:endyr
+    endyr <- ss_mle[[scenario]]$endyr+1
+    # years <- startyr:endyr
 
     tmpdata <- ss_mcmc[[scenario]] |>
       dplyr::select(tidyselect::contains("Bratio_"))
 
-    B_final <- tmpdata[,dim(tmpdata)[2]]
+    B_final <- tmpdata |> dplyr::select(paste0("Bratio_", endyr))  |> dplyr::pull()
 
     # If there are an odd number of MCMC runs:
     if (length(B_final) %% 2 == 1) {

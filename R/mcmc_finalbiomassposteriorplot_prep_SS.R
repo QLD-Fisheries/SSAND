@@ -56,6 +56,7 @@ mcmc_finalbiomassposterior_prep_SS <- function(ss_mle,
   quant_upper <- unname(quantile(data$value, probs=c(1-(1-credible_interval)/2))*100)
   quant_lower <- unname(quantile(data$value, probs=c((1-credible_interval)/2))*100)
   median <- unname(quantile(data$value, probs=c(0.5))*100)
+  mode <- density$x[which.max(density$y)]
 
   risk <- c(round(dim(data |> dplyr::filter(value<=0.2))[1] / dim(data)[1] * 100),
             round(dim(data |> dplyr::filter(value>=0.2 & value<=0.4))[1] / dim(data)[1] * 100),
@@ -68,6 +69,7 @@ mcmc_finalbiomassposterior_prep_SS <- function(ss_mle,
     quant_lower = quant_lower,
     quant_upper = quant_upper,
     median = median,
+    mode = mode,
     risk = risk,
     end_year = end_year,
     credible_interval = credible_interval
