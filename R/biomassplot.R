@@ -56,6 +56,7 @@
 #' @param ridge_colour Two-element vector for the fill and outline of ridges (character). Only used when mcmc_style=="joy".
 #' @param shapes Vector of shapes to denote different median types. Only used when mcmc_style=="joy".
 #' @param band_colour Colour of bands (character). Only used when mcmc_style=="banded". Input one colour, bands will be distinguished using an alpha.
+#' @param band_labels Labels for bands. Default is NULL and interval is used.
 #' @param show_final_biomass Set to TRUE to show final biomass value at the end of the time series.
 #'
 #' @return Biomass plot
@@ -110,6 +111,7 @@ biomassplot <- function(data,
                         ridge_colour = c("grey30","black"),
                         shapes = c(16,18,17),
                         band_colour = "black",
+                        band_labels = NULL,
                         show_final_biomass = FALSE) {
 
   # Standard plot data set up
@@ -195,7 +197,7 @@ biomassplot <- function(data,
   # Determine aesthetics if missing
   if (!MCMC & missing(colours)) {colours <- "black"}
   if (MCMC & missing(colours)) {colours <- c(c("#7CC8FC", "#FFC000", "#773158", "#01917C"))} # fq_palette("alisecolours"). Colour blind friendly, bright against the grey, not red or green
-  if (missing(alpha)) {alpha=0.7}
+  if (missing(alpha) & mcmc_style !="banded") {alpha=0.7}
 
   if (!mcmc_style == "joy") {
     # Build MLE plot
@@ -249,17 +251,26 @@ biomassplot <- function(data,
       # Banded plot
       if (mcmc_style == "banded") {
         tmp <- unique(data$interval)[!is.na(unique(data$interval))]
-        alpha_scale <- seq(round(1/length(tmp),2),1,round(1/length(tmp),2))^2 + 0.1
-        alpha_scale <- alpha_scale/max(alpha_scale)
+
+        if (missing(alpha)) {
+          alpha_scale <- seq(round(1/length(tmp),2),1,round(1/length(tmp),2))^2 + 0.1
+          alpha_scale <- alpha_scale/max(alpha_scale)
+        } else {
+          if (length(alpha) != length(unique(stats::na.omit(data$interval)))) {
+            stop("The number of alpha values provided does not match the number of credible intervals to plot.")
+          }
+          alpha_scale <- alpha
+        }
+
+        if (missing(band_labels)) {band_labels <- rev(unique(data$interval)[!is.na(unique(data$interval))])}
 
         p <- ggplot2::ggplot(data) +
           ggplot2::geom_ribbon(data = data |> dplyr::filter(!is.na(interval)),
                                ggplot2::aes(x=year, ymin=prob_lower, ymax=prob_upper, group=interval, alpha=as.factor(-interval)),
                                fill=band_colour) +
           ggplot2::scale_alpha_manual(values = alpha_scale,
-                                      labels = unique(data$interval)[!is.na(unique(data$interval))],
+                                      labels = band_labels,
                                       name = "Credible interval")
-
       }
 
       # Hairy plot
