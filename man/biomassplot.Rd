@@ -44,6 +44,7 @@ biomassplot(
   ridge_colour = c("grey30", "black"),
   shapes = c(16, 18, 17),
   band_colour = "black",
+  band_labels = NULL,
   show_final_biomass = FALSE
 )
 }
@@ -129,6 +130,8 @@ Any scenarios not included in "scenario_order" will be tacked on in the order th
 \item{shapes}{Vector of shapes to denote different median types. Only used when mcmc_style=="joy".}
 
 \item{band_colour}{Colour of bands (character). Only used when mcmc_style=="banded". Input one colour, bands will be distinguished using an alpha.}
+
+\item{band_labels}{Labels for bands. Default is NULL and interval is used.}
 
 \item{show_final_biomass}{Set to TRUE to show final biomass value at the end of the time series.}
 }
