@@ -10,6 +10,7 @@ summarytable(
   row_names = NULL,
   column_names = NULL,
   caption = "Stock status indicators",
+  caption_placement = "top",
   align = NULL
 )
 }
@@ -23,6 +24,8 @@ summarytable(
 \item{column_names}{An optional vector of column names}
 
 \item{caption}{Caption for table}
+
+\item{caption_placement}{Placement of table caption. Default is "top"}
 
 \item{align}{An optional vector of alignment for the table, input as a character string that is one character longer than the number of columns in the table. Default is centered.}
 }
