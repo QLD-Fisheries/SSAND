@@ -12,6 +12,7 @@
 #' @param row_names An option to customise the text in the Indicator columns
 #' @param column_names An optional vector of column names
 #' @param caption Caption for table
+#' @param caption_placement Placement of table caption. Default is "top"
 #' @param align An optional vector of alignment for the table, input as a character string that is one character longer than the number of columns in the table. Default is centered.
 #'
 #' @return Code that can be used within a code chunk in a RMarkdown style document to produce a summary table
@@ -27,6 +28,7 @@ summarytable <- function (data,
                           row_names = NULL,
                           column_names = NULL,
                           caption = "Stock status indicators",
+                          caption_placement = "top",
                           align = NULL) {
 
   if (missing(label)) {warning("Please specify a label for your table (e.g. label=\"tab:summary\")" )  }
@@ -44,5 +46,6 @@ summarytable <- function (data,
         include.rownames = FALSE,
         sanitize.colnames.function=function(x) paste('{\\textbf{',x,'}}', sep =''),
         sanitize.text.function= function(x) x,
-        table.placement = "H")
+        table.placement = "H",
+        caption.placement = caption_placement)
 }
