@@ -28,20 +28,15 @@ Imports:
     ggridges,
     ggspatial,
     gridExtra,
-    htmltools (>= 0.5.8),
-    knitr,
     lubridate,
     magick,
     purrr,
-    rmarkdown,
     scales,
     sf,
     stringr,
     tibble,
     tidyr,
     tidyselect,
-    TMB,
-    xfun (>= 0.44),
     xtable,
     gganimate
 Depends: 
@@ -50,10 +45,15 @@ LazyData: true
 LazyDataCompression: xz
 Suggests: 
     DT,
+    extrafont,
     ggupset,
+    htmltools (>= 0.5.8),
+	knitr,
     r4ss,
     rstan,
     testthat (>= 3.0.0),
-    extrafont
+	rmarkdown,
+    TMB,
+    xfun (>= 0.44)
 VignetteBuilder: knitr
 Config/testthat/edition: 3
