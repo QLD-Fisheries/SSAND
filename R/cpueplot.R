@@ -263,8 +263,8 @@ cpueplot <- function(data,
 
     # General
     p <- p +
-      ggplot2::scale_x_continuous(limits = xlim, breaks = xbreaks, labels = xlabels) +
-      ggplot2::scale_y_continuous(limits = ylim) +
+      ggplot2::scale_x_continuous(limits = as.numeric(xlim), breaks = xbreaks, labels = xlabels) +
+      ggplot2::scale_y_continuous(limits = as.numeric(ylim)) +
       ggplot2::theme(axis.text.x = ggplot2::element_text(angle = xangle, vjust = 0.5, hjust=ifelse(xangle==90,0,0.5)))
 
     if (length(unique(data$scenario))>1){
