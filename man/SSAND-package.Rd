@@ -17,6 +17,7 @@ Authors:
 \itemize{
   \item Montana Wickens (\href{https://orcid.org/0000-0002-7316-014X}{ORCID})
   \item Robyn Lovett
+  \item Justin Cameron
   \item Mai Tanimoto
 }
 
