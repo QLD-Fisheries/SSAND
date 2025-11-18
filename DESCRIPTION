@@ -6,6 +6,7 @@ Authors@R:
     person("Alise", "Fox", , "fisheriesassessment@daf.qld.gov.au", role = c("aut", "cre"), comment = c(ORCID = "0009-0002-5634-0963")),
     person("Montana", "Wickens", , , role = c("aut"), comment = c(ORCID = "0000-0002-7316-014X")),
     person("Robyn", "Lovett", , , role = c("aut")),
+    person("Justin", "Cameron", , , role = c("aut")),
     person("Mai", "Tanimoto", , , role = c("aut")),
     person("Fisheries Queensland, FQ", role = c("cph", "fnd"))
     )
@@ -17,7 +18,7 @@ Description: A toolkit for visualising data used in, and produced by, stock asse
 License: GPL (>= 3)
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.3.2
+RoxygenNote: 7.3.3
 Imports: 
     cowplot,
     dplyr,
@@ -44,7 +45,7 @@ Imports:
     xtable,
     gganimate
 Depends: 
-    R (>= 2.10)
+    R (>= 4.1.0)
 LazyData: true
 LazyDataCompression: xz
 Suggests: 
