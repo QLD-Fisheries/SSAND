@@ -17,7 +17,6 @@
 
 <<init, include=FALSE>>=
 library(SSAND)
-library(knitr)
 library(xtable)
 
 %begin_SS
