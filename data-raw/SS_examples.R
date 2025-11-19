@@ -2079,7 +2079,7 @@ ss_mcmc <- list(ss_mcmc1, ss_mcmc2)
 usethis::use_data(ss_mcmc, overwrite = TRUE, compress = "xz")
 
 # Data too big for package. Take only what we need from ss_mle
-elements_to_keep <- c("age_error_mean","agedbase","ageselex","biology","catch","cpue","derived_quants","discard","Dynamic_Bzero","endgrowth","endyr","equil_yield","ghostagedbase","ghostcondbase","ghostlendbase","Growth_Parameter",
+elements_to_keep <- c("accuage", "age_error_mean","agedbase","ageselex","biology","catch","cpue","derived_quants","discard","Dynamic_Bzero","endgrowth","endyr","equil_yield","ghostagedbase","ghostcondbase","ghostlendbase","Growth_Parameter",
                       "growthCVtype","ladbase","lendbase","likelihoods_used","mainmorphs","mnwgt","natage","nfleets","ngpatterns","nsexes","parameters","RecrDistpars","recruit","recruitpars","sizedbase","sizeselex","startyr","survey_error","tagdbase1","timeseries","wadbase",
                       "condbase" ,"CoVar","Growth_Parameters","F_report_basis", "current_depletion") #"tagrelease"
 
