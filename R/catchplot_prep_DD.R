@@ -1,4 +1,4 @@
-# Copyright 2024 Fisheries Queensland
+# Copyright 2025 Fisheries Queensland
 
 # This file is part of SSAND.
 # SSAND is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
@@ -16,24 +16,33 @@
 #' @examples
 #' data <- catchplot_prep_DD(dd_mle)
 #' catchplot(data)
-catchplot_prep_DD <- function(dd_mle,
-                              scenarios = NULL){
+catchplot_prep_DD <- function(dd_mle, scenarios = NULL) {
 
-  if (check_scenarios(dd_mle,"DD","MLE")=="single scenario"){dd_mle <- list(dd_mle)}
-  if (missing(scenarios)){scenarios <- 1:length(dd_mle)}
+  if(check_scenarios(dd_mle, "DD", "MLE") == "single scenario") {
+    dd_mle <- list(dd_mle)
+  }
+  if(missing(scenarios)) {
+    scenarios <- 1:length(dd_mle)
+  }
 
   data <- data.frame()
-  for (scenario in scenarios) {
-    tmp <- data.frame(year = sort(rep(dd_mle[[scenario]]$data$first_year_catch:dd_mle[[scenario]]$data$last_year_catch,12/dd_mle[[scenario]]$data$Number_months_per_timestep)),
-                      month = seq(1,12,dd_mle[[scenario]]$data$Number_months_per_timestep),
-                      value = dd_mle[[scenario]]$data$ctch,
-                      fleet = as.factor(1))
-    tmp <- dplyr::mutate(tmp, date = as.Date(paste0('01/',month,'/',year), format = '%d/%m/%Y'))
-    tmp <- dplyr::select(tmp, !c(year, month))
-    tmp <- dplyr::mutate(tmp, scenario = scenario)
+  for(scenario in scenarios) {
+    all_years          <- dd_mle[[scenario]]$data$first_year_catch:dd_mle[[scenario]]$data$last_year_catch
+    timesteps_per_year <- 12 / dd_mle[[scenario]]$data$Number_months_per_timestep
+    tmp <- data.frame(
+      year  = sort(rep(all_years, timesteps_per_year)),
+      month = seq(1, 12, dd_mle[[scenario]]$data$Number_months_per_timestep),
+      value = dd_mle[[scenario]]$data$ctch,
+      fleet = as.factor(1)
+    )
+    tmp <- tmp |>
+      dplyr::mutate(date = as.Date(paste0('01/', month, '/', year), format = '%d/%m/%Y')) |>
+      dplyr::select(!c(year, month)) |>
+      dplyr::mutate(scenario = scenario)
 
     data <- rbind(data, tmp)
   }
+
   rownames(data) <- NULL
   return(data)
 }
