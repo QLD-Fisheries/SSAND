@@ -21,5 +21,5 @@ Prepare Stock Synthesis data for catchplot()
 }
 \examples{
 data <- catchplot_prep_SS(ss_mle)
-catchplot(data, scenarios=1)
+catchplot(data, scenarios = 1)
 }
