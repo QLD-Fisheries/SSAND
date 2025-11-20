@@ -4,7 +4,7 @@
 \alias{growthplot_prep_SS}
 \title{Prepare Stock  Synthesis data for growth plot}
 \usage{
-growthplot_prep_SS(ss_mle, ss_mcmc = NULL, scenarios = NULL, season = 1)
+growthplot_prep_SS(ss_mle, ss_mcmc = NULL, scenarios = NULL)
 }
 \arguments{
 \item{ss_mle}{A list of outputs from r4ss::SS_output() with one element per scenario. Will automatically reformat as a list if a single r4ss::SS_output() output (i.e. one scenario) is entered.}
@@ -12,8 +12,6 @@ growthplot_prep_SS(ss_mle, ss_mcmc = NULL, scenarios = NULL, season = 1)
 \item{ss_mcmc}{A list of outputs from r4ss::SSgetMCMC() with one element per scenario. Only needed if MCMC was used. Will automatically reformat as a list if a single r4ss::SSgetMCMC() output (i.e. one scenario) is entered.}
 
 \item{scenarios}{A vector of scenarios to plot (numeric). Shows all scenarios if left blank. Can be overridden in the plotting function.}
-
-\item{season}{A numeric value indicating the season to use (default = 1).}
 }
 \value{
 A data frame with variables age (numeric), value (numeric), upper (numeric), and lower (numeric) and Sex (integer)
@@ -33,7 +31,7 @@ growthplot(data)
 
 \dontrun{
 # MCMC
-data <- growthplot_prep_SS(ss_mle, ss_mcmc, scenarios=1)
+data <- growthplot_prep_SS(ss_mle, ss_mcmc, scenarios = 1)
 growthplot(data)
 
 # Ensemble model
