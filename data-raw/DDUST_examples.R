@@ -8,7 +8,6 @@
 # 📚 Libraries ----
 suppressPackageStartupMessages({
   library(DDUST)     #DDUST
-  library(TMB)       #compile and MakeADFun
   library(dplyr)     #tidyverse
   library(ggplot2)   #plots
   library(cowplot)   #plots

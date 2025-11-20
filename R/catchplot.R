@@ -168,8 +168,8 @@ catchplot <- function(data,
                    legend.position = legend_position) +
     ggplot2::theme(text = ggplot2::element_text(size=12),
                    legend.text = ggplot2::element_text(size=12)) +
-    ggplot2::scale_x_continuous(limits = xlim, breaks = xbreaks, labels = xlabels) +
-    ggplot2::scale_y_continuous(limits = ylim, breaks = ybreaks, labels = ylabels) +
+    ggplot2::scale_x_continuous(limits = as.numeric(xlim), breaks = xbreaks, labels = xlabels) +
+    ggplot2::scale_y_continuous(limits = as.numeric(ylim), breaks = ybreaks, labels = ylabels) +
     ggplot2::theme(axis.text.x = ggplot2::element_text(angle = xangle, vjust = 0.5, hjust=ifelse(xangle==90,0,0.5)))
 
 
