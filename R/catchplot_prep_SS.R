@@ -47,7 +47,7 @@ catchplot_prep_SS <- function(ss_mle, scenarios = NULL, partition = "retained") 
       dplyr::mutate(date = as.Date(paste0('01/01/', Yr), format = '%d/%m/%Y'))  |>
       dplyr::select(date, contains(paste0(partition, "(B)"))) |>
       tidyr::pivot_longer(cols = !date, names_to = c("name", "fleet"), names_sep = "_", values_to = "value") |>
-      dplyr::transmute(date, value, fleet = as.factor(fleet), scenario, partition)
+      dplyr::transmute(date, value, fleet = as.factor(fleet), scenario = scenario, partition = partition)
     data <- rbind(data, tmp)
   }
 
