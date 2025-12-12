@@ -1,4 +1,4 @@
-# Copyright 2024 Fisheries Queensland
+# Copyright 2025 Fisheries Queensland
 
 # This file is part of SSAND.
 # SSAND is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
@@ -25,48 +25,56 @@
 #' @examples
 #' data <- growthplot_prep_DD(dd_mle)
 #' growthplot(data)
-growthplot_prep_DD <- function(dd_mle,
-                               type = 'weight',
-                               age_rec=2,
-                               age_max=10*12,
-                               W_r_minus1=NA,
-                               W_r=NA,
-                               rho=NA,
-                               t0=NA,
-                               kappa=NA,
-                               Linf=NA,
-                               scenarios = 1
-                               ) {
+growthplot_prep_DD <- function(
+  dd_mle, type = 'weight', age_rec = 2, age_max = 10 * 12, W_r_minus1 = NA, W_r = NA, rho = NA, t0 = NA, kappa = NA, Linf = NA, scenarios = 1
+) {
 
-  if (check_scenarios(dd_mle,"DD","MLE")=="single scenario"){dd_mle <- list(dd_mle)}
-  if (missing(scenarios)){scenarios <- 1:length(dd_mle)}
+  if(check_scenarios(dd_mle, "DD", "MLE") == "single scenario") {
+    dd_mle <- list(dd_mle)
+  }
+  if(missing(scenarios)) {
+    scenarios <- 1:length(dd_mle)
+  }
 
   data <- data.frame()
-  for (scenario in scenarios) {
-    if (type=='weight') {
+  for(scenario in scenarios) {
+    if(type == 'weight') {
 
-      #if weight-at-age parameters not provided - take them from dd_mle
-      if (is.na(W_r_minus1)) {W_r_minus1 = dd_mle[[scenario]]$data$weight_at_recruitment[[1]]}
-      if (is.na(W_r)) {W_r = dd_mle[[scenario]]$data$weight_at_recruitment[[2]]}
-      if (is.na(rho)) {rho = dd_mle[[scenario]]$rho}
+      # If weight-at-age parameters not provided - take them from dd_mle
+      if(is.na(W_r_minus1)) {
+        W_r_minus1 <- dd_mle[[scenario]]$data$weight_at_recruitment[[1]]
+      }
+      if(is.na(W_r)) {
+        W_r <- dd_mle[[scenario]]$data$weight_at_recruitment[[2]]
+      }
+      if(is.na(rho)) {
+        rho <- dd_mle[[scenario]]$rho
+      }
 
-      age_vector <- seq(0,age_max,by=12/dd_mle[[scenario]]$data$Number_months_per_timestep)
-      weight_vector <- W_r_minus1 + (W_r-W_r_minus1)*(1-rho^(1+age_vector-age_rec))/(1-rho) #Schnute growth curve (Eq 5.14 of Quinn & Deriso)
-      tmp <- data.frame(age=age_vector, value=weight_vector, lower=NA, upper=NA, sex=1)
-      tmp$scenario <- scenario
+      timesteps_per_year <- 12 / dd_mle[[scenario]]$data$Number_months_per_timestep
+      age_vector         <- seq(0, age_max, by = timesteps_per_year)
+      weight_vector      <- W_r_minus1 + (W_r - W_r_minus1) * (1 - rho ^ (1 + age_vector - age_rec)) / (1 - rho)  # Schnute growth curve (Eq 5.14 of Quinn & Deriso)
 
-    } else if (type=='length'){
+    } else if(type == 'length') {
 
-      if (is.na(t0)) {t0=0}
-      if (is.na(Linf) + is.na(kappa) > 0) {stop('Provide growth parameters')}
+      if(is.na(t0)) {
+        t0 <- 0
+      }
+      if(is.na(Linf) + is.na(kappa) > 0) {
+        stop('Provide growth parameters')
+      }
 
-      age_vector <- seq(0,age_max/12*dd_mle[[scenario]]$data$Number_months_per_timestep,by=dd_mle[[scenario]]$data$Number_months_per_timestep/12)
-      length_vector <- Linf*(1-exp(-kappa*(age_vector-t0)))
-      tmp <- data.frame(age=age_vector, value=length_vector, lower=NA, upper=NA, sex=1)
-      tmp$scenario <- scenario
+      max_timestep           <- age_max / 12 * dd_mle[[scenario]]$data$Number_months_per_timestep
+      timestep_year_fraction <- dd_mle[[scenario]]$data$Number_months_per_timestep / 12
+      age_vector             <- seq(0, max_timestep, by = timestep_year_fraction)
+      length_vector          <- Linf * (1 - exp(-kappa * (age_vector - t0)))
+
     } else {
       stop('Check type input')
     }
+
+    tmp          <- data.frame(age = age_vector, value = weight_vector, lower = NA, upper = NA, sex = 1)
+    tmp$scenario <- scenario
     data <- rbind(data, tmp)
   }
   rownames(data) <- NULL
