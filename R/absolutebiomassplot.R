@@ -256,8 +256,8 @@ absolutebiomassplot <- function(data,
 
     # General
     p <- p +
-      ggplot2::scale_x_continuous(limits = xlim, breaks = xbreaks, labels = xlabels) +
-      ggplot2::scale_y_continuous(limits = ylim) +
+      ggplot2::scale_x_continuous(limits = as.numeric(xlim), breaks = xbreaks, labels = xlabels) +
+      ggplot2::scale_y_continuous(limits = as.numeric(ylim)) +
       ggplot2::theme(axis.text.x = ggplot2::element_text(angle = xangle, vjust = 0.5, hjust=ifelse(xangle==90,0,0.5)))
 
     if (length(unique(data$scenario))>1){
@@ -390,8 +390,8 @@ absolutebiomassplot <- function(data,
 
     # Universal aesthetics
     p <- p +
-      ggplot2::scale_x_continuous(limits = xlim, breaks = xbreaks, labels = xlabels) +
-      ggplot2::scale_y_continuous(limits = ylim, breaks = ybreaks, labels = ylabels) +
+      ggplot2::scale_x_continuous(limits = as.numeric(xlim), breaks = xbreaks, labels = xlabels) +
+      ggplot2::scale_y_continuous(limits = as.numeric(ylim), breaks = ybreaks, labels = ylabels) +
       ggplot2::theme_bw() +
       ggplot2::xlab(xlab) +
       ggplot2::ylab(ylab) +
@@ -405,8 +405,8 @@ absolutebiomassplot <- function(data,
     if (length(unique(data$scenario))>1) {
       suppressMessages({
         p <- p +
-          ggplot2::scale_x_continuous(limits = xlim, breaks = xbreaks, labels = xlabels) +
-          ggplot2::scale_y_continuous(limits = ylim, breaks = ybreaks, labels = ylabels) +
+          ggplot2::scale_x_continuous(limits = as.numeric(xlim), breaks = xbreaks, labels = xlabels) +
+          ggplot2::scale_y_continuous(limits = as.numeric(ylim), breaks = ybreaks, labels = ylabels) +
           ggplot2::facet_wrap(~scenario_labels, ncol = ncol, scales = scales)
 
       })
