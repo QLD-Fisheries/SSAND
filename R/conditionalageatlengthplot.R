@@ -52,7 +52,8 @@ conditionalageatlengthplot <- function(data,
   if (!"sex" %in% names(data)) {warning("Input data is missing sex column")}
   if (!"scenario" %in% names(data)) {warning("Input data is missing scenario column")}
 
-  data <- data |> dplyr::filter(fleet == fleet)
+  fleet_filter <- fleet
+  data <- data |> dplyr::filter(fleet == fleet_filter)
 
   if (!show_fits) {
     p <- ggplot2::ggplot(data) +
