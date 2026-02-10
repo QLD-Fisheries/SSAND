@@ -69,7 +69,10 @@ summarytable_prep_SS <- function(ss_mle,
 
   data <- data.frame(Indicator = indicator, Value = value)
 
-  if (ss_mle[[1]]$F_report_basis == "(F)/(Fmsy);_with_F=Exploit(bio)") {
+  if (
+    (!(is.null(ss_mle[[1]]$F_report_basis)) && ss_mle[[1]]$F_report_basis == "(F)/(Fmsy);_with_F=Exploit(bio)") ||  # The old variable name
+    (!(is.null(ss_mle[[1]]$F_std_basis))    && ss_mle[[1]]$F_std_basis    == "(F)/(Fmsy);_with_F=Exploit(bio)")
+  ) {
     data <- data |>
       rbind(
         data.frame(Indicator = "\\hspace{5 mm}Probability exceeds $F_{MSY}$", Value = paste0(data$F_summary_risk,"\\%"))
