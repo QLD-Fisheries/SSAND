@@ -207,7 +207,10 @@ report_values_SS <- function(ss_mle,
       quantile(0.5)
     data$F_summary_med <- round(f_summary_med[[1]],round_F_summary)
 
-    if (ss_mle[[1]]$F_report_basis == "(F)/(Fmsy);_with_F=Exploit(bio)") {
+    if (
+      (!(is.null(ss_mle[[1]]$F_report_basis)) && ss_mle[[1]]$F_report_basis == "(F)/(Fmsy);_with_F=Exploit(bio)") ||  # The old variable name
+      (!(is.null(ss_mle[[1]]$F_std_basis))    && ss_mle[[1]]$F_std_basis    == "(F)/(Fmsy);_with_F=Exploit(bio)")
+    ) {
       f_summary_risk <- f_summary_data |>
         dplyr::mutate(above = `F` > 1.0) |>
         dplyr::select(above) |>
