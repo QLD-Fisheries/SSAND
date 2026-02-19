@@ -60,5 +60,6 @@ parametertable <- function (data,
         include.rownames = FALSE,
         sanitize.colnames.function=function(x) paste('{\\textbf{',x,'}}', sep =''),
         sanitize.text.function= function(x) x,
-        table.placement = "H")
+        table.placement = "H",
+        caption.placement = "top")
 }
