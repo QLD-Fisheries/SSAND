@@ -174,7 +174,7 @@ template <- function(dir = NULL,
   # ____________________________________
   # Edit Makefile to match fish filename
   # ____________________________________
-  Makefile_path <- paste0(dir,'Makefile')
+  Makefile_path <- file.path(dir, 'makefile')
   Makefile_content <- gsub("template", filename, readLines(Makefile_path))
   writeLines(Makefile_content, Makefile_path) # Write the modified content back to the file
 }
