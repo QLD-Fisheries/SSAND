@@ -8,6 +8,7 @@
 #' Maturity plot
 #'
 #' @param data A data frame with variables value (num), maturity (num), sex (int), scenario (int), type (chr)
+#' @param maturity_type To define the x-axis. Use "length1" or "age1", depending on what you'd like on the x-axis, if you modelled length-based maturity. Use "length2" or "age2", depending on what you'd like on the x-axis, if you modelled age-based maturity.
 #' @param xlab Label for x-axis (character). Default is "Age".
 #' @param ylab Label for y-axis (character). Default is "Carapace length (cm, beginning of year)".
 #' @param text_size Text size (num). Default is 12.
@@ -20,7 +21,6 @@
 #' @param colours A vector of colours used (character).
 #' @param scales Scales for ggplot2::facet_wrap(). Default is 'free', see ?ggplot2::facet_wrap for options.
 #' @param ncol Number of columns for facet_wrap(). Default is 2.
-#' @param maturity_type Either "length" or "age", to define the x-axis.
 #'
 #' @return Maturity plot
 #' @export
@@ -32,7 +32,7 @@
 #' data <- maturityplot_prep_DD(x_max=10,x_mat=2)
 #' maturityplot(data)
 maturityplot <- function(data,
-                         maturity_type = "length",
+                         maturity_type = "length1",
                          xlab = NULL,
                          ylab = "Maturity",
                          text_size = 12,
@@ -56,7 +56,7 @@ maturityplot <- function(data,
     dplyr::filter(type %in% maturity_type) |>
     dplyr::mutate(sex = dplyr::recode(sex, "1" = "Female" ,  "2" = "Male"))
 
-  if (missing(xlab)) {xlab <- ifelse(maturity_type=="length","Length (cm)", "Age (years)")}
+  if (missing(xlab)) {xlab <- ifelse(maturity_type%in%c("length1","length2"),"Length (cm)", "Age (years)")}
 
   if (!missing(scenarios)){data <- data |> dplyr::filter(scenario %in% scenarios)}
 
@@ -75,7 +75,6 @@ maturityplot <- function(data,
     # Reorder scenarios
     data$scenario_labels <- factor(data$scenario_labels, levels = scenario_order)
   }
-
 
   if (missing(colours)) {colours = c("grey70",fq_palette("alisecolours"))}
 
