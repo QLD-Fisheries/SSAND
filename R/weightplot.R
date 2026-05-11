@@ -32,6 +32,7 @@ weightplot <- function(data,
                        scenarios = NULL,
                        scenario_labels = NULL,
                        scenario_order = NULL,
+                       show_two_sex = FALSE,
                        scales = 'free',
                        ncol = 2) {
 
@@ -72,6 +73,12 @@ weightplot <- function(data,
   if (length(unique(data$scenario))>1){
     p <- p +
       ggplot2::facet_wrap(~scenario_labels, scales = scales, ncol = ncol)
+  }
+
+  if (show_two_sex){
+    p <- p + (aes(colour = sex)) +
+      ggplot2::theme(legend.position = "top", legend.title = ggplot2::element_blank()) +
+      ggplot2::scale_colour_manual(values = colours)
   }
 
   return(p)
