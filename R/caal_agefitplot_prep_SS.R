@@ -30,8 +30,17 @@ caal_agefitplot_prep_SS <- function(ss_mle,
     tmp <- ss_mle[[scenario]]$condbase |>
       dplyr::mutate(Obs0 = round(Nsamp_in * (Obs - min(Obs)), 2),
                     Exp0 = Nsamp_in * (Exp - min(Obs))) |>
-      dplyr::rename(year=Yr, bin=Bin) |>
-      dplyr::group_by(year, bin, sex) |>
+      dplyr::rename(year=Yr, bin=Bin, fleet=Fleet)
+
+    if (is.na(sex_code)) {
+      tmp <- tmp |>
+        dplyr::group_by(year, bin, fleet)
+    } else {
+      tmp <- tmp |>
+        dplyr::group_by(year, bin, sex, fleet)
+    }
+
+    tmp <- tmp |>
       dplyr::summarise(obs = sum(Obs0),
                        exp = sum(Exp0),
                        .groups = 'drop') |>
@@ -40,7 +49,9 @@ caal_agefitplot_prep_SS <- function(ss_mle,
     data <- rbind(data, tmp)
   }
 
-  data <- data |> dplyr::filter(sex==sex_code)
+  if (!is.na(sex_code)) {
+    data <- data |> dplyr::filter(sex==sex_code)
+  }
 
   return(data)
 }
