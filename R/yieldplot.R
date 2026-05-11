@@ -77,11 +77,11 @@ yieldplot <- function(data,
       dplyr::filter(data=="msy")
 
     p <- ggplot2::ggplot(data) +
-      ggplot2::geom_line(ggplot2::aes(x=Final_bio, y=yield/1000)) +
+      ggplot2::geom_line(ggplot2::aes(x=Final_bio, y=yield)) +
       ggplot2::geom_segment(data = final_data, ggplot2::aes(x = Final_bio, xend = Final_bio,
-                                                            y = 0, yend = yield/1000, linetype = "A")) +
+                                                            y = 0, yend = yield, linetype = "A")) +
       ggplot2::geom_segment(data = msy_data, ggplot2::aes(x = Final_bio, xend = Final_bio,
-                                                          y = 0, yend = yield/1000, linetype = "B")) +
+                                                          y = 0, yend = yield, linetype = "B")) +
       ggplot2::scale_linetype_manual(values = c("dashed", "twodash"), labels = c("Current", "MSY"))
 
   }else if(show_current_line){
@@ -89,9 +89,9 @@ yieldplot <- function(data,
       dplyr::filter(data=="final")
 
     p <- ggplot2::ggplot(data) +
-      ggplot2::geom_line(ggplot2::aes(x=Final_bio, y=yield/1000)) +
+      ggplot2::geom_line(ggplot2::aes(x=Final_bio, y=yield)) +
       ggplot2::geom_segment(data = final_data, ggplot2::aes(x = Final_bio, xend = Final_bio,
-                                                            y = 0, yend = yield/1000, linetype = "B")) +
+                                                            y = 0, yend = yield, linetype = "B")) +
       ggplot2::scale_linetype_manual(values = "dashed", labels = 'Current')
 
   }else if (show_msy_line){
@@ -103,14 +103,14 @@ yieldplot <- function(data,
       filter(data=="msy")
 
     p <- ggplot2::ggplot(data) +
-      ggplot2::geom_line(ggplot2::aes(x=Final_bio, y=yield/1000)) +
+      ggplot2::geom_line(ggplot2::aes(x=Final_bio, y=yield)) +
       ggplot2::geom_segment(data = msy_data, ggplot2::aes(x = Final_bio, xend = Final_bio,
-                                                          y = 0, yend = yield/1000, linetype = "A")) +
+                                                          y = 0, yend = yield, linetype = "A")) +
       ggplot2::scale_linetype_manual(values = "twodash", labels = "MSY")
 
   }else{
     p <- ggplot2::ggplot(data) +
-      ggplot2::geom_line(ggplot2::aes(x=Final_bio, y=yield/1000))
+      ggplot2::geom_line(ggplot2::aes(x=Final_bio, y=yield))
   }
   p <- p +
     ggplot2::theme_bw() +
