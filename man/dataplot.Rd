@@ -21,7 +21,8 @@ dataplot(
   scenario_order = NULL,
   scales = "free",
   ncol = 2,
-  fleet_names = NULL
+  fleet_names = NULL,
+  hollow = TRUE
 )
 }
 \arguments{
@@ -60,6 +61,8 @@ Any scenarios not included in "scenario_order" will be tacked on in the order th
 \item{ncol}{Number of columns for facet_wrap(). Default is .}
 
 \item{fleet_names}{A vector of customised fleet names for legend}
+
+\item{hollow}{A logitcal to switch between two colouring styles. Default is TRUE.}
 }
 \value{
 A plot of data used in model

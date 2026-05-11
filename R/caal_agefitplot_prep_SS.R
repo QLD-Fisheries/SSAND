@@ -11,12 +11,13 @@
 #' @param scenarios A vector of scenarios to plot (numeric). Shows all scenarios if left blank. Can be overridden in the plotting function.
 #' @param sex_code Specify which sex to show on the graph. Sex codes correspond to Stock Synthesis sex codes (1 is female, 2 is male, 3 and 0 are combined.)
 #'
-#' @return A data frame with year (int), bin (int), obs (num), exp (num), scenario (int), sex (int)
+#' @return A data frame with year (int), bin (int), obs (num), exp (num), scenario (int), sex (int), fleet (int).
 #' @export
 #'
 #' @examples
 #' data <- caal_agefitplot_prep_SS(ss_mle)
-#' caal_agefitplot(data, scenario=1,show_fits=FALSE)
+#' caal_agefitplot(data, scenario=2,show_fits=FALSE)
+#' caal_agefitplot(data, scenario=2)
 caal_agefitplot_prep_SS <- function(ss_mle,
                                     sex_code = 1,
                                     scenarios=NULL) {

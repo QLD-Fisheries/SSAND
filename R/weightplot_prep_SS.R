@@ -32,7 +32,7 @@ weightplot_prep_SS <- function(ss_mle,
       dplyr::select(xvar = Len_mean, weight = Wt_M) |>
       dplyr::mutate(scenario = scenario, sex = "Male")
 
-    data <- bind_rows(data, length_female, length_male)
+    data <- rbind(data, length_female, length_male)
   }
   return(data)
 }

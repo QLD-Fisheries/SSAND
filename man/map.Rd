@@ -62,7 +62,8 @@ map(
   custom_fill_variable = NULL,
   custom_border_colour = rep("grey30", 99),
   custom_fill_colour_static = NA,
-  custom_border_thickness = rep(0.5, 99)
+  custom_border_thickness = rep(0.5, 99),
+  fill_transform = "identity"
 )
 }
 \arguments{
@@ -188,6 +189,10 @@ Default is "QLD". For other regions, specify using xlim and ylim.}
 \item{custom_fill_colour_static}{Colour to fill, if fill is not dynamic. If plotting multiple custom layers, must be a vector as long as the list of layers.}
 
 \item{custom_border_thickness}{Thickness of border. If plotting multiple custom layers, must be a vector as long as the list of layers.}
+
+\item{fill_transform}{Enter "log" to transform the fill scale to logarithm. Default is natural scale. Other options are "asn", "atanh", "boxcox",
+"date", "exp", "hms", "identity", "log", "log10", "log1p", "log2", "logit", "modulus",
+"probability", "probit", "pseudo_log", "reciprocal", "reverse", "sqrt" and "time"}
 }
 \value{
 A customised map.

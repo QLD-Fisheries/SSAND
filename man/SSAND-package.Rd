@@ -15,6 +15,7 @@ A toolkit for visualising data used in, and produced by, stock assessment models
 
 Authors:
 \itemize{
+  \item Alise Fox \email{fisheriesassessment@daf.qld.gov.au} (\href{https://orcid.org/0009-0002-5634-0963}{ORCID})
   \item Montana Wickens (\href{https://orcid.org/0000-0002-7316-014X}{ORCID})
   \item Robyn Lovett
   \item Justin Cameron

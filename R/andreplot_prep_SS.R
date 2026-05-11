@@ -21,8 +21,8 @@
 #' @export
 #'
 #' @examples
-#' data <- andreplot_prep_SS_mod(ss_mle, sex_code=1)
-#' andreplot_mod(data, fleet = 1)
+#' data <- andreplot_prep_SS(ss_mle, sex_code=1)
+#' andreplot(data, fleet = 1)
 andreplot_prep_SS <- function(ss_mle,
                               scenarios = NULL,
                               sex_code = NULL,

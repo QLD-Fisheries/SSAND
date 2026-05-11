@@ -49,7 +49,8 @@ cpueplot(
   input_range_colour = "black",
   aggregate_scenarios = FALSE,
   CI_range = 0.95,
-  alpha = NULL
+  alpha = NULL,
+  fit_colour = NULL
 )
 }
 \arguments{
@@ -146,6 +147,8 @@ Any scenarios not included in "scenario_order" will be tacked on in the order th
 \item{CI_range}{Specify credible interval range (numeric). Only activated if mcmc_style==CI.}
 
 \item{alpha}{Transparency for range (numeric) used in ggplot2::geom_density_ridges(). Default is 0.7.}
+
+\item{fit_colour}{Default is fleet colour. Otherwise input a colour here (useful when displaying fleets in a facet_wrap)}
 }
 \value{
 A plot that shows input data and model fits to CPUE data

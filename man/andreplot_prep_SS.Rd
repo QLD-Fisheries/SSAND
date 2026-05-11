@@ -19,7 +19,7 @@ andreplot_prep_SS(ss_mle, scenarios = NULL, sex_code = NULL, CI = 0.95)
 \item{CI}{Confident interval. Default is 0.95.}
 }
 \value{
-A data frame with columns "year" (num), "length" (num), "obs" (num), "pred" (num), "low" (num), "upp" (num), "label" (chr), "scenario" (int), "CI" (num)
+A data frame with columns "year" (num), "fleet" (num), "length" (num), "obs" (num), "pred" (num), "low" (num), "upp" (num), "label" (chr), "scenario" (int), "CI" (num)
 }
 \description{
 Prepare SS data for Andre plot
@@ -29,5 +29,5 @@ Right plots in each pair are SE of mean age-at-length (obs. and exp.) with confi
 }
 \examples{
 data <- andreplot_prep_SS(ss_mle, sex_code=1)
-andreplot(data)
+andreplot(data, fleet = 1)
 }
