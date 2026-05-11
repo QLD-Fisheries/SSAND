@@ -23,10 +23,10 @@
 #' @examples
 #' data <- andreplot_prep_SS_mod(ss_mle, sex_code=1)
 #' andreplot_mod(data, fleet = 1)
-andreplot_prep_SS_mod <- function(ss_mle,
-                                  scenarios = NULL,
-                                  sex_code = NULL,
-                                  CI = 0.95) {
+andreplot_prep_SS <- function(ss_mle,
+                              scenarios = NULL,
+                              sex_code = NULL,
+                              CI = 0.95) {
 
   if (check_scenarios(ss_mle,"SS","MLE")=="single scenario"){ss_mle <- list(ss_mle); warning("Assuming you are entering a single scenario, not a list of scenarios. Wrap ss_mle input inside a list() to avoid this warning.")}
   if (missing(scenarios)){scenarios <- 1:length(ss_mle)}

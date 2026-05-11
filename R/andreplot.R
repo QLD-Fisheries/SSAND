@@ -23,15 +23,15 @@
 #' @examples
 #' data <- andreplot_prep_SS_mod(ss_mle, sex_code=1)
 #' andreplot_mod(data, fleet = 1)
-andreplot_mod <- function(data,
-                          scenario = 1,
-                          fleet = 1,
-                          years = NULL,
-                          xlab = "Length (cm)",
-                          ylab = c("Age","Standard deviation (age)"),
-                          colours = c("black","grey80",fq_palette("DAF")),
-                          legend_position = "top",
-                          legend_ratio = c(1,10)) {
+andreplot <- function(data,
+                      scenario = 1,
+                      fleet = 1,
+                      years = NULL,
+                      xlab = "Length (cm)",
+                      ylab = c("Age","Standard deviation (age)"),
+                      colours = c("black","grey80",fq_palette("DAF")),
+                      legend_position = "top",
+                      legend_ratio = c(1,10)) {
 
   if (!missing(years)) {data <- data |> dplyr::filter(year %in% years)}
   scenario_var <- scenario
