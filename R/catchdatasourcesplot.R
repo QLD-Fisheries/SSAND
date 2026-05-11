@@ -20,6 +20,7 @@
 #' @param text_size Text size (num). Default is 12.
 #' @param financial_year Set to TRUE if the assessment was based on financial year (logical). Adjusts the x-axis to show full financial year notation.
 #' @param xangle Set to 90 to rotate x-axis labels 90 degrees.
+#' @param legend_size Size of legend markers. Default is 6.
 #'
 # Copyright 2024 Fisheries Queensland
 
@@ -71,7 +72,8 @@ catchdatasourcesplot <- function(data,
                                  colours = NULL,
                                  text_size = 12,
                                  xangle = NULL,
-                                 financial_year = FALSE){
+                                 financial_year = FALSE,
+                                 legend_size = 6){
 
   # Data input warnings
   if (!"sector" %in% names(data)) {warning("Input data is missing sector column")}
@@ -90,7 +92,7 @@ catchdatasourcesplot <- function(data,
 
   p <- ggplot2::ggplot(data) +
     ggplot2::geom_segment(ggplot2::aes(x=startyr-0.5,xend=endyr+0.5,y=sector,yend=sector,color=col),linewidth=30) +
-    ggplot2::scale_x_continuous(breaks=xbreaks, labels = xlabels) +
+    ggplot2::scale_x_continuous(breaks=xbreaks, labels = xlabels, expand = c(0,0)) +
     ggplot2::scale_colour_manual(values=c(colours,"#C1C0C0")) +
     ggplot2::geom_text(data=data|>dplyr::filter(label==1),ggplot2::aes(x=startyr-0.5 + 0.5*(endyr - (startyr)), y=sector, label=source),color="#000000") +
     ggplot2::geom_text(data=data|>dplyr::filter(label==2),ggplot2::aes(x=startyr-0.5 + 0.5*(endyr - (startyr)), y=sector, label=source),color="#000000", angle = 90) +
@@ -100,7 +102,9 @@ catchdatasourcesplot <- function(data,
     ggplot2::theme(legend.position = legend_position) +
     ggplot2::ylab(ylab) +
     ggplot2::xlab(xlab) +
-    ggplot2::theme(axis.text.x = ggplot2::element_text(angle = xangle, vjust = 0.5, hjust=ifelse(xangle==90,0,0.5)))
+    ggplot2::theme(axis.text.x = ggplot2::element_text(angle = xangle, vjust = 0.5, hjust=ifelse(xangle==90,0,0.5))) +
+    ggplot2::guides(color = ggplot2::guide_legend(override.aes = list(linewidth = legend_size))) +
+    ggplot2::theme(legend.title = ggplot2::element_blank())
 
   return(p)
 }
