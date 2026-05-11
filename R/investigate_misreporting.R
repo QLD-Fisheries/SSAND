@@ -75,7 +75,9 @@ heatplot <- function(data,
 
   data <- data |>
     dplyr::summarise(days = dplyr::n_distinct(date),
-                     weight = sum(weight), .groups='drop')  |>
+                     weight = sum(weight),
+                     cpue = weight/days,
+                     .groups='drop')  |>
     dplyr::mutate(weight = round(weight, digits = 0))
 
   if (!missing(filter_weight_lower)) {
@@ -110,8 +112,10 @@ heatplot <- function(data,
 
       if (fill_var == "days") {
         p <- ggplot2::ggplot(data_subset, ggplot2::aes(x = operator, y = year, fill = days))
-      } else {
+      } else if (fill_var == "weight") {
         p <- ggplot2::ggplot(data_subset, ggplot2::aes(x = operator, y = year, fill = weight))
+      } else {
+        p <- ggplot2::ggplot(data_subset, ggplot2::aes(x = operator, y = year, fill = cpue))
       }
 
       p <- p +
