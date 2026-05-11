@@ -74,6 +74,9 @@
 #' @param reef_alpha Alpha of reefs
 #' @param reef_border Colour of border of reefs
 #' @param plot_title Enter a string to add a plot title.
+#' @param fill_transform Enter "log" to transform the fill scale to logarithm. Default is natural scale. Other options are "asn", "atanh", "boxcox",
+#' "date", "exp", "hms", "identity", "log", "log10", "log1p", "log2", "logit", "modulus",
+#' "probability", "probit", "pseudo_log", "reciprocal", "reverse", "sqrt" and "time"
 #'
 #' @return A customised map.
 #' @export
@@ -222,7 +225,8 @@ map <- function(show_coast = TRUE,
                 custom_fill_variable = NULL,
                 custom_border_colour = rep("grey30",99),
                 custom_fill_colour_static = NA,
-                custom_border_thickness = rep(0.5,99)
+                custom_border_thickness = rep(0.5,99),
+                fill_transform = "identity"
 ) {
 
   # Warnings
@@ -422,7 +426,7 @@ map <- function(show_coast = TRUE,
     }
   } else {
     p <- p +
-      ggplot2::scale_fill_viridis_c()
+      ggplot2::scale_fill_viridis_c(transform = fill_transform)
   }
 
   if (!missing(caption)) {
