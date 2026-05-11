@@ -17,23 +17,16 @@
 #'
 #' @importFrom stats "qchisq"
 #'
-#' @return A data frame with columns "year" (num), "length" (num), "obs" (num), "pred" (num), "low" (num), "upp" (num), "label" (chr), "scenario" (int), "CI" (num)
+#' @return A data frame with columns "year" (num), "fleet" (num), "length" (num), "obs" (num), "pred" (num), "low" (num), "upp" (num), "label" (chr), "scenario" (int), "CI" (num)
 #' @export
 #'
 #' @examples
-#' data <- andreplot_prep_SS(ss_mle, sex_code=1)
-#' andreplot(data)
-andreplot_prep_SS <- function(ss_mle,
-                              scenarios = NULL,
-                              sex_code = # Copyright 2024 Fisheries Queensland
-
-# This file is part of SSAND.
-# SSAND is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
-# SSAND is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
-# You should have received a copy of the GNU General Public License along with SSAND. If not, see <https://www.gnu.org/licenses/>.
-
-NULL,
-                              CI = 0.95) {
+#' data <- andreplot_prep_SS_mod(ss_mle, sex_code=1)
+#' andreplot_mod(data, fleet = 1)
+andreplot_prep_SS_mod <- function(ss_mle,
+                                  scenarios = NULL,
+                                  sex_code = NULL,
+                                  CI = 0.95) {
 
   if (check_scenarios(ss_mle,"SS","MLE")=="single scenario"){ss_mle <- list(ss_mle); warning("Assuming you are entering a single scenario, not a list of scenarios. Wrap ss_mle input inside a list() to avoid this warning.")}
   if (missing(scenarios)){scenarios <- 1:length(ss_mle)}
@@ -48,7 +41,7 @@ NULL,
   for (scenario in scenarios) {
     tmp <- ss_mle[[scenario]]$condbase |>
       dplyr::filter(Sex == sex_code) |>
-      dplyr::group_by(Lbin_lo,Yr.S) |>
+      dplyr::group_by(Lbin_lo,Yr.S, Fleet) |>
       dplyr::summarise(ObsV = sum(Bin * Obs / sum(Obs)),
                        ObsV2 = sum(Bin * Bin * Obs / sum(Obs)),
                        PredV = sum(Bin * Exp / sum(Exp)),
@@ -69,8 +62,8 @@ NULL,
   }
 
   data <- rbind(
-    data |> dplyr::mutate(label = "Age") |> dplyr::select(year, length = Lbin_lo, obs = ObsV, pred=PredV, low=Low, upp=Upp, label, scenario, CI),
-    data |> dplyr::mutate(label = "Standard deviation (age)") |>  dplyr::select(year, length = Lbin_lo, obs = Obs2, pred=varn, low=Low2, upp=Upp2, label, scenario, CI)
+    data |> dplyr::mutate(label = "Age") |> dplyr::select(year, fleet = Fleet, length = Lbin_lo, obs = ObsV, pred=PredV, low=Low, upp=Upp, label, scenario, CI),
+    data |> dplyr::mutate(label = "Standard deviation (age)") |>  dplyr::select(year, fleet = Fleet, length = Lbin_lo, obs = Obs2, pred=varn, low=Low2, upp=Upp2, label, scenario, CI)
   )
 
   return(data)
