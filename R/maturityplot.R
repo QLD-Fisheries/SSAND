@@ -12,7 +12,6 @@
 #' @param xlab Label for x-axis (character). Default is "Age".
 #' @param ylab Label for y-axis (character). Default is "Carapace length (cm, beginning of year)".
 #' @param text_size Text size (num). Default is 12.
-#' @param show_two_sex Set to TRUE to activate a feature that is relevant for two-sex models (logical).
 #' @param scenarios A vector of scenario numbers to be shown on plot (numeric). This was already specified in prep file, but this is a manual override to save running the prep function again.
 #' @param scenario_labels A vector of customised scenario names (character). Default is "Scenario 1", "Scenario 2", etc.
 #' @param scenario_order A vector to reorder how scenarios are displayed (character). Use the label names defined in "scenario_labels".
@@ -36,7 +35,6 @@ maturityplot <- function(data,
                          xlab = NULL,
                          ylab = "Maturity",
                          text_size = 12,
-                         show_two_sex=NULL,
                          scenarios = NULL,
                          scenario_labels = NULL,
                          scenario_order = NULL,
