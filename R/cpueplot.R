@@ -280,7 +280,7 @@ cpueplot <- function(data,
 
     # General
     p <- p +
-      ggplot2::scale_x_continuous(limits = xlim, breaks = xbreaks, labels = xlabels) +
+      ggplot2::scale_x_date(limits = xlim, breaks = xbreaks, labels = xlabels) +
       ggplot2::scale_y_continuous(limits = ylim) +
       ggplot2::theme(axis.text.x = ggplot2::element_text(angle = xangle, vjust = 0.5, hjust=ifelse(xangle==90,0,0.5)))
 
@@ -429,7 +429,7 @@ cpueplot <- function(data,
     if (length(unique(data$scenario))>1) {
       suppressMessages({
         p <- p +
-          ggplot2::scale_x_continuous(limits = xlim, breaks = xbreaks, labels = xlabels) +
+          ggplot2::scale_x_date(limits = xlim, breaks = xbreaks, labels = xlabels) +
           ggplot2::scale_y_continuous(limits = ylim, breaks = ybreaks, labels = ylabels) +
           ggplot2::facet_wrap(~scenario_labels, ncol = ncol, scales = scales)
 
