@@ -414,7 +414,7 @@ cpueplot <- function(data,
 
     # Universal aesthetics
     p <- p +
-      ggplot2::scale_x_continuous(limits = xlim, breaks = xbreaks, labels = xlabels) +
+      ggplot2::scale_x_date(limits = xlim, breaks = xbreaks, labels = xlabels) +
       ggplot2::scale_y_continuous(limits = ylim, breaks = ybreaks, labels = ylabels) +
       ggplot2::theme_bw() +
       ggplot2::xlab(xlab) +
