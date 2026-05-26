@@ -153,7 +153,16 @@ cpueplot <- function(data,
   if (!missing(fleets)) {data <- data |> dplyr::filter(fleet %in% fleets)}
 
 
-  # If xlim is entered as just years, convert to dates
+
+
+  # If "date" column is entered as just years, convert to dates
+  if (!lubridate::is.Date(data$date)) {
+    # If just entered as years, convert to date
+    if (nchar(data$date[1])==4) {
+      data$date <- as.Date(paste0(data$date,"-01-01"), format = "%Y-%m-%d")
+    }
+  }
+
   # If xlim is entered as just years, convert to dates
   if (!missing(xlim)) {
     if (nchar(xlim[1])==4) {

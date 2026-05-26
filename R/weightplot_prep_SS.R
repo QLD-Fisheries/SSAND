@@ -28,9 +28,16 @@ weightplot_prep_SS <- function(ss_mle,
       dplyr::select(xvar = Len_mean, weight = Wt_F) |>
       dplyr::mutate(scenario = scenario, sex = "Female")
 
-    length_male <- ss_mle[[scenario]]$biology |>
-      dplyr::select(xvar = Len_mean, weight = Wt_M) |>
-      dplyr::mutate(scenario = scenario, sex = "Male")
+    if ("Wt_M"  %in% names(ss_mle[[scenario]]$biology)) {
+      # Two-sex model
+      length_male <- ss_mle[[scenario]]$biology |>
+        dplyr::select(xvar = Len_mean, weight = Wt_M) |>
+        dplyr::mutate(scenario = scenario, sex = "Male")
+    } else {
+      # Single-sex model
+      length_male <- length_female |>
+        dplyr::mutate(sex = "Male")
+    }
 
     data <- rbind(data, length_female, length_male)
   }
