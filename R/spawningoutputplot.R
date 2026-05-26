@@ -67,9 +67,9 @@ spawningoutputplot <- function(data,
   if (missing(colours)) {colours <- "black"}
 
 
-  p <- ggplot2::ggplot(data, ggplot2::aes(x=xvar, y=maturityxfecundity), colour=colours) +
-    ggplot2::geom_line() +
-    ggplot2::geom_point() +
+  p <- ggplot2::ggplot(data, ggplot2::aes(x=xvar, y=maturityxfecundity)) +
+    ggplot2::geom_line(colour=colours) +
+    ggplot2::geom_point(colour=colours) +
     ggplot2::xlab(xlab) +
     ggplot2::ylab(ylab) +
     ggplot2::theme_bw()
