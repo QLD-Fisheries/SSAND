@@ -1,6 +1,6 @@
 Package: SSAND
 Title: Standardised Stock Assessment Numerical Displays
-Version: 1.0.1
+Version: 1.0.2
 Authors@R: 
   c(
     person("Alise", "Fox", , "fisheriesassessment@daf.qld.gov.au", role = c("aut", "cre"), comment = c(ORCID = "0009-0002-5634-0963")),
