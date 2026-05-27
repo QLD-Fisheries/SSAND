@@ -14,12 +14,13 @@ caal_agefitplot_prep_SS(ss_mle, sex_code = 1, scenarios = NULL)
 \item{scenarios}{A vector of scenarios to plot (numeric). Shows all scenarios if left blank. Can be overridden in the plotting function.}
 }
 \value{
-A data frame with year (int), bin (int), obs (num), exp (num), scenario (int), sex (int)
+A data frame with year (int), bin (int), obs (num), exp (num), scenario (int), sex (int), fleet (int).
 }
 \description{
 Prepare Stock Synthesis data for plot to show age fits from conditional-age-at-length data
 }
 \examples{
 data <- caal_agefitplot_prep_SS(ss_mle)
-caal_agefitplot(data, scenario=1,show_fits=FALSE)
+caal_agefitplot(data, scenario=2,show_fits=FALSE)
+caal_agefitplot(data, scenario=2)
 }

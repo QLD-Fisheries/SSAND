@@ -12,7 +12,8 @@ catchdatasourcesplot(
   colours = NULL,
   text_size = 12,
   xangle = NULL,
-  financial_year = FALSE
+  financial_year = FALSE,
+  legend_size = 6
 )
 }
 \arguments{
@@ -31,6 +32,8 @@ catchdatasourcesplot(
 \item{xangle}{Set to 90 to rotate x-axis labels 90 degrees.}
 
 \item{financial_year}{Set to TRUE if the assessment was based on financial year (logical). Adjusts the x-axis to show full financial year notation.}
+
+\item{legend_size}{Size of legend markers. Default is 6.}
 }
 \value{
 Catch reconstruction data sources plot

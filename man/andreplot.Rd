@@ -7,6 +7,7 @@
 andreplot(
   data,
   scenario = 1,
+  fleet = 1,
   years = NULL,
   xlab = "Length (cm)",
   ylab = c("Age", "Standard deviation (age)"),
@@ -19,6 +20,8 @@ andreplot(
 \item{data}{Output of andreplot_prep_SS. A data frame with columns "year" (num), "length" (num), "obs" (num), "pred" (num), "low" (num), "upp" (num), "label" (chr), "scenario" (int), "CI" (num)}
 
 \item{scenario}{The scenario to plot. Default is 1.}
+
+\item{fleet}{The fleet to plot. Default is 1.}
 
 \item{years}{A vector of years to plot}
 
@@ -33,12 +36,12 @@ andreplot(
 \item{legend_ratio}{A vector specifying the relative heights of the legend and the rest of the plot. Default is c(1,10)}
 }
 \value{
-Andre plot
+Andre plot with an option to filter by fleet
 }
 \description{
 Andre plot
 }
 \examples{
 data <- andreplot_prep_SS(ss_mle, sex_code=1)
-andreplot(data)
+andreplot(data, fleet = 1)
 }

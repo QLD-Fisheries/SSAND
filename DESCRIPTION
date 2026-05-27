@@ -1,6 +1,6 @@
 Package: SSAND
 Title: Standardised Stock Assessment Numerical Displays
-Version: 1.0.1
+Version: 1.0.2
 Authors@R: 
   c(
     person("Alise", "Fox", , "fisheriesassessment@daf.qld.gov.au", role = c("aut", "cre"), comment = c(ORCID = "0009-0002-5634-0963")),
@@ -18,7 +18,6 @@ Description: A toolkit for visualising data used in, and produced by, stock asse
 License: GPL (>= 3)
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.3.3
 Imports: 
     cowplot,
     dplyr,
@@ -57,3 +56,4 @@ Suggests:
     xfun (>= 0.44)
 VignetteBuilder: knitr
 Config/testthat/edition: 3
+Config/roxygen2/version: 8.0.0

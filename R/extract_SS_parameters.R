@@ -27,7 +27,8 @@ extract_SS_parameters <- function(ss_dat) {
     for (i in 1:length(ss_dat)) {
       tmp <- data.frame(rownames(ss_dat[[i]]$parameters  |>
                                    dplyr::filter(!grepl("Main_RecrDev", Label)) |>
-                                   dplyr::filter(!grepl("ForeRecr", Label)) ))
+                                   dplyr::filter(!grepl("Late_RecrDev", Label)) |>
+                                   dplyr::filter(!grepl("ForeRecr", Label))  ))
       names <- rbind(names, tmp)
     }
     names <- unique(names)

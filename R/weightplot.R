@@ -16,6 +16,7 @@
 #' @param scenario_order A vector to reorder how scenarios are displayed (character). Use the label names defined in "scenario_labels".
 #' If "scenario_labels" is left blank, the labels will be "Scenario 1", "Scenario 2" etc.
 #' Any scenarios not included in "scenario_order" will be tacked on in the order they appear in the input data.
+#' @param show_two_sex Default is FALSE. Set to TRUE to show two sexes on the plot (logical).
 #' @param scales Scales for ggplot2::facet_wrap(). Default is 'free', see ?ggplot2::facet_wrap for options.
 #' @param ncol Number of columns for facet_wrap(). Default is 2.
 #'
@@ -32,6 +33,7 @@ weightplot <- function(data,
                        scenarios = NULL,
                        scenario_labels = NULL,
                        scenario_order = NULL,
+                       show_two_sex = FALSE,
                        scales = 'free',
                        ncol = 2) {
 
@@ -72,6 +74,12 @@ weightplot <- function(data,
   if (length(unique(data$scenario))>1){
     p <- p +
       ggplot2::facet_wrap(~scenario_labels, scales = scales, ncol = ncol)
+  }
+
+  if (show_two_sex){
+    p <- p + (aes(colour = sex)) +
+      ggplot2::theme(legend.position = "top", legend.title = ggplot2::element_blank()) +
+      ggplot2::scale_colour_manual(values = colours)
   }
 
   return(p)

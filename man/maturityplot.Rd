@@ -6,11 +6,10 @@
 \usage{
 maturityplot(
   data,
-  maturity_type = "length",
+  maturity_type = "length1",
   xlab = NULL,
   ylab = "Maturity",
   text_size = 12,
-  show_two_sex = NULL,
   scenarios = NULL,
   scenario_labels = NULL,
   scenario_order = NULL,
@@ -22,15 +21,13 @@ maturityplot(
 \arguments{
 \item{data}{A data frame with variables value (num), maturity (num), sex (int), scenario (int), type (chr)}
 
-\item{maturity_type}{Either "length" or "age", to define the x-axis.}
+\item{maturity_type}{To define the x-axis. Use "length1" or "age1", depending on what you'd like on the x-axis, if you modelled length-based maturity. Use "length2" or "age2", depending on what you'd like on the x-axis, if you modelled age-based maturity.}
 
 \item{xlab}{Label for x-axis (character). Default is "Age".}
 
 \item{ylab}{Label for y-axis (character). Default is "Carapace length (cm, beginning of year)".}
 
 \item{text_size}{Text size (num). Default is 12.}
-
-\item{show_two_sex}{Set to TRUE to activate a feature that is relevant for two-sex models (logical).}
 
 \item{scenarios}{A vector of scenario numbers to be shown on plot (numeric). This was already specified in prep file, but this is a manual override to save running the prep function again.}
 

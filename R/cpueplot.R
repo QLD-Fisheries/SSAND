@@ -56,6 +56,7 @@
 #' @param aggregate_scenarios Set to TRUE to calculate credible intervals across all scenarios (logical). Only activated if mcmc_style==CI.
 #' @param CI_range Specify credible interval range (numeric). Only activated if mcmc_style==CI.
 #' @param alpha Transparency for range (numeric) used in ggplot2::geom_density_ridges(). Default is 0.7.
+#' @param fit_colour Default is fleet colour. Otherwise input a colour here (useful when displaying fleets in a facet_wrap)
 #'
 #' @return A plot that shows input data and model fits to CPUE data
 #' @export
@@ -117,7 +118,8 @@ cpueplot <- function(data,
                      input_range_colour = "black",
                      aggregate_scenarios = FALSE,
                      CI_range = 0.95,
-                     alpha = NULL) {
+                     alpha = NULL,
+                     fit_colour = NULL) {
 
   # 📐Set up ----
   if ("med" %in% names(data)) {MCMC <- TRUE} else {MCMC <- FALSE}
@@ -151,7 +153,16 @@ cpueplot <- function(data,
   if (!missing(fleets)) {data <- data |> dplyr::filter(fleet %in% fleets)}
 
 
-  # If xlim is entered as just years, convert to dates
+
+
+  # If "date" column is entered as just years, convert to dates
+  if (!lubridate::is.Date(data$date)) {
+    # If just entered as years, convert to date
+    if (nchar(data$date[1])==4) {
+      data$date <- as.Date(paste0(data$date,"-01-01"), format = "%Y-%m-%d")
+    }
+  }
+
   # If xlim is entered as just years, convert to dates
   if (!missing(xlim)) {
     if (nchar(xlim[1])==4) {
@@ -229,7 +240,7 @@ cpueplot <- function(data,
       ggplot2::theme(text = ggplot2::element_text(size=text_size)) +
       ggplot2::theme(legend.title=ggplot2::element_blank(), legend.position = legend_position)
 
-    # Model fits
+    # Model inputs
     if (show_CI_ribbon){
       p <- p +
         ggplot2::geom_ribbon(ggplot2::aes(x=date, ymin = lb, ymax= ub, group = fleet), alpha = 0.1, group = 1) +
@@ -241,15 +252,6 @@ cpueplot <- function(data,
         ggplot2::geom_errorbar(ggplot2::aes(x=date,ymin=lb, ymax=ub), width=.5, position=ggplot2::position_dodge(0))
     }
 
-    if (show_fits) { # Just line of model fits, no error on estimation
-      if (show_line) {
-        p <- p +
-          ggplot2::geom_line(ggplot2::aes(x=date,y=exp,group=as.factor(fleet), colour=as.factor(fleet), linetype="Model fit")) +
-          ggplot2::scale_linetype_manual(values="dashed")
-      }
-    }
-
-    # Model inputs
     if (show_inputs) {
       if (show_line) {
         p <- p +
@@ -261,10 +263,25 @@ cpueplot <- function(data,
       }
     }
 
+    # Model fits
+    if (show_fits) { # Just line of model fits, no error on estimation
+      if (show_line) {
+        if (missing(fit_colour)) {
+          p <- p +
+            ggplot2::geom_line(ggplot2::aes(x=date,y=exp,group=as.factor(fleet), colour=as.factor(fleet), linetype="Model fit"))
+        } else {
+          p <- p +
+            ggplot2::geom_line(ggplot2::aes(x=date,y=exp,group=as.factor(fleet), linetype="Model fit"), colour=fit_colour)
+        }
+        p <- p +
+          ggplot2::scale_linetype_manual(values="dashed")
+      }
+    }
+
     # General
     p <- p +
-      ggplot2::scale_x_continuous(limits = as.numeric(xlim), breaks = xbreaks, labels = xlabels) +
-      ggplot2::scale_y_continuous(limits = as.numeric(ylim)) +
+      ggplot2::scale_x_date(limits = xlim, breaks = xbreaks, labels = xlabels) +
+      ggplot2::scale_y_continuous(limits = ylim) +
       ggplot2::theme(axis.text.x = ggplot2::element_text(angle = xangle, vjust = 0.5, hjust=ifelse(xangle==90,0,0.5)))
 
     if (length(unique(data$scenario))>1){
@@ -397,7 +414,7 @@ cpueplot <- function(data,
 
     # Universal aesthetics
     p <- p +
-      ggplot2::scale_x_continuous(limits = xlim, breaks = xbreaks, labels = xlabels) +
+      ggplot2::scale_x_date(limits = xlim, breaks = xbreaks, labels = xlabels) +
       ggplot2::scale_y_continuous(limits = ylim, breaks = ybreaks, labels = ylabels) +
       ggplot2::theme_bw() +
       ggplot2::xlab(xlab) +
@@ -412,7 +429,7 @@ cpueplot <- function(data,
     if (length(unique(data$scenario))>1) {
       suppressMessages({
         p <- p +
-          ggplot2::scale_x_continuous(limits = xlim, breaks = xbreaks, labels = xlabels) +
+          ggplot2::scale_x_date(limits = xlim, breaks = xbreaks, labels = xlabels) +
           ggplot2::scale_y_continuous(limits = ylim, breaks = ybreaks, labels = ylabels) +
           ggplot2::facet_wrap(~scenario_labels, ncol = ncol, scales = scales)
 
@@ -421,4 +438,3 @@ cpueplot <- function(data,
   }
   return(p)
 }
-

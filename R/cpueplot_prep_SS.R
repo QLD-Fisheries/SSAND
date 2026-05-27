@@ -37,14 +37,23 @@ cpueplot_prep_SS <- function(ss_mle,
     data <- data.frame()
     for (scenario in scenarios) {
 
-      if (month_override) {ss_mle[[scenario]]$cpue$Month <- 1}
+      if (month_override) {
+        ss_mle[[scenario]]$cpue$Month <- 1
+        temp <- ss_mle[[scenario]]$cpue |>
+          dplyr::mutate(date = as.Date(paste0('01/',Month,'/',Yr), format = '%d/%m/%Y'))
+      }else{
+        temp <- ss_mle[[scenario]]$cpue |>
+          dplyr::mutate(
+            date = lubridate::date_decimal(Time, tz = "UTC"),
+            date = as.Date(date, format = '%d/%m/%Y')
+          )
+      }
 
       if (any(ss_mle[[scenario]]$survey_error) != 0) {
         warning('Data preparation assumed error distribution is lognormal, but SS output indicates your fleet uses normal error or Students t-distrubtion. ')
       }
 
-      temp <- ss_mle[[scenario]]$cpue |>
-        dplyr::mutate(date = as.Date(paste0('01/',Month,'/',Yr), format = '%d/%m/%Y')) |>
+      temp <- temp |>
         dplyr::mutate(ub = qlnorm(0.975, meanlog = log(Obs),sdlog = SE),
                       lb = qlnorm(0.025, meanlog = log(Obs),sdlog = SE)) |>
         dplyr::mutate(scenario = as.factor(scenario)) |>
@@ -58,5 +67,3 @@ cpueplot_prep_SS <- function(ss_mle,
   rownames(data) <- NULL
   return(data)
 }
-
-

@@ -1,5 +1,5 @@
 test_that("plot is produced and displaying data", {
-  p <- caal_agefitplot(caal_agefitplot_prep_SS(ss_mle))
+  p <- caal_agefitplot(caal_agefitplot_prep_SS(ss_mle),scenario=2)
   # Test if function produces a ggplot
   expect_true(inherits(p, "gg"))
   # Test if data being plot is not empty

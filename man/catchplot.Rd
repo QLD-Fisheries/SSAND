@@ -88,7 +88,7 @@ Catch plot
 \examples{
 data <- catchplot_prep_SS(ss_mle)
 catchplot(data, fleet_names = "Commercial")
-catchplot(data, fleet_names = "Commercial", financial_year=TRUE)
+catchplot(data, fleet_names = "Commercial", financial_year = TRUE)
 
 data <- catchplot_prep_DD(dd_mle)
 catchplot(data)

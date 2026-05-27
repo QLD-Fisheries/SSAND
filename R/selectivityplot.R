@@ -118,25 +118,26 @@ selectivityplot <- function(data,
     } else {
       fleet.lookup <- data.frame(fleet = unique(data$fleet), fleet_names = fleet_names)
       data <- data |>
-        dplyr::left_join(fleet.lookup, by = "fleet") |>
-        dplyr::mutate(fleet_names = as.factor(fleet_names))
+        dplyr::left_join(fleet.lookup, by = "fleet")
+      # Reorder fleet names
+      data$fleet_names <- factor(data$fleet_names, levels = fleet_names)
     }
 
     if (missing(colours)) {colours = c("grey70",fq_palette("alisecolours"))}
 
 
     if(!time_blocks) {
-    data <- data |> dplyr::filter(year==endyear)
+      data <- data |> dplyr::filter(year==endyear)
 
-    p <- ggplot2::ggplot(data) +
-      ggplot2::geom_line(ggplot2::aes(x=value, y=selectivity, colour=type, linetype=sex)) +
-      ggplot2::theme_bw() +
-      ggplot2::xlab(xlab) +
-      ggplot2::ylab(ylab) +
-      ggplot2::ylim(c(0,1)) +
-      ggplot2::theme(text = ggplot2::element_text(size=text_size)) +
-      ggplot2::theme(legend.position = "top", legend.title = ggplot2::element_blank()) +
-      ggplot2::scale_colour_manual(values = colours)
+      p <- ggplot2::ggplot(data) +
+        ggplot2::geom_line(ggplot2::aes(x=value, y=selectivity, colour=type, linetype=sex)) +
+        ggplot2::theme_bw() +
+        ggplot2::xlab(xlab) +
+        ggplot2::ylab(ylab) +
+        ggplot2::ylim(c(0,1)) +
+        ggplot2::theme(text = ggplot2::element_text(size=text_size)) +
+        ggplot2::theme(legend.position = "top", legend.title = ggplot2::element_blank()) +
+        ggplot2::scale_colour_manual(values = colours)
     }
 
     if(time_blocks) {
@@ -178,20 +179,20 @@ selectivityplot <- function(data,
   }
 
   # Facet as required
-    if (length(unique(data$fleet))>1 && length(unique(data$scenario))>1) {
-      p <- p +
-        ggplot2::facet_grid(rows=ggplot2::vars(fleet_names), cols=ggplot2::vars(scenario_labels))
-    }
+  if (length(unique(data$fleet))>1 && length(unique(data$scenario))>1) {
+    p <- p +
+      ggplot2::facet_grid(rows=ggplot2::vars(fleet_names), cols=ggplot2::vars(scenario_labels))
+  }
 
-    if (length(unique(data$fleet))==1 && length(unique(data$scenario))>1) {
-      p <- p +
-        ggplot2::facet_wrap(~scenario_labels)
-    }
+  if (length(unique(data$fleet))==1 && length(unique(data$scenario))>1) {
+    p <- p +
+      ggplot2::facet_wrap(~scenario_labels)
+  }
 
-    if (length(unique(data$fleet))>1 && length(unique(data$scenario))==1) {
-      p <- p +
-        ggplot2::facet_wrap(~fleet_names)
-    }
+  if (length(unique(data$fleet))>1 && length(unique(data$scenario))==1) {
+    p <- p +
+      ggplot2::facet_wrap(~fleet_names)
+  }
 
   return(p)
 }

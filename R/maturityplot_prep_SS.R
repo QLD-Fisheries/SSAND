@@ -24,19 +24,31 @@ maturityplot_prep_SS <- function(ss_mle,
 
   data <- data.frame()
   for (scenario in scenarios) {
-    tmpL <- ss_mle[[scenario]]$endgrowth |>
+    tmpLL <- ss_mle[[scenario]]$endgrowth |>
       dplyr::select(Len_Beg, Len_Mat, sex = Sex) |>
       dplyr::mutate(scenario = scenario) |>
       dplyr::rename(value = Len_Beg, maturity = Len_Mat) |>
-      dplyr::mutate(type = "length")
+      dplyr::mutate(type = "length1")
 
-    tmpA <- ss_mle[[scenario]]$endgrowth |>
+    tmpAL <- ss_mle[[scenario]]$endgrowth |>
+      dplyr::select(Age_Beg, Len_Mat, sex = Sex) |>
+      dplyr::mutate(scenario = scenario) |>
+      dplyr::rename(value = Age_Beg, maturity = Len_Mat) |>
+      dplyr::mutate(type = "age1")
+
+    tmpAA <- ss_mle[[scenario]]$endgrowth |>
       dplyr::select(Age_Beg, Age_Mat, sex = Sex) |>
       dplyr::mutate(scenario = scenario) |>
       dplyr::rename(value = Age_Beg, maturity = Age_Mat) |>
-      dplyr::mutate(type = "age")
+      dplyr::mutate(type = "age2")
 
-    tmp <- rbind(tmpL, tmpA)
+    tmpLA <- ss_mle[[scenario]]$endgrowth |>
+      dplyr::select(Len_Beg, Age_Mat, sex = Sex) |>
+      dplyr::mutate(scenario = scenario) |>
+      dplyr::rename(value = Len_Beg, maturity = Age_Mat) |>
+      dplyr::mutate(type = "length2")
+
+    tmp <- rbind(tmpLA,tmpLL,tmpAL,tmpAA)
     data <- rbind(data, tmp)
   }
 

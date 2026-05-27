@@ -9,6 +9,7 @@
 #'
 #' @param data Output of andreplot_prep_SS. A data frame with columns "year" (num), "length" (num), "obs" (num), "pred" (num), "low" (num), "upp" (num), "label" (chr), "scenario" (int), "CI" (num)
 #' @param scenario The scenario to plot. Default is 1.
+#' @param fleet The fleet to plot. Default is 1.
 #' @param years A vector of years to plot
 #' @param colours A vector of colours to plot. First is the colour of points, then the colour of the ribbon, then the colour of the expected line.
 #' @param xlab Label for x-axis (character). Default is "Length (cm)".
@@ -16,14 +17,15 @@
 #' @param legend_position Position of the legend ("top" or "bottom"). Default is "top".
 #' @param legend_ratio A vector specifying the relative heights of the legend and the rest of the plot. Default is c(1,10)
 #'
-#' @return Andre plot
+#' @return Andre plot with an option to filter by fleet
 #' @export
 #'
 #' @examples
 #' data <- andreplot_prep_SS(ss_mle, sex_code=1)
-#' andreplot(data)
+#' andreplot(data, fleet = 1)
 andreplot <- function(data,
                       scenario = 1,
+                      fleet = 1,
                       years = NULL,
                       xlab = "Length (cm)",
                       ylab = c("Age","Standard deviation (age)"),
@@ -33,10 +35,12 @@ andreplot <- function(data,
 
   if (!missing(years)) {data <- data |> dplyr::filter(year %in% years)}
   scenario_var <- scenario
+  fleet_var <- fleet
 
   data <- data |>
     dplyr::mutate(fill_var = paste0(round(CI*100),"% confidence interval")) |>
-    dplyr::filter(scenario == scenario_var)
+    dplyr::filter(scenario == scenario_var) |>
+    dplyr::filter(fleet == fleet_var)
 
   data_age <- data |> dplyr::filter(label=="Age")
   data_sd  <- data |> dplyr::filter(label=="Standard deviation (age)")

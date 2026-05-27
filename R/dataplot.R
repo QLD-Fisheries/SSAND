@@ -26,6 +26,7 @@
 #' @param scales Scales for ggplot2::facet_wrap(). Default is 'free', see ?ggplot2::facet_wrap for options.
 #' @param ncol Number of columns for facet_wrap(). Default is .
 #' @param financial_year Set to TRUE if the assessment was based on financial year (logical). Adjusts the x-axis to show full financial year notation.
+#' @param hollow A logitcal to switch between two colouring styles. Default is TRUE.
 #'
 #' @return A plot of data used in model
 #' @export
@@ -52,7 +53,8 @@ dataplot <- function(data,
                      scenario_order = NULL,
                      scales = 'free',
                      ncol = 2,
-                     fleet_names = NULL) {
+                     fleet_names = NULL,
+                     hollow = TRUE) {
 
   # Data input warnings
   if (!"year" %in% names(data)) {warning("Input data is missing year column")}
@@ -90,18 +92,20 @@ dataplot <- function(data,
     dplyr::left_join(fleet_names.lookup, by="fleet")
 
 
-  # if (!missing(scenario_order)) {
-  #   # Add on any scenarios not included in the scenario_order list
-  #   scenario_order = c(scenario_order, setdiff(scenario_labels, scenario_order))
-  #   # Reorder scenarios
-  #   data$scenario_labels <- factor(data$scenario_labels, levels = scenario_order)
-  # }
-
-
   p <- ggplot2::ggplot(data) +
-    ggplot2::theme_bw() +
-    ggplot2::geom_point(ggplot2::aes(x=year, y=fleet_names, size=size,colour=fleet_names)) + # coloured
-    ggplot2::geom_point(ggplot2::aes(x=year, y=fleet_names, size=size),shape = 1,colour="#9D9D9D", alpha = 0.3) + # outline
+    ggplot2::theme_bw()
+
+  if (hollow) {
+    p <- p +
+      ggplot2::geom_point(ggplot2::aes(x=year, y=fleet_names, size=size,colour=fleet_names), alpha = 0.01) + # coloured
+      ggplot2::geom_point(ggplot2::aes(x=year, y=fleet_names, size=size, colour=fleet_names),shape = 1) # outline
+  } else {
+    p <- p +
+      ggplot2::geom_point(ggplot2::aes(x=year, y=fleet_names, size=size,colour=fleet_names)) + # coloured
+      ggplot2::geom_point(ggplot2::aes(x=year, y=fleet_names, size=size), shape = 1,colour="#9D9D9D", alpha = 0.3)
+  }
+
+  p <- p +
     ggplot2::facet_wrap(~typename, ncol=1, scales='free_y') +
     ggplot2::scale_x_continuous(limits = xlim, breaks = xbreaks, labels = xlabels) +
     ggplot2::scale_y_discrete(limits=rev, position = "right") + # read y-axis top to bottom

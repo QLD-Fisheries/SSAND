@@ -7,7 +7,8 @@
 
 #' Plot to show age fits from conditional-age-at-length data
 #'
-#' @param data A data frame with year (int), bin (int), obs (num), exp (num), scenario (int), sex (int)
+#' @param data A data frame with year (int), bin (int), obs (num), exp (num), scenario (int), sex (int), fleet (int)
+#' @param fleet A numeric of fleet number to plot
 #' @param scenario A single scenario number to plot (numeric). Default is 1.
 #' @param colours A vector of colours used (character). First element is bar fill, then line colour, then point colour.
 #' @param line_width Width of lines.
@@ -24,26 +25,35 @@
 #'
 #' @examples
 #' data <- caal_agefitplot_prep_SS(ss_mle)
-#' caal_agefitplot(data, scenario=1,show_fits=FALSE)
-#' caal_agefitplot(data, scenario=1)
+#' caal_agefitplot(data, scenario=2,show_fits=FALSE)
+#' caal_agefitplot(data, scenario=2)
 caal_agefitplot <- function(data,
                             scenario = 1,
+                            fleet = 1,
                             colours = c("grey70","black","black"),
                             line_width = 1,
                             ncol = 3,
                             scales = 'free',
                             point_size = 1.5,
                             xlab = "Age (years)",
-                            ylab = "Sample size",
+                            ylab = "Proportion",
                             show_fits = TRUE) {
 
-  if (!show_fits) {
-    data <- data |>
-      dplyr::group_by(year) |>
-      dplyr::mutate(sum = sum(obs),
-             obs = obs/sum) |>
-      dplyr::ungroup()
-  }
+  fleet_val <- fleet
+  scenario_val <- scenario
+  data <- data |>
+    dplyr::filter(scenario == scenario_val) |>
+    dplyr::filter(fleet == fleet_val)
+
+  if (length(colours) == 1) { colours = c(colours, 'black', 'black')}
+
+  data <- data |>
+    dplyr::group_by(year) |>
+    dplyr::mutate(sum = sum(obs),
+                  obs = obs/sum,
+                  sum1 = sum(exp),
+                  exp = exp/sum1) |>
+    dplyr::ungroup()
 
   if (!show_fits & missing(ylab)) {ylab = "Proportion"}
 
@@ -57,13 +67,12 @@ caal_agefitplot <- function(data,
       ggplot2::geom_line(ggplot2::aes(x=bin,y=exp), colour=colours[2], linewidth=line_width) +
       ggplot2::geom_point(ggplot2::aes(x=bin,y=exp), colour=colours[3], size=point_size)
   }
+
   p <- p +
     ggplot2::facet_wrap(~year, scales=scales, ncol=ncol, dir="v") +
     ggplot2::theme_bw() +
-    ggplot2::scale_x_continuous(name=xlab)+
+    ggplot2::scale_x_continuous(name=xlab) +
     ggplot2::scale_y_continuous(name=ylab)
 
   return(p)
 }
-
-
