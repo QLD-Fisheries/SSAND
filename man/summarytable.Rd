@@ -10,8 +10,8 @@ summarytable(
   row_names = NULL,
   column_names = NULL,
   caption = "Stock status indicators",
-  caption_placement = "top",
-  align = NULL
+  align = NULL,
+  caption_placement = "top"
 )
 }
 \arguments{
@@ -25,9 +25,9 @@ summarytable(
 
 \item{caption}{Caption for table}
 
-\item{caption_placement}{Placement of table caption. Default is "top"}
-
 \item{align}{An optional vector of alignment for the table, input as a character string that is one character longer than the number of columns in the table. Default is centered.}
+
+\item{caption_placement}{Location of caption relative to table. Default is "top".}
 }
 \value{
 Code that can be used within a code chunk in a RMarkdown style document to produce a summary table

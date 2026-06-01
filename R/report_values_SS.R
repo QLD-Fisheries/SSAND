@@ -180,7 +180,6 @@ report_values_SS <- function(ss_mle,
     # Fishing mortality ----
     F_years <- (end_year-number_F_years):(end_year-1)
 
-
     f_summary_data <- ss_mcmc[[1]] |>
       dplyr::select(starts_with("F_")) |>
       dplyr::mutate(iteration=dplyr::row_number()) |>
@@ -207,10 +206,13 @@ report_values_SS <- function(ss_mle,
       quantile(0.5)
     data$F_summary_med <- round(f_summary_med[[1]],round_F_summary)
 
+    # change for later versions of r4ss
+    if(!"F_report_basis" %in% names(ss_mle[[1]])) {ss_mle[[1]]$F_report_basis <- ss_mle[[1]]$F_std_basis}
+
+
     if (
-      (!(is.null(ss_mle[[1]]$F_report_basis)) && ss_mle[[1]]$F_report_basis == "(F)/(Fmsy);_with_F=Exploit(bio)") ||  # The old variable name
-      (!(is.null(ss_mle[[1]]$F_std_basis))    && ss_mle[[1]]$F_std_basis    == "(F)/(Fmsy);_with_F=Exploit(bio)")
-    ) {
+      (!(is.null(ss_mle[[1]]$F_report_basis)) && ss_mle[[1]]$F_report_basis %in% c("(F)/(F_at_B60%);_with_F=Exploit(bio)","(F)/(Fmsy);_with_F=Exploit(bio)","(F)/(Fspr);_with_F=Exploit(bio)"))
+      ) {
       f_summary_risk <- f_summary_data |>
         dplyr::mutate(above = `F` > 1.0) |>
         dplyr::select(above) |>
@@ -219,8 +221,6 @@ report_values_SS <- function(ss_mle,
 
       f_summary_risk <- f_summary_risk / nrow(f_summary_data)
       data$F_summary_risk <- round(f_summary_risk*100)
-    } else {
-      warning("Skipping calculation of probability of F exceeding FMSY because F_report_basis was not set to 2 in the starter file.")
     }
 
 

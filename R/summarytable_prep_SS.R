@@ -33,51 +33,112 @@ summarytable_prep_SS <- function(ss_mle,
                                  credible_interval = 0.95,
                                  number_F_years = 5) {
 
-  if (check_scenarios(ss_mcmc,"SS","MCMC")=="single scenario"){ ss_mcmc <- list(ss_mcmc)}
+  if (missing(ss_mcmc)) {MCMC = FALSE} else {MCMC = TRUE}
 
+  if (MCMC) {if (check_scenarios(ss_mcmc,"SS","MCMC")=="single scenario"){ ss_mcmc <- list(ss_mcmc)}}
   if (check_scenarios(ss_mle,"SS","MLE")=="single scenario"){ ss_mle <- list(ss_mle) }
 
   if (missing(end_year)) {
     end_year <- ss_mle[[1]]$endyr+1
   }
 
-  data <- report_values_SS(ss_mle,ss_mcmc,
-                           credible_interval = credible_interval,
-                           number_F_years = number_F_years)
+  if (!MCMC) {
+    data <- report_values_SS(ss_mle,
+                             credible_interval = credible_interval,
+                             number_F_years = number_F_years)
 
-  indicator <- c(
-    "\\rowcolor{light-gray} Biomass ratio (relative to unfished)",
-    "\\rowcolor{white} \\hspace{5 mm}Range (95\\% credible interval)",
-    "\\rowcolor{white} \\hspace{5 mm}Probability below 20\\%",
-    "\\rowcolor{white} \\hspace{5 mm}Probability between 20\\% and 40\\%",
-    "\\rowcolor{white} \\hspace{5 mm}Probability between 40\\% and 60\\%",
-    "\\rowcolor{white} \\hspace{5 mm}Probability above 60\\%",
-    "\\rowcolor{light-gray} Fishing pressure ratio (relative to MSY)",
-    "\\rowcolor{white} \\hspace{5 mm}Range (95\\% credible interval)"
-  )
+    indicator <- c(
+      "\\rowcolor{light-gray} Biomass ratio (relative to unfished)",
+      "\\rowcolor{white} \\hspace{5 mm}Range (95\\% confidence interval)",
+      "\\rowcolor{light-gray} Fishing pressure ratio",
+      "\\rowcolor{white} \\hspace{5 mm}Range (95\\% confidence interval)"
+    )
 
-  value <- c(
-    "",
-    paste0(data$biomass_summary_lower,"--",data$biomass_summary_upper,"\\%"),
-    paste0(data$biomass_risk20,"\\%"),
-    paste0(data$biomass_risk20_40,"\\%"),
-    paste0(data$biomass_risk40_60,"\\%"),
-    paste0(data$biomass_risk60,"\\%"),
-    "",
-    paste0(data$F_summary_lower,"--",data$F_summary_upper)
-  )
+    value <- c(
+      paste0(data$biomass_summary,"\\%"),
+      paste0(data$biomass_summary_lower,"--",data$biomass_summary_upper,"\\%"),
+      paste0(data$F_summary_mean),
+      paste0(data$F_summary_lower,"--",data$F_summary_upper)
+    )
 
-  data <- data.frame(Indicator = indicator, Value = value)
+    newdata <- data.frame(Indicator = indicator, Value = value)
 
-  if (
-    (!(is.null(ss_mle[[1]]$F_report_basis)) && ss_mle[[1]]$F_report_basis == "(F)/(Fmsy);_with_F=Exploit(bio)") ||  # The old variable name
-    (!(is.null(ss_mle[[1]]$F_std_basis))    && ss_mle[[1]]$F_std_basis    == "(F)/(Fmsy);_with_F=Exploit(bio)")
-  ) {
-    data <- data |>
-      rbind(
-        data.frame(Indicator = "\\hspace{5 mm}Probability exceeds $F_{MSY}$", Value = paste0(data$F_summary_risk,"\\%"))
-      )
+
+    if(!"F_report_basis" %in% names(ss_mle[[1]])) {ss_mle[[1]]$F_report_basis <- ss_mle[[1]]$F_std_basis}
+
+    if (ss_mle[[1]]$F_report_basis == "(F)/(Fmsy);_with_F=Exploit(bio)") {
+      newdata$Indicator[3] <- "\\rowcolor{light-gray} Fishing pressure ratio (relative to $F_{MSY}$)"
+    }
+
+    if (ss_mle[[1]]$F_report_basis == "(F)/(F_at_B60%);_with_F=Exploit(bio)") {
+      newdata$Indicator[3] <- "\\rowcolor{light-gray} Fishing pressure ratio (relative to $F_{60}$)"
+    }
+
+    if (ss_mle[[1]]$F_report_basis == "(F)/(Fspr);_with_F=Exploit(bio)") {
+      newdata$Indicator[3] <- "\\rowcolor{light-gray} Fishing pressure ratio (relative to SPR)"
+    }
+
+  } else {
+    data <- report_values_SS(ss_mle,ss_mcmc,
+                             credible_interval = credible_interval,
+                             number_F_years = number_F_years)
+
+    indicator <- c(
+      "\\rowcolor{light-gray} Biomass ratio (relative to unfished)",
+      "\\rowcolor{white} \\hspace{5 mm}Range (95\\% credible interval)",
+      "\\rowcolor{white} \\hspace{5 mm}Median",
+      "\\rowcolor{white} \\hspace{5 mm}Probability below 20\\%",
+      "\\rowcolor{white} \\hspace{5 mm}Probability between 20\\% and 40\\%",
+      "\\rowcolor{white} \\hspace{5 mm}Probability between 40\\% and 60\\%",
+      "\\rowcolor{white} \\hspace{5 mm}Probability above 60\\%",
+      "\\rowcolor{light-gray} Fishing pressure ratio",
+      "\\rowcolor{white} \\hspace{5 mm}Range (95\\% credible interval)"
+    )
+
+    value <- c(
+      "",
+      paste0(data$biomass_summary_lower,"--",data$biomass_summary_upper,"\\%"),
+      paste0(data$biomass_median,"\\%"),
+      paste0(data$biomass_risk20,"\\%"),
+      paste0(data$biomass_risk20_40,"\\%"),
+      paste0(data$biomass_risk40_60,"\\%"),
+      paste0(data$biomass_risk60,"\\%"),
+      "",
+      paste0(data$F_summary_lower,"--",data$F_summary_upper)
+    )
+
+    newdata <- data.frame(Indicator = indicator, Value = value)
+
+
+    # change for later versions of r4ss
+    if(!"F_report_basis" %in% names(ss_mle[[1]])) {ss_mle[[1]]$F_report_basis <- ss_mle[[1]]$F_std_basis}
+
+    if (ss_mle[[1]]$F_report_basis == "(F)/(Fmsy);_with_F=Exploit(bio)") {
+      newdata <- newdata |>
+        rbind(
+          data.frame(Indicator = "\\hspace{5 mm}Probability exceeds $F_{MSY}$", Value = paste0(data$F_summary_risk,"\\%"))
+        )
+
+      newdata$Indicator[8] <- "\\rowcolor{light-gray} Fishing pressure ratio (relative to $F_{MSY}$)"
+    }
+
+    if (ss_mle[[1]]$F_report_basis == "(F)/(F_at_B60%);_with_F=Exploit(bio)") {
+      newdata <- newdata |>
+        rbind(
+          data.frame(Indicator = "\\hspace{5 mm}Probability exceeds $F_{B60}$", Value = paste0(data$F_summary_risk,"\\%"))
+        )
+      newdata$Indicator[8] <- "\\rowcolor{light-gray} Fishing pressure ratio (relative to $F_{60}$)"
+
+    }
+
+    if (ss_mle[[1]]$F_report_basis == "(F)/(Fspr);_with_F=Exploit(bio)") {
+      newdata <- newdata |>
+        rbind(
+          data.frame(Indicator = "\\hspace{5 mm}Probability exceeds $F_{SPR}$", Value = paste0(data$F_summary_risk,"\\%"))
+        )
+      newdata$Indicator[8] <- "\\rowcolor{light-gray} Fishing pressure ratio (relative to SPR)"
+
+    }
   }
-
-  return(data)
+  return(newdata)
 }
