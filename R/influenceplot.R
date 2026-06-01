@@ -103,14 +103,7 @@ influenceplot <- function(data,
 
     p <- p +
       ggplot2::geom_point(ggplot2::aes(x=year,y=cpue, colour=as.factor(model))) +
-      ggplot2::geom_line(ggplot2::aes(x=year,y=cpue, colour=as.factor(model))) +
-      ggplot2::scale_x_continuous(limits = xlim, breaks = xbreaks) +
-      ggplot2::scale_y_continuous(limits = ylim, breaks = ybreaks) +
-      ggplot2::xlab(xlab) +
-      ggplot2::ylab(ylab) +
-      ggplot2::theme_bw() +
-      ggplot2::theme(legend.position = legend_position,
-                     legend.title = ggplot2::element_blank())
+      ggplot2::geom_line(ggplot2::aes(x=year,y=cpue, colour=as.factor(model)))
   }
   if (step) {
 
@@ -143,12 +136,17 @@ influenceplot <- function(data,
         ggplot2::scale_shape_manual(name="Model", values=c(1,2)) +
         ggplot2::scale_colour_manual(name="Model", values=colours) +
         ggplot2::scale_fill_manual(name="Model", values=colours) +
-        ggplot2::scale_x_continuous(limits = xlim, breaks = xbreaks, labels=xbreaks) +
-        ggplot2::scale_y_continuous(limits = ylim, breaks = ybreaks, labels=ybreaks) +
-        ggplot2::theme_bw() +
-        ggplot2::theme(legend.position = legend_position,
-                       legend.title = ggplot2::element_blank()) +
         ggplot2::facet_wrap(~panel)
   }
+
+  p <- p +
+    ggplot2::scale_x_continuous(limits = xlim, breaks = xbreaks) +
+    ggplot2::scale_y_continuous(limits = ylim, breaks = ybreaks) +
+    ggplot2::xlab(xlab) +
+    ggplot2::ylab(ylab) +
+    ggplot2::theme_bw() +
+    ggplot2::theme(legend.position = legend_position,
+                   legend.title = ggplot2::element_blank())
+
   return(p)
 }
