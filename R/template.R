@@ -221,7 +221,7 @@ add_scenarios <- function(filename = paste0(getwd(),"/scenarios_appendix.txt"),
 
     if (model=="SS") {
       write("\\rowcolors{2}{white}{light-gray}", filename, append=TRUE)
-      write("<<table_mleXXX, results='asis', echo=FALSE>>=", filename, append=TRUE)
+      write("<<table_mleXXX>>=", filename, append=TRUE)
       write("parameters <- extract_SS_parameters(ss_mle)[2:4,]", filename, append=TRUE)
       write("data <- parametertable_prep_SS(ss_mle=ss_mle, parameters=parameters, scenario=XXX)", filename, append=TRUE)
       write("parametertable(data, label='tab:paramXXX_mle')", filename, append=TRUE)
@@ -230,7 +230,7 @@ add_scenarios <- function(filename = paste0(getwd(),"/scenarios_appendix.txt"),
 
       if (MCMC) {
         write("\\rowcolors{2}{white}{light-gray}", filename, append=TRUE)
-        write("<<table_mcmcXXX, results='asis', echo=FALSE>>=", filename, append=TRUE)
+        write("<<table_mcmcXXX>>=", filename, append=TRUE)
         write("parameters <- extract_SS_parameters(ss_mle)[2:4,]", filename, append=TRUE)
         write("data <- parametertable_prep_SS(ss_mcmc=ss_mcmc, parameters=parameters, scenario=XXX)", filename, append=TRUE)
         write("parametertable(data, label='tab:paramXXX_mcmc')", filename, append=TRUE)
@@ -239,7 +239,7 @@ add_scenarios <- function(filename = paste0(getwd(),"/scenarios_appendix.txt"),
       }
 
 
-      write("<<cpue_fitsXXX, echo=FALSE, fig.pos='H', fig.width=8,fig.height=4,out.width='0.85textwidth',fig.align='center',fig.cap='Scenario XXX: Model predictions (blue line) to standardised catch rates for SPECIES in the STOCK, based on maximum likelihood estimation---grey line and error bars represent the model input and associated uncertainty'>>=", filename, append=TRUE)
+      write("<<cpue_fitsXXX, fig.cap='Scenario XXX: Model predictions (blue line) to standardised catch rates for SPECIES in the STOCK, based on maximum likelihood estimation---grey line and error bars represent the model input and associated uncertainty'>>=", filename, append=TRUE)
       write("data <- cpueplot_prep_SS(ss_mle)", filename, append=TRUE)
       write("cpueplot(data, scenarios=XXX)", filename, append=TRUE)
       write("@", filename, append=TRUE)
@@ -248,14 +248,14 @@ add_scenarios <- function(filename = paste0(getwd(),"/scenarios_appendix.txt"),
 
 
       if (MCMC) {
-        write("<<recdevsXXX, echo=FALSE, fig.pos='H', fig.width=8,fig.height=4,out.width='0.85textwidth',fig.align='center',fig.cap='Scenario XXX: Recruitment deviations---whiskers represent 95% credible intervals, boxes represent 50% credible intervals, horizontal bars represent medians, and the points represent outliers'>>=", filename, append=TRUE)
+        write("<<recdevsXXX, fig.cap='Scenario XXX: Recruitment deviations---whiskers represent 95% credible intervals, boxes represent 50% credible intervals, horizontal bars represent medians, and the points represent outliers'>>=", filename, append=TRUE)
         write("data <- recdevplot_prep_SS(ss_mle,ss_mcmc)", filename, append=TRUE)
         write("recdevplot(data, scenarios=XXX)", filename, append=TRUE)
         write("@", filename, append=TRUE)
         write("\n", filename, append=TRUE)
 
       } else {
-        write("<<recdevsXXX, echo=FALSE, fig.pos='H', fig.width=8,fig.height=4,out.width='0.85textwidth',fig.align='center',fig.cap='Scenario XXX: Recruitment deviations'>>=", filename, append=TRUE)
+        write("<<recdevsXXX, fig.cap='Scenario XXX: Recruitment deviations'>>=", filename, append=TRUE)
         write("data <- recdevplot_prep_SS(ss_mle)", filename, append=TRUE)
         write("recdevplot(data, scenarios=XXX)", filename, append=TRUE)
         write("@", filename, append=TRUE)
@@ -263,7 +263,7 @@ add_scenarios <- function(filename = paste0(getwd(),"/scenarios_appendix.txt"),
       }
 
       if (length) {
-        write("<<length_outputsXXX, echo=FALSE, fig.pos='H', fig.width=8,fig.height=8,out.width='0.85textwidth',fig.align='center',fig.cap='Weight--length relationship for SPECIES in the STOCK'>>=", filename, append=TRUE)
+        write("<<length_outputsXXX,fig.cap='Weight--length relationship for SPECIES in the STOCK'>>=", filename, append=TRUE)
         write("data <- lengthplot_prep_SS(ss_mle, scenarios=XXX)", filename, append=TRUE)
         write("lengthplot(data)", filename, append=TRUE)
         write("@", filename, append=TRUE)
@@ -271,7 +271,7 @@ add_scenarios <- function(filename = paste0(getwd(),"/scenarios_appendix.txt"),
       }
 
       if (age) {
-        write("<<age_outputsXXX, echo=FALSE, fig.pos='H', fig.width=8,fig.height=8,out.width='0.85textwidth',fig.align='center',fig.cap='Scenario XXX: Fits to age structures, based on maximum likelihood estimation---grey bars represent input data and black line and points represent model fits'>>=", filename, append=TRUE)
+        write("<<age_outputsXXX, fig.cap='Scenario XXX: Fits to age structures, based on maximum likelihood estimation---grey bars represent input data and black line and points represent model fits'>>=", filename, append=TRUE)
         write("data <- caal_agefitplot_prep_SS(ss_mle, sex_code=1, scenarios=XXX)", filename, append=TRUE)
         write("caal_agefitplot(data,show_fits=FALSE, scenario=XXX)", filename, append=TRUE)
         write("# data <- ageplot_prep_SS(ss_mle)", filename, append=TRUE)
@@ -281,48 +281,48 @@ add_scenarios <- function(filename = paste0(getwd(),"/scenarios_appendix.txt"),
       }
 
       if (caal) {
-        write("<<caal_outputsXXX, echo=FALSE, fig.pos='H', fig.width=8,fig.height=8,out.width='0.85textwidth',fig.align='center',fig.cap='Scenario XXX: Pearson residuals for age-at-length compositions, based on maximum likelihood estimation---circle size represents the magnitude of the Pearson residual'>>=", filename, append=TRUE)
+        write("<<caal_outputsXXX, fig.cap='Scenario XXX: Pearson residuals for age-at-length compositions, based on maximum likelihood estimation---circle size represents the magnitude of the Pearson residual'>>=", filename, append=TRUE)
         write("data <- conditionalageatlengthplot_prep_SS(ss_mle,sex_code=1, scenarios=XXX)", filename, append=TRUE)
         write("conditionalageatlengthplot(data, show_fits=FALSE)", filename, append=TRUE)
         write("@", filename, append=TRUE)
         write("\n", filename, append=TRUE)
       }
 
-      write("<<biomass_mleXXX, echo=FALSE, fig.pos='H', fig.width=8,fig.height=4,out.width='0.85textwidth',fig.align='center',fig.cap='Scenario XXX: Predicted spawning biomass trajectory relative to unfished for SPECIES in the STOCK, based on maximum likelihood estimation'>>=", filename, append=TRUE)
+      write("<<biomass_mleXXX, fig.cap='Scenario XXX: Predicted spawning biomass trajectory relative to unfished for SPECIES in the STOCK, based on maximum likelihood estimation'>>=", filename, append=TRUE)
       write("data <- biomassplot_prep_SS(ss_mle)", filename, append=TRUE)
       write("biomassplot(data, mcmc_style = 'banded', show_median = c('annual_biomass','trajectory'), scenarios=XXX)", filename, append=TRUE)
       write("@", filename, append=TRUE)
       write("\n", filename, append=TRUE)
 
       if (MCMC) {
-        write("<<biomass_mcmcXXX, echo=FALSE, fig.pos='H', fig.width=8,fig.height=4,out.width='0.85textwidth',fig.align='center',fig.cap='Scenario XXX: Predicted spawning biomass trajectory relative to unfished for SPECIES in the STOCK, based on MCMC'>>=", filename, append=TRUE)
+        write("<<biomass_mcmcXXX, fig.cap='Scenario XXX: Predicted spawning biomass trajectory relative to unfished for SPECIES in the STOCK, based on MCMC'>>=", filename, append=TRUE)
         write("data <- biomassplot_prep_SS(ss_mle, ss_mcmc)", filename, append=TRUE)
         write("biomassplot(data, mcmc_style = 'banded', show_median = c('annual_biomass','trajectory'), scenarios=XXX)", filename, append=TRUE)
         write("@", filename, append=TRUE)
         write("\n", filename, append=TRUE)
       }
 
-      write("<<phaseXXX, echo=FALSE, fig.pos='H', fig.width=8,fig.height=8,out.width='0.85textwidth',fig.align='center',fig.cap='Scenario XXX: Stock status indicator trajectory for SPECIES in the STOCK, based on maximum likelihood estimation'>>=", filename, append=TRUE)
+      write("<<phaseXXX, fig.height=8, fig.cap='Scenario XXX: Stock status indicator trajectory for SPECIES in the STOCK, based on maximum likelihood estimation'>>=", filename, append=TRUE)
       write("data <- phaseplot_prep_SS(ss_mle)", filename, append=TRUE)
       write("phaseplot(data, scenarios=XXX)", filename, append=TRUE)
       write("@", filename, append=TRUE)
       write("\n", filename, append=TRUE)
 
-      write("<<yieldXXX, echo=FALSE, fig.pos='H', fig.width=8,fig.height=4,out.width='0.85textwidth',fig.align='center',fig.cap='Scenario XXX: Equilibrium dead catch curve for SPECIES in the STOCK, based on maximum likelihood estimation'>>=", filename, append=TRUE)
+      write("<<yieldXXX, fig.cap='Scenario XXX: Equilibrium dead catch curve for SPECIES in the STOCK, based on maximum likelihood estimation'>>=", filename, append=TRUE)
       write("data <- yieldplot_prep_SS(ss_mle)", filename, append=TRUE)
       write("yieldplot(data, show_msy_line=TRUE, scenarios=XXX)", filename, append=TRUE)
       write("@", filename, append=TRUE)
       write("\n", filename, append=TRUE)
 
       if (MCMC) {
-        write("<<pdfXXX, echo=FALSE, fig.pos='H', fig.width=8,fig.height=10,out.width='0.85textwidth',fig.align='center',fig.cap='Scenario XXX: Posterior density of MCMC iterations. \"Median\" line shows median parameter value for MCMC iterations  \"Optimised\" shows the parameter value found from maximum likelihood estimates.'>>=", filename, append=TRUE)
+        write("<<pdfXXX, fig.cap='Scenario XXX: Posterior density of MCMC iterations. \"Median\" line shows median parameter value for MCMC iterations  \"Optimised\" shows the parameter value found from maximum likelihood estimates.'>>=", filename, append=TRUE)
         write("parameters <- extract_SS_parameters(ss_mcmc)[c(2:10,449),]", filename, append=TRUE)
         write("data <- mcmc_posteriordensityplot_prep_SS(ss_mle, ss_mcmc, scenario = XXX, parameters)", filename, append=TRUE)
         write("mcmc_posteriordensityplot(data)", filename, append=TRUE)
         write("@", filename, append=TRUE)
         write("\n", filename, append=TRUE)
 
-        write("<<traceXXX, echo=FALSE, fig.pos='H', fig.width=8,fig.height=10,out.width='0.85textwidth',fig.align='center',fig.cap='Scenario XXX: Trace plot of MCMC iterations---\"Optimised\" shows the parameter value found from maximum likelihood estimates'>>=", filename, append=TRUE)
+        write("<<traceXXX, fig.cap='Scenario XXX: Trace plot of MCMC iterations---\"Optimised\" shows the parameter value found from maximum likelihood estimates'>>=", filename, append=TRUE)
         write("parameters <- extract_SS_parameters(ss_mcmc)[c(2:9),]", filename, append=TRUE)
         write("data <- mcmc_posteriordensityplot_prep_SS(ss_mle,", filename, append=TRUE)
         write("                                          ss_mcmc,", filename, append=TRUE)
@@ -333,7 +333,7 @@ add_scenarios <- function(filename = paste0(getwd(),"/scenarios_appendix.txt"),
         write("@", filename, append=TRUE)
         write("\n", filename, append=TRUE)
 
-        write("<<mcmc_correlation_XXX, echo=FALSE, fig.pos='H', fig.width=12,fig.height=12,out.width='0.85textwidth',fig.align='center',fig.cap='Scenario XXX: Correlation plot of MCMC iterations'>>=", filename, append=TRUE)
+        write("<<mcmc_correlation_XXX, fig.width=12, fig.height=12, fig.cap='Scenario XXX: Correlation plot of MCMC iterations'>>=", filename, append=TRUE)
         write("parameters <- extract_SS_parameters(ss_mcmc)[c(2:9),]", filename, append=TRUE)
         write("data <- correlationplot_prep_SS(ss_mle, ss_mcmc, scenario = XXX, parameters = parameters)", filename, append=TRUE)
         write("correlationplot(data)", filename, append=TRUE)
@@ -342,7 +342,7 @@ add_scenarios <- function(filename = paste0(getwd(),"/scenarios_appendix.txt"),
       }
 
       if (!MCMC) {
-        write("<<mcmc_correlation_XXX, echo=FALSE, fig.pos='H', fig.width=12,fig.height=12,out.width='0.85textwidth',fig.align='center',fig.cap='Scenario XXX: Correlation plot of MCMC iterations'>>=", filename, append=TRUE)
+        write("<<mcmc_correlation_XXX, fig.width=12, fig.height=12, fig.cap='Scenario XXX: Correlation plot of MCMC iterations'>>=", filename, append=TRUE)
         write("parameters <- extract_SS_parameters(ss_mle)[c(2,3,4,26),]", filename, append=TRUE)
         write("data <- correlationplot_prep_SS(ss_mle, scenario = 1, parameters = parameters)", filename, append=TRUE)
         write("correlationplot(data)", filename, append=TRUE)
@@ -353,7 +353,7 @@ add_scenarios <- function(filename = paste0(getwd(),"/scenarios_appendix.txt"),
 
     if (model=="DD") {
       write("\\rowcolors{2}{white}{light-gray}", filename, append=TRUE)
-      write("<<table_mleXXX, results='asis', echo=FALSE>>=", filename, append=TRUE)
+      write("<<table_mleXXX>>=", filename, append=TRUE)
       write("data <- parametertable_prep_DD(dd_mle=dd_mle, scenario=XXX)", filename, append=TRUE)
       write("parametertable(data, label='tab:paramXXX_mle')", filename, append=TRUE)
       write("@", filename, append=TRUE)
@@ -361,7 +361,7 @@ add_scenarios <- function(filename = paste0(getwd(),"/scenarios_appendix.txt"),
 
       if (MCMC) {
         write("\\rowcolors{2}{white}{light-gray}", filename, append=TRUE)
-        write("<<table_mcmcXXX, results='asis', echo=FALSE>>=", filename, append=TRUE)
+        write("<<table_mcmcXXX>>=", filename, append=TRUE)
         write("# dd_mcmc_ens <- mcmc_ensemble_DD(dd_mcmc,dd_sim,scenarios=c(1,2))$dd_mcmc", filename, append=TRUE)
         write("data <- parametertable_prep_DD(dd_mcmc=dd_mcmc, scenario=XXX)", filename, append=TRUE)
         write("parametertable(data, label='tab:paramXXX_mcmc')", filename, append=TRUE)
@@ -369,27 +369,27 @@ add_scenarios <- function(filename = paste0(getwd(),"/scenarios_appendix.txt"),
         write("\n", filename, append=TRUE)
       }
 
-      write("<<cpue_fitsXXX, echo=FALSE, fig.pos='H', fig.width=8,fig.height=4,out.width='0.85textwidth',fig.align='center',fig.cap='Scenario XXX: Model predictions (blue line) to standardised catch rates for SPECIES in the STOCK, based on maximum likelihood estimation---grey line and error bars represent the model input and associated uncertainty'>>=", filename, append=TRUE)
+      write("<<cpue_fitsXXX, fig.cap='Scenario XXX: Model predictions (blue line) to standardised catch rates for SPECIES in the STOCK, based on maximum likelihood estimation---grey line and error bars represent the model input and associated uncertainty'>>=", filename, append=TRUE)
       write("data <- cpueplot_prep_DD(dd_mle)", filename, append=TRUE)
       write("cpueplot(data, scenarios=XXX)", filename, append=TRUE)
       write("@", filename, append=TRUE)
       write("\n", filename, append=TRUE)
 
       if (MCMC) {
-        write("<<recdevsXXX, echo=FALSE, fig.pos='H', fig.width=8,fig.height=4,out.width='0.85textwidth',fig.align='center',fig.cap='Scenario XXX: Recruitment deviations---whiskers represent 95% credible intervals, boxes represent 50% credible intervals, horizontal bars represent medians, and the points represent outliers'>>=", filename, append=TRUE)
+        write("<<recdevsXXX, fig.cap='Scenario XXX: Recruitment deviations---whiskers represent 95% credible intervals, boxes represent 50% credible intervals, horizontal bars represent medians, and the points represent outliers'>>=", filename, append=TRUE)
         write("data <- recdevplot_prep_DD(dd_mle,dd_mcmc,dd_sim)", filename, append=TRUE)
         write("recdevplot(data, scenarios=XXX)", filename, append=TRUE)
         write("@", filename, append=TRUE)
         write("\n", filename, append=TRUE)
       } else {
-        write("<<recdevsXXX, echo=FALSE, fig.pos='H', fig.width=8,fig.height=4,out.width='0.85textwidth',fig.align='center',fig.cap='Scenario XXX: Recruitment deviations'>>=", filename, append=TRUE)
+        write("<<recdevsXXX, fig.cap='Scenario XXX: Recruitment deviations'>>=", filename, append=TRUE)
         write("data <- recdevplot_prep_DD(dd_mle)", filename, append=TRUE)
         write("recdevplot(data, scenarios=XXX)", filename, append=TRUE)
         write("@", filename, append=TRUE)
         write("\n", filename, append=TRUE)
       }
 
-      write("<<biomass_mleXXX, echo=FALSE, fig.pos='H', fig.width=8,fig.height=4,out.width='0.85textwidth',fig.align='center',fig.cap='Scenario XXX: Predicted spawning biomass trajectory relative to unfished for SPECIES in the STOCK, based on maximum likelihood estimation'>>=", filename, append=TRUE)
+      write("<<biomass_mleXXX, fig.cap='Scenario XXX: Predicted spawning biomass trajectory relative to unfished for SPECIES in the STOCK, based on maximum likelihood estimation'>>=", filename, append=TRUE)
       write("data <- biomassplot_prep_DD(dd_mle)", filename, append=TRUE)
       write("biomassplot(data, scenarios=XXX)", filename, append=TRUE)
       write("@", filename, append=TRUE)
@@ -403,32 +403,32 @@ add_scenarios <- function(filename = paste0(getwd(),"/scenarios_appendix.txt"),
         write("\n", filename, append=TRUE)
       }
 
-      write("<<phaseXXX, echo=FALSE, fig.pos='H', fig.width=8,fig.height=8,out.width='0.85textwidth',fig.align='center',fig.cap='Scenario XXX: Stock status indicator trajectory for SPECIES in the STOCK, based on maximum likelihood estimation'>>=", filename, append=TRUE)
+      write("<<phaseXXX, fig.width=8, fig.height=8, fig.cap='Scenario XXX: Stock status indicator trajectory for SPECIES in the STOCK, based on maximum likelihood estimation'>>=", filename, append=TRUE)
       write("data <- phaseplot_prep_DD(dd_mle)", filename, append=TRUE)
       write("phaseplot(data, scenarios=XXX)", filename, append=TRUE)
       write("@", filename, append=TRUE)
       write("\n", filename, append=TRUE)
 
-      write("<<yieldXXX, echo=FALSE, fig.pos='H', fig.width=8,fig.height=4,out.width='0.85textwidth',fig.align='center',fig.cap='Scenario XXX: Equilibrium dead catch curve for SPECIES in the STOCK, based on maximum likelihood estimation'>>=", filename, append=TRUE)
+      write("<<yieldXXX, fig.cap='Scenario XXX: Equilibrium dead catch curve for SPECIES in the STOCK, based on maximum likelihood estimation'>>=", filename, append=TRUE)
       write("data <- yieldplot_prep_DD(dd_mle)", filename, append=TRUE)
       write("yieldplot(data, show_msy_line=TRUE, scenarios=XXX)", filename, append=TRUE)
       write("@", filename, append=TRUE)
       write("\n", filename, append=TRUE)
 
       if (MCMC) {
-        write("<<pdfXXX, echo=FALSE, fig.pos='H', fig.width=8,fig.height=10,out.width='0.85textwidth',fig.align='center',fig.cap='Scenario XXX: Posterior density of MCMC iterations. \"Median\" line shows median parameter value for MCMC iterations  \"Optimised\" shows the parameter value found from maximum likelihood estimates.'>>=", filename, append=TRUE)
+        write("<<pdfXXX, fig.cap='Scenario XXX: Posterior density of MCMC iterations. \"Median\" line shows median parameter value for MCMC iterations  \"Optimised\" shows the parameter value found from maximum likelihood estimates.'>>=", filename, append=TRUE)
         write("data <- mcmc_posteriordensityplot_prep_DD(dd_mle, dd_mcmc, dd_sim, scenario = XXX)", filename, append=TRUE)
         write("mcmc_posteriordensityplot(data)", filename, append=TRUE)
         write("@", filename, append=TRUE)
         write("\n", filename, append=TRUE)
 
-        write("<<traceXXX, echo=FALSE, fig.pos='H', fig.width=8,fig.height=10,out.width='0.85textwidth',fig.align='center',fig.cap='Scenario XXX: Trace plot of MCMC iterations---\"Optimised\" shows the parameter value found from maximum likelihood estimates'>>=", filename, append=TRUE)
+        write("<<traceXXX, fig.cap='Scenario XXX: Trace plot of MCMC iterations---\"Optimised\" shows the parameter value found from maximum likelihood estimates'>>=", filename, append=TRUE)
         write("data <- mcmc_posteriordensityplot_prep_DD(dd_mle, dd_mcmc, dd_sim, scenario = XXX)", filename, append=TRUE)
         write("mcmc_traceplot(data)", filename, append=TRUE)
         write("@", filename, append=TRUE)
         write("\n", filename, append=TRUE)
 
-        write("<<mcmc_correlation_XXX, echo=FALSE, fig.pos='H', fig.width=12,fig.height=12,out.width='0.85textwidth',fig.align='center',fig.cap='Scenario XXX: Correlation plot of MCMC iterations'>>=", filename, append=TRUE)
+        write("<<mcmc_correlation_XXX, fig.width=12, fig.height=12, fig.cap='Scenario XXX: Correlation plot of MCMC iterations'>>=", filename, append=TRUE)
         write("# dd_sdr <- TMB::sdreport(dd_mle[[XXX]]$model)", filename, append=TRUE)
         write("# data <- correlationplot_prep_DD(dd_mle, dd_mcmc, dd_sim, scenario = XXX)", filename, append=TRUE)
         write("# correlationplot(data)", filename, append=TRUE)
@@ -437,7 +437,7 @@ add_scenarios <- function(filename = paste0(getwd(),"/scenarios_appendix.txt"),
       }
 
       if (!MCMC) {
-        write("<<mcmc_correlation_XXX, echo=FALSE, fig.pos='H', fig.width=12,fig.height=12,out.width='0.85textwidth',fig.align='center',fig.cap='Scenario XXX: Correlation plot of MCMC iterations'>>=", filename, append=TRUE)
+        write("<<mcmc_correlation_XXX, fig.width=12, fig.height=12, fig.cap='Scenario XXX: Correlation plot of MCMC iterations'>>=", filename, append=TRUE)
         write("# data <- correlationplot_prep_DD(dd_mle, scenario = 1)", filename, append=TRUE)
         write("# correlationplot(data)", filename, append=TRUE)
         write("@", filename, append=TRUE)

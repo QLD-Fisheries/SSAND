@@ -7,17 +7,45 @@
 \def\DAFfooter{Stock assessment of STOCK SPECIES \the\year}
 \bibliography{bib/references}
 
-% Copyright 2024 Fisheries Queensland
+% Copyright 2026 Fisheries Queensland
 
 % This file is part of SSAND.
 % SSAND is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
 % SSAND is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 % You should have received a copy of the GNU General Public License along with SSAND. If not, see <https://www.gnu.org/licenses/>.
 
+% \usepackage{draftwatermark}
+% \SetWatermarkText{DRAFT}
+% \SetWatermarkScale{1}
+
+% To export as a Word document:
+% 1. Ensure no loose open curly brackets (e.g. {\rowcolours})
+% 2. Ensure knitr::opts_chunk$set(dev = "png", dpi = 300) (PDF doesn't work in Word)
+% 3. In Terminal: pandoc -s report.tex -o report.docx
+
+\DeclareGraphicsExtensions{.png,.PNG,.jpg,.JPG}  % reduce filesize
+
+<<png, include=FALSE, warning=FALSE, message=FALSE>>=
+# knitr::opts_chunk$set(dev = "png", dpi = 300)
+# Uncomment the line above to render all plots as png, not PDF, to save file size.
+# Note that in doing so, any plots that are loaded from other files as PDFs will break.
+@
 
 <<init, include=FALSE>>=
 library(SSAND)
 library(xtable)
+
+knitr::opts_chunk$set(
+  echo=FALSE,
+  message=FALSE,
+  warning=FALSE,
+  fig.pos='H',
+  fig.width=10,
+  fig.height=5,
+  out.width='\\textwidth',
+  fig.align='center',
+  results='asis'
+)
 
 %begin_SS
 # Load model objects here (e.g. ss_mle and ss_mcmc)
@@ -136,13 +164,13 @@ The assessment used an age-structured model with an annual time step, fitted to 
 Over the last five years, \Sexpr{x$end_year_catch-5} to \Sexpr{x$end_year_catch}, total retained catch averaged \Sexpr{x$catch_5year_average}~tonnes per year in the STOCK (Figure \ref{fig:summary_catch}). Of the overall harvest, \Sexpr{x$catch_5year_average_percent_Commercial}\% was taken by the commercial sector and \Sexpr{x$catch_5year_average_percent_Recreational}\% by the recreational sector.
 
 %begin_SS
-<<summary_catch, echo=FALSE, fig.pos='H', fig.width=8,fig.height=4,out.width='0.85\\textwidth',fig.align='center',fig.cap=paste0('Estimated retained catch between ', x$start_year_catch, ' and ', x$end_year_catch, ' for SPECIES in the STOCK')>>=
+<<summary_catch, fig.cap=paste0('Estimated retained catch between ', x$start_year_catch, ' and ', x$end_year_catch, ' for SPECIES in the STOCK')>>=
 data <- catchplot_prep_SS(ss_mle)
 catchplot(data, fleet_names = "Commercial", scenarios = 1)
 @
 %end_SS
 %begin_DD
-<<summary_catch, echo=FALSE, fig.pos='H', fig.width=8,fig.height=4,out.width='0.85\\textwidth',fig.align='center',fig.cap=paste0('Estimated retained catch between ', x$start_year_catch, ' and ', x$end_year_catch, ' for SPECIES in the STOCK')>>=
+<<summary_catch, fig.cap=paste0('Estimated retained catch between ', x$start_year_catch, ' and ', x$end_year_catch, ' for SPECIES in the STOCK')>>=
 data <- catchplot_prep_DD(dd_mle)
 catchplot(data, fleet_names = "Commercial", scenarios = 1)
 @
@@ -151,7 +179,7 @@ catchplot(data, fleet_names = "Commercial", scenarios = 1)
 The commercial catch rates were standardised to estimate an index of abundance of SPECIES through time (Figure \ref{fig:summary_cpue}). The unit of standardisation was kilograms of SPECIES per fisher per day, and included an adjustment for targeting. The catch rate standardisation model included terms for year, month, location, net mesh size, net length and fisher. Several different methods of spatial weighting were considered when constructing the final index.
 
 %begin_SS
-<<summary_cpue, echo=FALSE, fig.pos='H', fig.width=8,fig.height=4,out.width='0.85\\textwidth',fig.align='center',fig.cap='Annual standardised catch rates for SPECIES in the STOCK'>>=
+<<summary_cpue, fig.align='center',fig.cap='Annual standardised catch rates for SPECIES in the STOCK'>>=
 data <- cpueplot_prep_SS(ss_mle, scenarios=1)
 cpueplot(data,
          fleets=1,
@@ -164,7 +192,7 @@ cpueplot(data,
 %end_SS
 
 %begin_DD
-<<summary_cpue, echo=FALSE, fig.pos='H', fig.width=8,fig.height=4,out.width='0.85\\textwidth',fig.align='center',fig.cap='Annual standardised catch rates for SPECIES in the STOCK'>>=
+<<summary_cpue, fig.cap='Annual standardised catch rates for SPECIES in the STOCK'>>=
 data <- cpueplot_prep_DD(dd_mle, scenarios=1)
 cpueplot(data,
          fleets=1,
@@ -176,28 +204,28 @@ cpueplot(data,
 @
 %end_DD
 
-Several scenarios were run to explore different settings of XXX. From these exploratory scenarios a final ensemble of X scenarios were chosen for inclusion in summary reporting. This ensemble indicates that the biomass ratio at the beginning of \Sexpr{x$end_year} was between \Sexpr{x$biomass_summary_lower}\% and \Sexpr{x$biomass_summary_upper}\% of unfished levels (95\% credible interval). We also report the probability of the 2023 biomass ratio falling into each of the following four biomass ratio categories: below 20\%, between 20\% and 40\%, between 40\% and 60\%, and above 60\% (Table~\ref{tab:table_summary}; Figures~\ref{fig:summary_biomass} and \ref{fig:summary_pdf}).
+Several scenarios were run to explore different settings of XXX as described in Table~\ref{tab:summary}. From these exploratory scenarios a final ensemble of X scenarios were chosen for inclusion in summary reporting. This ensemble indicates that the biomass ratio at the beginning of \Sexpr{x$end_year} was between \Sexpr{x$biomass_summary_lower}\% and \Sexpr{x$biomass_summary_upper}\% of unfished levels (95\% credible interval). We also report the probability of the 2023 biomass ratio falling into each of the following four biomass ratio categories: below 20\%, between 20\% and 40\%, between 40\% and 60\%, and above 60\% (Table~\ref{tab:summary}; Figures~\ref{fig:summary_biomass} and \ref{fig:summary_pdf}).
 
 %begin_SS
 %begin_MLE
-<<summary_biomass, echo=FALSE, fig.pos='H', fig.width=8,fig.height=4,out.width='0.85\\textwidth',fig.align='center',fig.cap=paste0('Probability distribution of the biomass ratio at the beginning of ',x$end_year, ' across the full ensemble of scenarios with the credible interval and probability of biomass falling into the four categories indicated')>>=
+<<summary_biomass, fig.cap=paste0('Probability distribution of the biomass ratio at the beginning of ',x$end_year, ' across the full ensemble of scenarios with the credible interval and probability of biomass falling into the four categories indicated')>>=
 data <- biomassplot_prep_SS(ss_mle)
 biomassplot(data, scenarios=1)
 @
 %end_MLE
 
 %begin_MCMC
-<<summary_biomass, echo=FALSE, fig.pos='H', fig.width=8,fig.height=4,out.width='0.85\\textwidth',fig.align='center',fig.cap=paste0('Probability distribution of the biomass ratio at the beginning of ',x$end_year, ' across the full ensemble of scenarios with the credible interval and probability of biomass falling into the four categories indicated')>>=
+<<summary_biomass, fig.cap=paste0('Probability distribution of the biomass ratio at the beginning of ',x$end_year, ' across the full ensemble of scenarios with the credible interval and probability of biomass falling into the four categories indicated')>>=
 data <- biomassplot_prep_SS(ss_mle, ss_mcmc_ens)
 biomassplot(data, mcmc_style = "banded", show_median = c("none"))
 @
 
-<<summary_pdf, echo=FALSE, fig.pos='H', fig.width=8,fig.height=4,out.width='0.85\\textwidth',fig.align='center',fig.cap=paste0('Probability distribution of the biomass ratio at the beginning of ',x$end_year, ' across the full ensemble of scenarios with the credible interval and probability of biomass falling into the four categories indicated')>>=
+<<summary_pdf, fig.cap=paste0('Probability distribution of the biomass ratio at the beginning of ',x$end_year, ' across the full ensemble of scenarios with the credible interval and probability of biomass falling into the four categories indicated')>>=
 data <- mcmc_finalbiomassposterior_prep_SS(ss_mle,ss_mcmc_ens)
 mcmc_finalbiomassposteriorplot(data)
 @
 
-<<table_summary, results='asis', echo=FALSE>>=
+<<table_summary>>=
 data <- summarytable_prep_SS(ss_mle,ss_mcmc_ens)
 summarytable(data, label="tab:summary",caption = "Stock status indicators for SPECIES in the STOCK")
 @
@@ -207,24 +235,24 @@ summarytable(data, label="tab:summary",caption = "Stock status indicators for SP
 
 %begin_DD
 %begin_MLE
-<<summary_biomass, echo=FALSE, fig.pos='H', fig.width=8,fig.height=4,out.width='0.85\\textwidth',fig.align='center',fig.cap=paste0('Probability distribution of the biomass ratio at the beginning of ',x$end_year, ' across the full ensemble of scenarios with the credible interval and probability of biomass falling into the four categories indicated')>>=
+<<summary_biomass, fig.cap=paste0('Probability distribution of the biomass ratio at the beginning of ',x$end_year, ' across the full ensemble of scenarios with the credible interval and probability of biomass falling into the four categories indicated')>>=
 data <- biomassplot_prep_DD(dd_mle)
 biomassplot(data, scenarios=1)
 @
 %end_MLE
 
 %begin_MCMC
-<<summary_biomass, echo=FALSE, fig.pos='H', fig.width=8,fig.height=4,out.width='0.85\\textwidth',fig.align='center',fig.cap=paste0('Probability distribution of the biomass ratio at the beginning of ',x$end_year, ' across the full ensemble of scenarios with the credible interval and probability of biomass falling into the four categories indicated')>>=
+<<summary_biomass, fig.cap=paste0('Probability distribution of the biomass ratio at the beginning of ',x$end_year, ' across the full ensemble of scenarios with the credible interval and probability of biomass falling into the four categories indicated')>>=
 data <- biomassplot_prep_DD(dd_mle, dd_mcmc_ens, dd_sim_ens)
 biomassplot(data, mcmc_style = "banded", show_median = c("none"))
 @
 
-<<summary_pdf, echo=FALSE, fig.pos='H', fig.width=8,fig.height=4,out.width='0.85\\textwidth',fig.align='center',fig.cap=paste0('Probability distribution of the biomass ratio at the beginning of ',x$end_year, ' across the full ensemble of scenarios with the credible interval and probability of biomass falling into the four categories indicated')>>=
+<<summary_pdf, fig.cap=paste0('Probability distribution of the biomass ratio at the beginning of ',x$end_year, ' across the full ensemble of scenarios with the credible interval and probability of biomass falling into the four categories indicated')>>=
 data <- mcmc_finalbiomassposterior_prep_DD(dd_mle,dd_mcmc_ens, dd_sim_ens)
 mcmc_finalbiomassposteriorplot(data)
 @
 
-<<table_summary, results='asis', echo=FALSE>>=
+<<table_summary>>=
 data <- summarytable_prep_DD(dd_mle,dd_mcmc_ens, dd_sim_ens)
 summarytable(data, label="tab:summary",caption = "Stock status indicators for SPECIES in the STOCK")
 @
@@ -334,7 +362,7 @@ Commercial logbook & YEAR--YEAR & Compulsory commercial logbook database (CFISH)
 
 \section{Retained catch estimates}
 
-<<catch_data_sources, echo=FALSE, fig.pos='H', fig.width=12,fig.height=4,out.width='0.85\\textwidth',fig.align='center',fig.cap='Overview of the methods used to reconstruct the history of SPECIES retained catch'>>=
+<<catch_data_sources, fig.cap='Overview of the methods used to reconstruct the history of SPECIES retained catch'>>=
 data <- data.frame(c('Queensland commercial'  , 'Hindcast (linear)', 1958, 1989, 'C', 1),
                    c('Queensland commercial'  , 'Logbook records'  , 1989, 2021, 'B', 1),
                    c('Queensland charter'     , 'Hindcast (linear)', 1958, 1995, 'C', 1),
@@ -458,13 +486,13 @@ X model runs were undertaken to determine the model's sensitivity to different p
 Model inputs are described for STOCK SPECIES. Model outputs in this section relate to Scenario X as a reference scenario (as defined in Table~\ref{tab:sensitivity}). Results from all scenarios are presented in Appendix~\ref{sec:appdetailedoutputs}.
 
 %begin_SS
-<<dataplot, echo=FALSE, fig.pos='H', fig.width=8,fig.height=6,out.width='0.85\\textwidth',fig.align='center',fig.cap='Data presence by year for each category of data type for SPECIES in the STOCK'>>=
+<<dataplot, fig.cap='Data presence by year for each category of data type for SPECIES in the STOCK'>>=
 data <- dataplot_prep_SS(ss_mle)
 dataplot(data)
 @
 %end_SS
 %begin_DD
-<<dataplot, echo=FALSE, fig.pos='H', fig.width=8,fig.height=6,out.width='0.85\\textwidth',fig.align='center',fig.cap='Data presence by year for each category of data type for SPECIES in the STOCK'>>=
+<<dataplot, fig.cap='Data presence by year for each category of data type for SPECIES in the STOCK'>>=
 data <- dataplot_prep_DD(dd_mle)
 dataplot(data)
 @
@@ -472,13 +500,13 @@ dataplot(data)
 
 \subsection{Retained catch estimates}
 %begin_SS
-<<catch_results, echo=FALSE, fig.pos='H', fig.width=8,fig.height=4,out.width='0.85\\textwidth',fig.align='center',fig.cap=paste0('Estimated retained catch by sector between ', x$start_year_catch, ' and ', x$end_year_catch)>>=
+<<catch_results, fig.cap=paste0('Estimated retained catch by sector between ', x$start_year_catch, ' and ', x$end_year_catch)>>=
 data <- catchplot_prep_SS(ss_mle)
 catchplot(data, fleet_names = "Commercial", scenarios=1)
 @
 %end_SS
 %begin_DD
-<<catch_results, echo=FALSE, fig.pos='H', fig.width=8,fig.height=4,out.width='0.85\\textwidth',fig.align='center',fig.cap=paste0('Estimated retained catch by sector between ', x$start_year_catch, ' and ', x$end_year_catch)>>=
+<<catch_results, fig.cap=paste0('Estimated retained catch by sector between ', x$start_year_catch, ' and ', x$end_year_catch)>>=
 data <- catchplot_prep_DD(dd_mle)
 catchplot(data, fleet_names = "Commercial", scenarios=1)
 @
@@ -486,13 +514,13 @@ catchplot(data, fleet_names = "Commercial", scenarios=1)
 
 \subsection{Standardised indices of abundance}
 %begin_SS
-<<cpue_results, echo=FALSE, fig.pos='H', fig.width=8,fig.height=4,out.width='0.85\\textwidth',fig.align='center',fig.cap='Annual standardised catch rates for SPECIES in the STOCK'>>=
+<<cpue_results, fig.cap='Annual standardised catch rates for SPECIES in the STOCK'>>=
 data <- cpueplot_prep_SS(ss_mle, scenarios=1)
 cpueplot(data)
 @
 %end_SS
 %begin_DD
-<<cpue_results, echo=FALSE, fig.pos='H', fig.width=8,fig.height=4,out.width='0.85\\textwidth',fig.align='center',fig.cap='Annual standardised catch rates for SPECIES in the STOCK'>>=
+<<cpue_results, fig.cap='Annual standardised catch rates for SPECIES in the STOCK'>>=
 data <- cpueplot_prep_DD(dd_mle, scenarios=1)
 cpueplot(data)
 @
@@ -500,7 +528,7 @@ cpueplot(data)
 
 % Consider using SSAND::map() to produce a heat map of specific grids
 
-<<cpue_map, echo=FALSE, fig.pos='H', fig.width=8,fig.height=4,out.width='0.85\\textwidth',fig.align='center',fig.cap='Map of grids included in catch rate analysis'>>=
+<<cpue_map, fig.cap='Map of grids included in catch rate analysis'>>=
 # heat_map <- data.frame(grid = c("E4", "Z8", "A33", "G29", "C19",
 #                                 "A32", "Y37", "T12", "S9", "F40",
 #                                 "J8", "J12", "Z40", "M5", "N23"),
@@ -513,7 +541,7 @@ cpueplot(data)
 %begin_SS
 %begin_discard
 \subsection{Discards}
-<<discard_input, echo=FALSE, fig.pos='H', fig.width=8,fig.height=8,out.width='0.85\\textwidth',fig.align='center',fig.cap='Annual discards of SPECIES'>>=
+<<discard_input, fig.cap='Annual discards of SPECIES'>>=
 data <- discardplot_prep_SS(ss_mle)
 discardplot(data, scenarios = 1)
 @
@@ -523,7 +551,7 @@ discardplot(data, scenarios = 1)
 %begin_SS
 %begin_length
 \subsection{Length composition}
-<<length_input, echo=FALSE, fig.pos='H', fig.width=8,fig.height=8,out.width='0.85\\textwidth',fig.align='center',fig.cap='Annual length compositions of SPECIES'>>=
+<<length_input, fig.cap='Annual length compositions of SPECIES'>>=
 data <- lengthplot_prep_SS(ss_mle)
 lengthplot(data, show_fits=FALSE)
 @
@@ -535,7 +563,7 @@ lengthplot(data, show_fits=FALSE)
 \subsection{Age composition} \label{sec:agecomp}
 Figure~\ref{fig:age_input} show the age structures of the population. Age data were input to the model through the conditional age-at-length data sets.
 
-<<age_input, echo=FALSE, fig.pos='H', fig.width=8,fig.height=8,out.width='0.85\\textwidth',fig.align='center',fig.cap='Annual age compositions of SPECIES'>>=
+<<age_input, fig.cap='Annual age compositions of SPECIES'>>=
 data <- caal_agefitplot_prep_SS(ss_mle)
 caal_agefitplot(data, scenario=1, show_fits=FALSE)
 
@@ -556,7 +584,7 @@ Parameter estimates across the ensemble (see Table~\ref{tab:sensitivity}) are li
 %begin_SS
 %begin_MLE
 \rowcolors{2}{white}{light-gray}
-<<table_mcmc1, results='asis', echo=FALSE>>=
+<<table_mcmc1>>=
 parameters <- extract_SS_parameters(ss_mle)[2:4,]
 data <- parametertable_prep_SS(ss_mle=ss_mle, parameters=parameters, scenario=1)
 parametertable(data, label="tab:param")
@@ -564,7 +592,7 @@ parametertable(data, label="tab:param")
 %end_MLE
 %begin_MCMC
 \rowcolors{2}{white}{light-gray}
-<<table_parm, results='asis', echo=FALSE>>=
+<<table_parm>>=
 parameters <- extract_SS_parameters(ss_mle)[2:4,]
 data <- parametertable_prep_SS(ss_mcmc=ss_mcmc_ens, parameters=parameters, scenario=1)
 parametertable(data,
@@ -579,14 +607,14 @@ parametertable(data,
 %begin_DD
 %begin_MLE
 \rowcolors{2}{white}{light-gray}
-<<table_parm, results='asis', echo=FALSE>>=
+<<table_parm>>=
 data <- parametertable_prep_DD(dd_mle=dd_mle)
 parametertable(data, label="tab:param")
 @
 %end_MLE
 %begin_MCMC
 \rowcolors{2}{white}{light-gray}
-<<table_parm, results='asis', echo=FALSE>>=
+<<table_parm>>=
 # dd_mcmc_ens <- mcmc_ensemble_DD(dd_mcmc,dd_sim,scenarios=c(1,2))$dd_mcmc
 data <- parametertable_prep_DD(dd_mcmc=dd_mcmc_ens)
 parametertable(data, label="tab:param",
@@ -611,7 +639,7 @@ Parameters for length-based selectivity to fishing were estimated within the mod
 % The retention function for whether fishers retain the fish that they catch was fixed to a length of 50\% retention equal to the minimum legal size, with a small amount of variation about this length.  The only discards were assumed to be fish that were selected but not retained because fishers considered them to be smaller than the MLS.
 
 %begin_SS
-<<selectivity, echo=FALSE, fig.pos='H', fig.width=8,fig.height=4,out.width='0.85\\textwidth',fig.align='center',fig.cap=paste0('Model estimated length-based selectivity in ', x$end_year, ' for the representative MLE model---the dashed line shows the current minimum legal size')>>=
+<<selectivity, fig.cap=paste0('Model estimated length-based selectivity in ', x$end_year, ' for the representative MLE model---the dashed line shows the current minimum legal size')>>=
 data <- selectivityplot_prep_SS(ss_mle)
 selectivityplot(data, selectivity_type = "Selectivity (length)", MLS=60, scenarios = 1)
 @
@@ -624,13 +652,13 @@ Parameters for the von Bertalanffy growth curve, including standard deviations a
 The resulting curve, fitted inside the model, shows a high level of variation in the lengths of individual fish at a given age (Figure~\ref{fig:growth}). This variation may be partly due to fluctuation in annual environmental conditions  and food availability.
 
 %begin_SS
-<<growth, echo=FALSE, fig.pos='H', fig.width=8,fig.height=4,out.width='0.85\\textwidth',fig.align='center',fig.cap='Estimated growth of SPECIES (95\\% confidence intervals) for the representative MLE model (scenario X)'>>=
+<<growth, fig.cap='Estimated growth of SPECIES (95\\% confidence intervals) for the representative MLE model (scenario X)'>>=
 data <- growthplot_prep_SS(ss_mle)
 growthplot(data, scenarios = 1)
 @
 %end_SS
 %begin_DD
-<<growth, echo=FALSE, fig.pos='H', fig.width=8,fig.height=4,out.width='0.85\\textwidth',fig.align='center',fig.cap='Estimated growth of SPECIES (95\\% confidence intervals) for the representative MLE model (scenario X)'>>=
+<<growth, fig.cap='Estimated growth of SPECIES (95\\% confidence intervals) for the representative MLE model (scenario X)'>>=
 data <- growthplot_prep_DD(dd_mle)
 growthplot(data, scenarios = 1)
 @
@@ -642,12 +670,12 @@ The time series of estimated spawning biomass ratio from all the scenarios liste
 
 %begin_SS
 %begin_MLE
-<<results_biomass, echo=FALSE, fig.pos='H', fig.width=8,fig.height=4,out.width='0.85\\textwidth',fig.align='center',fig.cap='Predicted spawning biomass trajectory relative to unfished for SPECIES in the STOCK, from the base case scenario'>>=
+<<results_biomass, fig.cap='Predicted spawning biomass trajectory relative to unfished for SPECIES in the STOCK, from the base case scenario'>>=
 data <- biomassplot_prep_SS(ss_mle)
 biomassplot(data, scenarios =1)
 @
 
-<<results_spaghetti, echo=FALSE, fig.pos='H', fig.width=8,fig.height=4,out.width='0.85\\textwidth',fig.align='center',fig.cap=paste0('Estimated spawning biomass trajectory relative to unfished levels for SPECIES in the STOCK from ', x$start_year_catch, ' to ', x$end_year, ' for all scenarios')>>=
+<<results_spaghetti, fig.cap=paste0('Estimated spawning biomass trajectory relative to unfished levels for SPECIES in the STOCK from ', x$start_year_catch, ' to ', x$end_year, ' for all scenarios')>>=
 data <- spaghettiplot_prep_SS(ss_mle)
 # spaghettiplot(data)
 # spaghettiplot(data, template = "greyscale", line_width = 0.5)
@@ -661,17 +689,17 @@ spaghettiplot(data,
 @
 %end_MLE
 %begin_MCMC
-<<results_biomass, echo=FALSE, fig.pos='H', fig.width=8,fig.height=4,out.width='0.85\\textwidth',fig.align='center',fig.cap='Predicted spawning biomass trajectory relative to unfished for SPECIES in the STOCK, from MCMC ensemble scenarios'>>=
+<<results_biomass, fig.cap='Predicted spawning biomass trajectory relative to unfished for SPECIES in the STOCK, from MCMC ensemble scenarios'>>=
 data <- biomassplot_prep_SS(ss_mle, ss_mcmc_ens)
 biomassplot(data, mcmc_style = "banded", show_median = c("none"))
 @
 
-<<results_pdf, echo=FALSE, fig.pos='H', fig.width=8,fig.height=4,out.width='0.85\\textwidth',fig.align='center',fig.cap=paste0('Probability distribution of the biomass ratio at the beginning of ',x$end_year, ' across the full ensemble of scenarios with the credible interval and probability of biomass falling into the four categories indicated')>>=
+<<results_pdf, fig.cap=paste0('Probability distribution of the biomass ratio at the beginning of ',x$end_year, ' across the full ensemble of scenarios with the credible interval and probability of biomass falling into the four categories indicated')>>=
 data <- mcmc_finalbiomassposterior_prep_SS(ss_mle,ss_mcmc_ens)
 mcmc_finalbiomassposteriorplot(data)
 @
 
-<<results_spaghetti, echo=FALSE, fig.pos='H', fig.width=8,fig.height=4,out.width='0.85\\textwidth',fig.align='center',fig.cap=paste0('Estimated spawning biomass trajectory relative to unfished levels for SPECIES in the STOCK from ', x$start_year_catch, ' to ', x$end_year, ' for all scenarios. The upper panel displays the \"MCMC median\" (i.e. iteration that produced the median value for biomass at the beginning of 2023) and the lower panel is the optimised maximum likelihood estimate')>>=
+<<results_spaghetti, fig.cap=paste0('Estimated spawning biomass trajectory relative to unfished levels for SPECIES in the STOCK from ', x$start_year_catch, ' to ', x$end_year, ' for all scenarios. The upper panel displays the \"MCMC median\" (i.e. iteration that produced the median value for biomass at the beginning of', x$end_year,') and the lower panel is the optimised maximum likelihood estimate')>>=
 
 data <- spaghettiplot_prep_SS(ss_mle, ss_mcmc)
 # spaghettiplot(data)
@@ -685,14 +713,14 @@ spaghettiplot(data,
               colours = fq_palette("alisecolours")[1:2])
 @
 
-<<table_summary2, results='asis', echo=FALSE>>=
+<<table_summary2>>=
 data <- summarytable_prep_SS(ss_mle,ss_mcmc_ens)
 summarytable(data, label="tab:summary2",
              caption = "Stock status indicators for SPECIES in the STOCK")
 @
 
 \rowcolors{2}{white}{light-gray}
-<<table_biomass, results='asis', echo=FALSE>>=
+<<table_biomass>>=
 data <- biomasstable_prep_SS(ss_mle,ss_mcmc)
 biomasstable(data, label="tab:biomass")
 @
@@ -701,12 +729,12 @@ biomasstable(data, label="tab:biomass")
 
 %begin_DD
 %begin_MLE
-<<results_biomass, echo=FALSE, fig.pos='H', fig.width=8,fig.height=4,out.width='0.85\\textwidth',fig.align='center',fig.cap='Predicted spawning biomass trajectory relative to unfished for SPECIES in the STOCK, from the base case scenario'>>=
+<<results_biomass, fig.cap='Predicted spawning biomass trajectory relative to unfished for SPECIES in the STOCK, from the base case scenario'>>=
 data <- biomassplot_prep_DD(dd_mle)
 biomassplot(data, scenarios =1)
 @
 
-<<results_spaghetti, echo=FALSE, fig.pos='H', fig.width=8,fig.height=4,out.width='0.85\\textwidth',fig.align='center',fig.cap=paste0('Estimated spawning biomass trajectory relative to unfished levels for SPECIES in the STOCK from ', x$start_year_catch, ' to ', x$end_year, ' for all scenarios')>>=
+<<results_spaghetti, fig.cap=paste0('Estimated spawning biomass trajectory relative to unfished levels for SPECIES in the STOCK from ', x$start_year_catch, ' to ', x$end_year, ' for all scenarios')>>=
 data <- spaghettiplot_prep_DD(dd_mle)
 # spaghettiplot(data)
 # spaghettiplot(data, template = "greyscale", line_width = 0.5)
@@ -721,17 +749,17 @@ spaghettiplot(data,
 
 %end_MLE
 %begin_MCMC
-<<results_biomass, echo=FALSE, fig.pos='H', fig.width=8,fig.height=4,out.width='0.85\\textwidth',fig.align='center',fig.cap='Predicted spawning biomass trajectory relative to unfished for SPECIES in the STOCK, from MCMC ensemble scenarios'>>=
+<<results_biomass, fig.cap='Predicted spawning biomass trajectory relative to unfished for SPECIES in the STOCK, from MCMC ensemble scenarios'>>=
 data <- biomassplot_prep_DD(dd_mle, dd_mcmc_ens, dd_sim_ens)
 biomassplot(data, mcmc_style = "banded", show_median = c("none"))
 @
 
-<<results_pdf, echo=FALSE, fig.pos='H', fig.width=8,fig.height=4,out.width='0.85\\textwidth',fig.align='center',fig.cap=paste0('Probability distribution of the biomass ratio at the beginning of ',x$end_year, ' across the full ensemble of scenarios with the credible interval and probability of biomass falling into the four categories indicated')>>=
+<<results_pdf, fig.cap=paste0('Probability distribution of the biomass ratio at the beginning of ',x$end_year, ' across the full ensemble of scenarios with the credible interval and probability of biomass falling into the four categories indicated')>>=
 data <- mcmc_finalbiomassposterior_prep_DD(dd_mle, dd_mcmc_ens, dd_sim_ens)
 mcmc_finalbiomassposteriorplot(data)
 @
 
-<<results_spaghetti, echo=FALSE, fig.pos='H', fig.width=8,fig.height=4,out.width='0.85\\textwidth',fig.align='center',fig.cap=paste0('Estimated spawning biomass trajectory relative to unfished levels for SPECIES in the STOCK from ', x$start_year_catch, ' to ', x$end_year, ' for all scenarios. The upper panel displays the \"MCMC median\" (i.e. iteration that produced the median value for biomass at the beginning of 2023) and the lower panel is the optimised maximum likelihood estimate')>>=
+<<results_spaghetti, fig.cap=paste0('Estimated spawning biomass trajectory relative to unfished levels for SPECIES in the STOCK from ', x$start_year_catch, ' to ', x$end_year, ' for all scenarios. The upper panel displays the \"MCMC median\" (i.e. iteration that produced the median value for biomass at the beginning of 2023) and the lower panel is the optimised maximum likelihood estimate')>>=
 data <- spaghettiplot_prep_DD(dd_mle, dd_mcmc_ens, dd_sim_ens)
 # spaghettiplot(data)
 # spaghettiplot(data, template = "greyscale", line_width = 0.5)
@@ -745,14 +773,14 @@ spaghettiplot(data,
 @
 
 \rowcolors{2}{white}{light-gray}
-<<table_summary2, results='asis', echo=FALSE>>=
+<<table_summary2>>=
 data <- summarytable_prep_DD(dd_mle, dd_mcmc_ens, dd_sim_ens)
 summarytable(data, label="tab:summary2",
              caption = "Stock status indicators for SPECIES in the STOCK")
 @
 
 \rowcolors{2}{white}{light-gray}
-<<table_biomass, results='asis', echo=FALSE>>=
+<<table_biomass>>=
 data <- biomasstable_prep_DD(dd_mle, dd_mcmc, dd_sim)
 biomasstable(data, label="tab:biomass")
 @
@@ -804,7 +832,7 @@ Weighting of length and age data, as input into the model, are shown in Table~\r
 \section{Conditional age-at-length} \label{sec:con-app}
 Age data were input to the population model in the form of conditional age-at-length data (Figure~\ref{fig:caal_inputs}).
 
-<<caal_inputs, echo=FALSE, fig.pos='H', fig.width=8,fig.height=8,out.width='0.85\\textwidth',fig.align='center',fig.cap='Conditional age-at-length compositions for SPECIES between X and Y---circle size is proportional to relative sample size in each bin across rows (i.e. for a given length bin)'>>=
+<<caal_inputs,fig.cap='Conditional age-at-length compositions for SPECIES between X and Y---circle size is proportional to relative sample size in each bin across rows (i.e. for a given length bin)'>>=
 data <- conditionalageatlengthplot_prep_SS(ss_mle,sex_code=1)
 conditionalageatlengthplot(data, show_fits=FALSE)
 @
@@ -815,13 +843,13 @@ conditionalageatlengthplot(data, show_fits=FALSE)
 \subsection{Weight and length}
 
 %begin_SS
-<<weight, echo=FALSE, fig.pos='H', fig.width=8,fig.height=4,out.width='0.85\\textwidth',fig.align='center',fig.cap='Weight--length relationship for SPECIES in the STOCK'>>=
+<<weight, fig.cap='Weight--length relationship for SPECIES in the STOCK'>>=
 data <- weightplot_prep_SS(ss_mle)
 weightplot(data, scenarios = 1)
 @
 %end_SS
 %begin_DD
-<<weight, echo=FALSE, fig.pos='H', fig.width=8,fig.height=4,out.width='0.85\\textwidth',fig.align='center',fig.cap='Weight--length relationship for SPECIES in the STOCK'>>=
+<<weight, fig.cap='Weight--length relationship for SPECIES in the STOCK'>>=
 data <- weightplot_prep_DD(dd_mle, age_max=10, age_rec=2)
 weightplot(data, scenarios = 1)
 @
@@ -830,29 +858,29 @@ weightplot(data, scenarios = 1)
 \subsection{Fecundity and maturity}
 
 %begin_SS
-<<maturity_length, echo=FALSE, fig.pos='H', fig.width=8,fig.height=4,out.width='0.85\\textwidth',fig.align='center',fig.cap='Maturity at length for SPECIES in the STOCK'>>=
+<<maturity_length, fig.cap='Maturity at length for SPECIES in the STOCK'>>=
 data <- maturityplot_prep_SS(ss_mle)
 maturityplot(data, scenarios = 1, maturity_type = "length")
 @
 
-<<maturity_age, echo=FALSE, fig.pos='H', fig.width=8,fig.height=4,out.width='0.85\\textwidth',fig.align='center',fig.cap='Maturity at age for SPECIES in the STOCK'>>=
+<<maturity_age, fig.cap='Maturity at age for SPECIES in the STOCK'>>=
 data <- maturityplot_prep_SS(ss_mle)
 maturityplot(data, scenarios = 1, maturity_type = "age")
 @
 
-<<spawningoutputplot_age, echo=FALSE, fig.pos='H', fig.width=8,fig.height=4,out.width='0.85\\textwidth',fig.align='center',fig.cap='Spawning output (maturity multiplied by fecundity) at age for SPECIES in the STOCK'>>=
+<<spawningoutputplot_age, fig.cap='Spawning output (maturity multiplied by fecundity) at age for SPECIES in the STOCK'>>=
 data <- spawningoutputplot_prep_SS(ss_mle)
 spawningoutputplot(data, xaxis="age", scenarios = 1)
 @
 
-<<spawningoutputplot_length, echo=FALSE, fig.pos='H', fig.width=8,fig.height=4,out.width='0.85\\textwidth',fig.align='center',fig.cap='Spawning output (maturity multiplied by fecundity) at length for SPECIES in the STOCK'>>=
+<<spawningoutputplot_length, fig.cap='Spawning output (maturity multiplied by fecundity) at length for SPECIES in the STOCK'>>=
 data <- spawningoutputplot_prep_SS(ss_mle)
 spawningoutputplot(data, xaxis="length", scenarios = 1)
 @
 %end_SS
 
 %begin_DD
-<<maturity, echo=FALSE, fig.pos='H', fig.width=8,fig.height=4,out.width='0.85\\textwidth',fig.align='center',fig.cap='Maturity at age for SPECIES in the STOCK'>>=
+<<maturity, fig.cap='Maturity at age for SPECIES in the STOCK'>>=
 data <- maturityplot_prep_DD(x_max=10,x_mat=2)
 maturityplot(data, scenarios = 1)
 @
@@ -870,13 +898,13 @@ Watch this space; SSAND plots are coming.
 
 Likelihood profile on R0, steepness and natural mortality was conducted on scenario X as reference.
 
-<<likelihood_R0, echo=FALSE, fig.pos='H', fig.width=8,fig.height=4,out.width='0.85\\textwidth',fig.align='center',fig.cap='Likelihood profile for ln(R0)'>>=
+<<likelihood_R0, fig.cap='Likelihood profile for ln(R0)'>>=
 # See 'init' code chunk for guide on running likelihood profile
 # data <- likelihoodprofileplot_prep_SS(profile_input, parameter="SR_BH_steep")
 # likelihoodprofileplot(data)
 @
 
-<<piner_R0_length, echo=FALSE, fig.pos='H', fig.width=8,fig.height=4,out.width='0.85\\textwidth',fig.align='center',fig.cap='Piner plot of length-composition likelihoods by fleet for ln(R0)'>>=
+<<piner_R0_length, fig.cap='Piner plot of length-composition likelihoods by fleet for ln(R0)'>>=
 # pinerplot_component_options(profile_input)
 # data <- pinerplot_prep_SS(profile_input, component="Length_like")
 # pinerplot(data)
@@ -891,26 +919,26 @@ Tables~\ref{tab:rhat} and \ref{tab:neff} show the potential scale reduction fact
 %begin_SS
 \subsection{Stock-recruit curve}
 \label{app:stockrecruitcurve}
-<<srplot, echo=FALSE, fig.pos='H', fig.width=8,fig.height=4,out.width='0.85\\textwidth',fig.align='center',fig.cap='Stock-recruit curve for SPECIES in the STOCK based on the reference scenario X---point colors indicate year, with warmer colors indicating earlier years and cooler colors in showing later years'>>=
+<<srplot, fig.cap='Stock-recruit curve for SPECIES in the STOCK based on the reference scenario X---point colors indicate year, with warmer colors indicating earlier years and cooler colors in showing later years'>>=
 data <- srplot_prep_SS(ss_mle)
 srplot(data, scenarios = 1)
 @
 
 %begin_MCMC
 \subsection{Fishing mortality}
-<<Fplot, echo=FALSE, fig.pos='H', fig.width=8,fig.height=4,out.width='0.85\\textwidth',fig.align='center',fig.cap='Time series of fishing mortality ratio ($F/F_{MSY}$) from the ensemble model'>>=
+<<Fplot, fig.cap='Time series of fishing mortality ratio ($F/F_{MSY}$) from the ensemble model'>>=
 data <- Fplot_prep_SS(ss_mle,ss_mcmc_ens)
 Fplot(data, mcmc_style="banded")
 @
 
 \subsection{Recruitment deviations} \label{app:recdevs}
-<<recdevplot, echo=FALSE, fig.pos='H', fig.width=8,fig.height=4,out.width='0.85\\textwidth',fig.align='center',fig.cap='Recruitment deviations from the ensemble model---whiskers represent 95\\% credible intervals, boxes represent 50\\% credible intervals, horizontal bars represent medians, and the points represent outliers'>>=
+<<recdevplot, fig.cap='Recruitment deviations from the ensemble model---whiskers represent 95\\% credible intervals, boxes represent 50\\% credible intervals, horizontal bars represent medians, and the points represent outliers'>>=
 data <- recdevplot_prep_SS(ss_mle,ss_mcmc_ens)
 recdevplot(data, mcmc_style = "boxplot")
 @
 
 \subsection{Sensitivity: parameter estimates and derived quantities} \label{app:sensitivity}
-<<sensitivity, echo=FALSE, fig.pos='H', fig.width=8,fig.height=12,out.width='0.85\\textwidth',fig.align='center',fig.cap='Comparison of parameter estimates and derived quantities among the X scenarios included in the ensemble model'>>=
+<<sensitivity, fig.cap='Comparison of parameter estimates and derived quantities among the X scenarios included in the ensemble model'>>=
 parm <- extract_SS_parameters(ss_mle)[c(3:6),]
 data <- sensitivityplot_prep_SS(ss_mle,
                                 ss_mcmc,
@@ -923,19 +951,19 @@ sensitivityplot(data)
 %end_MCMC
 %begin_MLE
 \subsection{Fishing mortality}
-<<Fplot, echo=FALSE, fig.pos='H', fig.width=8,fig.height=4,out.width='0.85\\textwidth',fig.align='center',fig.cap='Time series of fishing mortality ratio ($F/F_{MSY}$) from the base case scenario'>>=
+<<Fplot, fig.cap='Time series of fishing mortality ratio ($F/F_{MSY}$) from the base case scenario'>>=
 data <- Fplot_prep_SS(ss_mle)
 Fplot(data)
 @
 
 \subsection{Recruitment deviations} \label{app:recdevs}
-<<recdevplot, echo=FALSE, fig.pos='H', fig.width=8,fig.height=4,out.width='0.85\\textwidth',fig.align='center',fig.cap='Recruitment deviations from the base case scenario'>>=
+<<recdevplot, fig.cap='Recruitment deviations from the base case scenario'>>=
 data <- recdevplot_prep_SS(ss_mle)
 recdevplot(data)
 @
 
 \subsection{Sensitivity: parameter estimates and derived quantities} \label{app:sensitivity}
-<<sensitivity, echo=FALSE, fig.pos='H', fig.width=8,fig.height=12,out.width='0.85\\textwidth',fig.align='center',fig.cap='Comparison of parameter estimates and derived quantities among the X scenarios explored'>>=
+<<sensitivity, fig.cap='Comparison of parameter estimates and derived quantities among the X scenarios explored'>>=
 parm <- extract_SS_parameters(ss_mle)[c(3:6),]
 data <- sensitivityplot_prep_SS(ss_mle,
                                 show_MSY = TRUE,
@@ -950,26 +978,26 @@ sensitivityplot(data)
 %begin_DD
 \subsection{Stock-recruit curve}
 \label{app:stockrecruitcurve}
-<<srplot, echo=FALSE, fig.pos='H', fig.width=8,fig.height=4,out.width='0.85\\textwidth',fig.align='center',fig.cap='Stock-recruit curve for SPECIES in the STOCK based on the reference scenario X---point colors indicate year, with warmer colors indicating earlier years and cooler colors in showing later years'>>=
+<<srplot, fig.cap='Stock-recruit curve for SPECIES in the STOCK based on the reference scenario X---point colors indicate year, with warmer colors indicating earlier years and cooler colors in showing later years'>>=
 data <- srplot_prep_DD(dd_mle)
 srplot(data, scenarios = 1)
 @
 
 %begin_MCMC
 \subsection{Fishing mortality}
-<<Fplot, echo=FALSE, fig.pos='H', fig.width=8,fig.height=4,out.width='0.85\\textwidth',fig.align='center',fig.cap='Time series of fishing mortality ratio ($F/F_{MSY}$) from the ensemble model'>>=
+<<Fplot, fig.cap='Time series of fishing mortality ratio ($F/F_{MSY}$) from the ensemble model'>>=
 data <- Fplot_prep_DD(dd_mle,dd_mcmc_ens,dd_sim_ens)
 Fplot(data, mcmc_style="banded")
 @
 
 \subsection{Recruitment deviations} \label{app:recdevs}
-<<recdevplot, echo=FALSE, fig.pos='H', fig.width=8,fig.height=4,out.width='0.85\\textwidth',fig.align='center',fig.cap='Recruitment deviations from the ensemble model---whiskers represent 95\\% credible intervals, boxes represent 50\\% credible intervals, horizontal bars represent medians, and the points represent outliers'>>=
+<<recdevplot, fig.cap='Recruitment deviations from the ensemble model---whiskers represent 95\\% credible intervals, boxes represent 50\\% credible intervals, horizontal bars represent medians, and the points represent outliers'>>=
 data <- recdevplot_prep_DD(dd_mle,dd_mcmc_ens,dd_sim_ens)
 recdevplot(data, mcmc_style = "boxplot")
 @
 
 \subsection{Sensitivity: parameter estimates and derived quantities} \label{app:sensitivity}
-<<sensitivity, echo=FALSE, fig.pos='H', fig.width=8,fig.height=12,out.width='0.85\\textwidth',fig.align='center',fig.cap='Comparison of parameter estimates and derived quantities among the X scenarios included in the ensemble model'>>=
+<<sensitivity, fig.cap='Comparison of parameter estimates and derived quantities among the X scenarios included in the ensemble model'>>=
 data <- sensitivityplot_prep_DD(dd_mle,
                                 dd_mcmc,
                                 dd_sim,
@@ -980,19 +1008,19 @@ sensitivityplot(data)
 %end_MCMC
 %begin_MLE
 \subsection{Fishing mortality}
-<<Fplot, echo=FALSE, fig.pos='H', fig.width=8,fig.height=4,out.width='0.85\\textwidth',fig.align='center',fig.cap='Time series of fishing mortality ratio ($F/F_{MSY}$) from the base case scenario'>>=
+<<Fplot, fig.cap='Time series of fishing mortality ratio ($F/F_{MSY}$) from the base case scenario'>>=
 data <- Fplot_prep_DD(dd_mle)
 Fplot(data)
 @
 
 \subsection{Recruitment deviations} \label{app:recdevs}
-<<recdevplot, echo=FALSE, fig.pos='H', fig.width=8,fig.height=4,out.width='0.85\\textwidth',fig.align='center',fig.cap='Recruitment deviations from the base case scenario'>>=
+<<recdevplot, fig.cap='Recruitment deviations from the base case scenario'>>=
 data <- recdevplot_prep_DD(dd_mle)
 recdevplot(data)
 @
 
 \subsection{Sensitivity: parameter estimates and derived quantities} \label{app:sensitivity}
-<<sensitivity, echo=FALSE, fig.pos='H', fig.width=8,fig.height=12,out.width='0.85\\textwidth',fig.align='center',fig.cap='Comparison of parameter estimates and derived quantities among the X scenarios explored'>>=
+<<sensitivity, fig.cap='Comparison of parameter estimates and derived quantities among the X scenarios explored'>>=
 data <- sensitivityplot_prep_DD(dd_mle,
                                 show_LL = TRUE,
                                 show_B_ratio = TRUE)
@@ -1009,7 +1037,7 @@ sensitivityplot(data)
 %begin_SS
 \section{Scenario XXX}
 \rowcolors{2}{white}{light-gray}
-<<table_mleXXX, results='asis', echo=FALSE>>=
+<<table_mleXXX>>=
 parameters <- extract_SS_parameters(ss_mle)[2:4,]
 data <- parametertable_prep_SS(ss_mle=ss_mle, parameters=parameters, scenario=XXX)
 parametertable(data, label="tab:paramXXX_mle")
@@ -1017,40 +1045,40 @@ parametertable(data, label="tab:paramXXX_mle")
 
 %begin_MCMC
 \rowcolors{2}{white}{light-gray}
-<<table_mcmcXXX, results='asis', echo=FALSE>>=
+<<table_mcmcXXX>>=
 parameters <- extract_SS_parameters(ss_mle)[2:4,]
 data <- parametertable_prep_SS(ss_mcmc=ss_mcmc, parameters=parameters, scenario=XXX)
 parametertable(data, label="tab:paramXXX_mcmc")
 @
 %end_MCMC
 
-<<cpue_fitsXXX, echo=FALSE, fig.pos='H', fig.width=8,fig.height=4,out.width='0.85\\textwidth',fig.align='center',fig.cap='Scenario XXX: Model predictions (blue line) to standardised catch rates for SPECIES in the STOCK, based on maximum likelihood estimation---grey line and error bars represent the model input and associated uncertainty'>>=
+<<cpue_fitsXXX, fig.cap='Scenario XXX: Model predictions (blue line) to standardised catch rates for SPECIES in the STOCK, based on maximum likelihood estimation---grey line and error bars represent the model input and associated uncertainty'>>=
 data <- cpueplot_prep_SS(ss_mle)
 cpueplot(data, scenarios=XXX)
 @
 
 %begin_MCMC
-<<recdevsXXX, echo=FALSE, fig.pos='H', fig.width=8,fig.height=4,out.width='0.85\\textwidth',fig.align='center',fig.cap='Scenario XXX: Recruitment deviations---whiskers represent 95\\% credible intervals, boxes represent 50\\% credible intervals, horizontal bars represent medians, and the points represent outliers'>>=
+<<recdevsXXX, fig.cap='Scenario XXX: Recruitment deviations---whiskers represent 95\\% credible intervals, boxes represent 50\\% credible intervals, horizontal bars represent medians, and the points represent outliers'>>=
 data <- recdevplot_prep_SS(ss_mle,ss_mcmc)
 recdevplot(data, scenarios=XXX)
 @
 %end_MCMC
 %begin_MLE
-<<recdevsXXX, echo=FALSE, fig.pos='H', fig.width=8,fig.height=4,out.width='0.85\\textwidth',fig.align='center',fig.cap='Scenario XXX: Recruitment deviations'>>=
+<<recdevsXXX, fig.cap='Scenario XXX: Recruitment deviations'>>=
 data <- recdevplot_prep_SS(ss_mle)
 recdevplot(data, scenarios=XXX)
 @
 %end_MLE
 
 %begin_length
-<<length_outputsXXX, echo=FALSE, fig.pos='H', fig.width=8,fig.height=8,out.width='0.85\\textwidth',fig.align='center',fig.cap='Weight--length relationship for SPECIES in the STOCK'>>=
+<<length_outputsXXX, fig.cap='Weight--length relationship for SPECIES in the STOCK'>>=
 data <- lengthplot_prep_SS(ss_mle, scenarios=XXX)
 lengthplot(data)
 @
 %end_length
 
 %begin_age
-<<age_outputsXXX, echo=FALSE, fig.pos='H', fig.width=8,fig.height=8,out.width='0.85\\textwidth',fig.align='center',fig.cap='Scenario XXX: Fits to age structures, based on maximum likelihood estimation---grey bars represent input data and black line and points represent model fits'>>=
+<<age_outputsXXX, fig.cap='Scenario XXX: Fits to age structures, based on maximum likelihood estimation---grey bars represent input data and black line and points represent model fits'>>=
 data <- caal_agefitplot_prep_SS(ss_mle, sex_code=1, scenarios=XXX)
 caal_agefitplot(data,show_fits=FALSE, scenario=XXX)
 # data <- ageplot_prep_SS(ss_mle)
@@ -1059,42 +1087,42 @@ caal_agefitplot(data,show_fits=FALSE, scenario=XXX)
 %end_age
 
 %begin_caal
-<<caal_outputsXXX, echo=FALSE, fig.pos='H', fig.width=8,fig.height=8,out.width='0.85\\textwidth',fig.align='center',fig.cap='Scenario XXX: Pearson residuals for age-at-length compositions, based on maximum likelihood estimation---circle size represents the magnitude of the Pearson residual'>>=
+<<caal_outputsXXX, fig.cap='Scenario XXX: Pearson residuals for age-at-length compositions, based on maximum likelihood estimation---circle size represents the magnitude of the Pearson residual'>>=
 data <- conditionalageatlengthplot_prep_SS(ss_mle,sex_code=1, scenarios=XXX)
 conditionalageatlengthplot(data, show_fits=FALSE)
 @
 %end_caal
 
-<<biomass_mleXXX, echo=FALSE, fig.pos='H', fig.width=8,fig.height=4,out.width='0.85\\textwidth',fig.align='center',fig.cap='Scenario XXX: Predicted spawning biomass trajectory relative to unfished for SPECIES in the STOCK, based on maximum likelihood estimation'>>=
+<<biomass_mleXXX, fig.cap='Scenario XXX: Predicted spawning biomass trajectory relative to unfished for SPECIES in the STOCK, based on maximum likelihood estimation'>>=
 data <- biomassplot_prep_SS(ss_mle)
 biomassplot(data, mcmc_style = "banded", show_median = c("annual_biomass","trajectory"), scenarios=XXX)
 @
 
 %begin_MCMC
-<<biomass_mcmcXXX, echo=FALSE, fig.pos='H', fig.width=8,fig.height=4,out.width='0.85\\textwidth',fig.align='center',fig.cap='Scenario XXX: Predicted spawning biomass trajectory relative to unfished for SPECIES in the STOCK, based on MCMC'>>=
+<<biomass_mcmcXXX, fig.cap='Scenario XXX: Predicted spawning biomass trajectory relative to unfished for SPECIES in the STOCK, based on MCMC'>>=
 data <- biomassplot_prep_SS(ss_mle, ss_mcmc)
 biomassplot(data, mcmc_style = "banded", show_median = c("annual_biomass","trajectory"), scenarios=XXX)
 @
 %end_MCMC
 
-<<phaseXXX, echo=FALSE, fig.pos='H', fig.width=8,fig.height=8,out.width='0.85\\textwidth',fig.align='center',fig.cap='Scenario XXX: Stock status indicator trajectory for SPECIES in the STOCK, based on maximum likelihood estimation'>>=
+<<phaseXXX, fig.cap='Scenario XXX: Stock status indicator trajectory for SPECIES in the STOCK, based on maximum likelihood estimation'>>=
 data <- phaseplot_prep_SS(ss_mle)
 phaseplot(data, scenarios=XXX)
 @
 
-<<yieldXXX, echo=FALSE, fig.pos='H', fig.width=8,fig.height=4,out.width='0.85\\textwidth',fig.align='center',fig.cap='Scenario XXX: Equilibrium dead catch curve for SPECIES in the STOCK, based on maximum likelihood estimation'>>=
+<<yieldXXX, fig.cap='Scenario XXX: Equilibrium dead catch curve for SPECIES in the STOCK, based on maximum likelihood estimation'>>=
 data <- yieldplot_prep_SS(ss_mle)
 yieldplot(data, show_msy_line=TRUE, scenarios=XXX)
 @
 
 %begin_MCMC
-<<pdfXXX, echo=FALSE, fig.pos='H', fig.width=8,fig.height=10,out.width='0.85\\textwidth',fig.align='center',fig.cap='Scenario XXX: Posterior density of MCMC iterations. \"Median\" line shows median parameter value for MCMC iterations  \"Optimised\" shows the parameter value found from maximum likelihood estimates.'>>=
+<<pdfXXX, fig.cap='Scenario XXX: Posterior density of MCMC iterations. \"Median\" line shows median parameter value for MCMC iterations  \"Optimised\" shows the parameter value found from maximum likelihood estimates.'>>=
 parameters <- extract_SS_parameters(ss_mcmc)[c(2:10,449),]
 data <- mcmc_posteriordensityplot_prep_SS(ss_mle, ss_mcmc, scenario = XXX, parameters)
 mcmc_posteriordensityplot(data)
 @
 
-<<traceXXX, echo=FALSE, fig.pos='H', fig.width=8,fig.height=10,out.width='0.85\\textwidth',fig.align='center',fig.cap='Scenario XXX: Trace plot of MCMC iterations---\"Optimised\" shows the parameter value found from maximum likelihood estimates'>>=
+<<traceXXX, fig.cap='Scenario XXX: Trace plot of MCMC iterations---\"Optimised\" shows the parameter value found from maximum likelihood estimates'>>=
 parameters <- extract_SS_parameters(ss_mcmc)[c(2:9),]
 data <- mcmc_posteriordensityplot_prep_SS(ss_mle,
                                           ss_mcmc,
@@ -1104,7 +1132,7 @@ data <- mcmc_posteriordensityplot_prep_SS(ss_mle,
 mcmc_traceplot(data)
 @
 
-<<mcmc_correlation_XXX, echo=FALSE, fig.pos='H', fig.width=12,fig.height=12,out.width='0.85\\textwidth',fig.align='center',fig.cap='Scenario XXX: Correlation plot of MCMC iterations'>>=
+<<mcmc_correlation_XXX, fig.cap='Scenario XXX: Correlation plot of MCMC iterations'>>=
 parameters <- extract_SS_parameters(ss_mcmc)[c(2:9),]
 data <- correlationplot_prep_SS(ss_mle, ss_mcmc, scenario = XXX, parameters = parameters)
 correlationplot(data)
@@ -1112,7 +1140,7 @@ correlationplot(data)
 %end_MCMC
 
 %begin_MLE
-<<mcmc_correlation_XXX, echo=FALSE, fig.pos='H', fig.width=12,fig.height=12,out.width='0.85\\textwidth',fig.align='center',fig.cap='Scenario XXX: Correlation plot of MCMC iterations'>>=
+<<mcmc_correlation_XXX, fig.cap='Scenario XXX: Correlation plot of MCMC iterations'>>=
 parameters <- extract_SS_parameters(ss_mle)[c(2,3,4,26),]
 data <- correlationplot_prep_SS(ss_mle, scenario = 1, parameters = parameters)
 correlationplot(data)
@@ -1124,72 +1152,72 @@ correlationplot(data)
 %begin_DD
 \section{Scenario XXX}
 \rowcolors{2}{white}{light-gray}
-<<table_mleXXX, results='asis', echo=FALSE>>=
+<<table_mleXXX>>=
 data <- parametertable_prep_DD(dd_mle=dd_mle, scenario=XXX)
 parametertable(data, label="tab:paramXXX_mle")
 @
 
 %begin_MCMC
 \rowcolors{2}{white}{light-gray}
-<<table_mcmcXXX, results='asis', echo=FALSE>>=
+<<table_mcmcXXX>>=
 # dd_mcmc_ens <- mcmc_ensemble_DD(dd_mcmc,dd_sim,scenarios=c(1,2))$dd_mcmc
 data <- parametertable_prep_DD(dd_mcmc=dd_mcmc, scenario=XXX)
 parametertable(data, label="tab:paramXXX_mcmc")
 @
 %end_MCMC
 
-<<cpue_fitsXXX, echo=FALSE, fig.pos='H', fig.width=8,fig.height=4,out.width='0.85\\textwidth',fig.align='center',fig.cap='Scenario XXX: Model predictions (blue line) to standardised catch rates for SPECIES in the STOCK, based on maximum likelihood estimation---grey line and error bars represent the model input and associated uncertainty'>>=
+<<cpue_fitsXXX, fig.cap='Scenario XXX: Model predictions (blue line) to standardised catch rates for SPECIES in the STOCK, based on maximum likelihood estimation---grey line and error bars represent the model input and associated uncertainty'>>=
 data <- cpueplot_prep_DD(dd_mle)
 cpueplot(data, scenarios=XXX)
 @
 
 %begin_MCMC
-<<recdevsXXX, echo=FALSE, fig.pos='H', fig.width=8,fig.height=4,out.width='0.85\\textwidth',fig.align='center',fig.cap='Scenario XXX: Recruitment deviations---whiskers represent 95\\% credible intervals, boxes represent 50\\% credible intervals, horizontal bars represent medians, and the points represent outliers'>>=
+<<recdevsXXX, fig.cap='Scenario XXX: Recruitment deviations---whiskers represent 95\\% credible intervals, boxes represent 50\\% credible intervals, horizontal bars represent medians, and the points represent outliers'>>=
 data <- recdevplot_prep_DD(dd_mle,dd_mcmc,dd_sim)
 recdevplot(data, scenarios=XXX)
 @
 %end_MCMC
 %begin_MLE
-<<recdevsXXX, echo=FALSE, fig.pos='H', fig.width=8,fig.height=4,out.width='0.85\\textwidth',fig.align='center',fig.cap='Scenario XXX: Recruitment deviations'>>=
+<<recdevsXXX, fig.cap='Scenario XXX: Recruitment deviations'>>=
 data <- recdevplot_prep_DD(dd_mle)
 recdevplot(data, scenarios=XXX)
 @
 %end_MLE
 
-<<biomass_mleXXX, echo=FALSE, fig.pos='H', fig.width=8,fig.height=4,out.width='0.85\\textwidth',fig.align='center',fig.cap='Scenario XXX: Predicted spawning biomass trajectory relative to unfished for SPECIES in the STOCK, based on maximum likelihood estimation'>>=
+<<biomass_mleXXX, fig.cap='Scenario XXX: Predicted spawning biomass trajectory relative to unfished for SPECIES in the STOCK, based on maximum likelihood estimation'>>=
 data <- biomassplot_prep_DD(dd_mle)
 biomassplot(data, scenarios=XXX)
 @
 
 %begin_MCMC
-<<biomass_mcmcXXX, echo=FALSE, fig.pos='H', fig.width=8,fig.height=4,out.width='0.85\\textwidth',fig.align='center',fig.cap='Scenario XXX: Predicted spawning biomass trajectory relative to unfished for SPECIES in the STOCK, based on MCMC'>>=
+<<biomass_mcmcXXX, fig.cap='Scenario XXX: Predicted spawning biomass trajectory relative to unfished for SPECIES in the STOCK, based on MCMC'>>=
 data <- biomassplot_prep_DD(dd_mle, dd_mcmc, dd_sim)
 biomassplot(data, mcmc_style = "banded", show_median = c("annual_biomass","trajectory"), scenarios=XXX)
 @
 %end_MCMC
 
-<<phaseXXX, echo=FALSE, fig.pos='H', fig.width=8,fig.height=8,out.width='0.85\\textwidth',fig.align='center',fig.cap='Scenario XXX: Stock status indicator trajectory for SPECIES in the STOCK, based on maximum likelihood estimation'>>=
+<<phaseXXX, fig.cap='Scenario XXX: Stock status indicator trajectory for SPECIES in the STOCK, based on maximum likelihood estimation'>>=
 data <- phaseplot_prep_DD(dd_mle)
 phaseplot(data, scenarios=XXX)
 @
 
-<<yieldXXX, echo=FALSE, fig.pos='H', fig.width=8,fig.height=4,out.width='0.85\\textwidth',fig.align='center',fig.cap='Scenario XXX: Equilibrium dead catch curve for SPECIES in the STOCK, based on maximum likelihood estimation'>>=
+<<yieldXXX, fig.cap='Scenario XXX: Equilibrium dead catch curve for SPECIES in the STOCK, based on maximum likelihood estimation'>>=
 data <- yieldplot_prep_DD(dd_mle)
 yieldplot(data, show_msy_line=TRUE, scenarios=XXX)
 @
 
 %begin_MCMC
-<<pdfXXX, echo=FALSE, fig.pos='H', fig.width=8,fig.height=10,out.width='0.85\\textwidth',fig.align='center',fig.cap='Scenario XXX: Posterior density of MCMC iterations. \"Median\" line shows median parameter value for MCMC iterations  \"Optimised\" shows the parameter value found from maximum likelihood estimates.'>>=
+<<pdfXXX, fig.cap='Scenario XXX: Posterior density of MCMC iterations. \"Median\" line shows median parameter value for MCMC iterations  \"Optimised\" shows the parameter value found from maximum likelihood estimates.'>>=
 data <- mcmc_posteriordensityplot_prep_DD(dd_mle, dd_mcmc, dd_sim, scenario = XXX)
 mcmc_posteriordensityplot(data)
 @
 
-<<traceXXX, echo=FALSE, fig.pos='H', fig.width=8,fig.height=10,out.width='0.85\\textwidth',fig.align='center',fig.cap='Scenario XXX: Trace plot of MCMC iterations---\"Optimised\" shows the parameter value found from maximum likelihood estimates'>>=
+<<traceXXX, fig.cap='Scenario XXX: Trace plot of MCMC iterations---\"Optimised\" shows the parameter value found from maximum likelihood estimates'>>=
 data <- mcmc_posteriordensityplot_prep_DD(dd_mle, dd_mcmc, dd_sim, scenario = XXX)
 mcmc_traceplot(data)
 @
 
-<<mcmc_correlation_XXX, echo=FALSE, fig.pos='H', fig.width=12,fig.height=12,out.width='0.85\\textwidth',fig.align='center',fig.cap='Scenario XXX: Correlation plot of MCMC iterations'>>=
+<<mcmc_correlation_XXX, fig.cap='Scenario XXX: Correlation plot of MCMC iterations'>>=
 # dd_sdr <- TMB::sdreport(dd_mle[[XXX]]$model)
 # data <- correlationplot_prep_DD(dd_mle, dd_mcmc, dd_sim, scenario = XXX)
 # correlationplot(data)
@@ -1197,7 +1225,7 @@ mcmc_traceplot(data)
 %end_MCMC
 
 %begin_MLE
-<<mcmc_correlation_XXX, echo=FALSE, fig.pos='H', fig.width=12,fig.height=12,out.width='0.85\\textwidth',fig.align='center',fig.cap='Scenario XXX: Correlation plot of MCMC iterations'>>=
+<<mcmc_correlation_XXX, fig.cap='Scenario XXX: Correlation plot of MCMC iterations'>>=
 # data <- correlationplot_prep_DD(dd_mle, scenario = 1)
 # correlationplot(data)
 @
