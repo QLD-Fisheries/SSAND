@@ -16,6 +16,10 @@
 #' @param line_type_label Label for linetype legend. Default is "X% falls within this range" where X is the credible_interval specified in the input data.
 #' @param CI_label_position Specify position for labels for 95% confidence interval percentages. Default "bottom", alternatives are "top" or "none".
 #' @param show_median Default is TRUE. Set to FALSE to remove median line.
+#' @param annotation_text_size Size of annotation text (e.g. median and CI). Default is 5.
+#' @param legend_text_size Size of legend text. Default is 11.5.
+#' @param axis_title_size Sie of axis title. Default is 13.
+#' @param axis_text_size Size of axis text. Default is 12.
 #' @return A posterior plot for final biomass ratio with risk area (below B20) highlighted
 #' @export
 #'
@@ -29,14 +33,14 @@ mcmc_finalbiomassposteriorplot <- function (data,
                                             ylab = NULL,
                                             legend_position = "top",
                                             CI_label_position = "bottom",
-                                            line_type = c("dashed","solid"),
+                                            line_type = NULL,
                                             line_type_label = NULL,
                                             show_median = TRUE,
                                             annotation_text_size = 5,
                                             legend_text_size = 11.5,
                                             axis_title_size = 13,
                                             axis_text_size = 12
-                                            ) {
+) {
   density <- data$density
   quant_lower <- data$quant_lower
   quant_upper <- data$quant_upper
@@ -45,7 +49,22 @@ mcmc_finalbiomassposteriorplot <- function (data,
   credible_interval <- data$credible_interval
 
   if (missing(xlab)) {xlab = paste0("Biomass at end of ",end_year-1)}
-  if (missing(line_type_label)) {line_type_label = c(paste0(credible_interval*100,"% falls within this range"),"Median")}
+
+  if (missing(line_type_label)) {
+    if (CI_label_position != "none") {
+      line_type_label = c(paste0(credible_interval*100,"% falls within this range"),"Median")
+    } else {
+      line_type_label = c("Median")
+    }
+  }
+
+  if (missing(line_type)) {
+    if (CI_label_position != "none") {
+      line_type = c("dashed","solid")
+    } else {
+      line_type = c("solid")
+    }
+  }
 
   # Keep all levels in legend by making fill a factor
   density <- density |>
@@ -83,7 +102,7 @@ mcmc_finalbiomassposteriorplot <- function (data,
       ggplot2::geom_vline(ggplot2::aes(linetype="E", xintercept = quant_upper))
   }
 
-    if (show_median) {
+  if (show_median) {
     p <- p +
       ggplot2::geom_vline(ggplot2::aes(linetype="F", xintercept = data$median)) +
       ggplot2::annotate('text', x=data$median+4, y=max(density$y), label = scales::percent(round(data$median)/100), size = annotation_text_size) # , family="Meta"
