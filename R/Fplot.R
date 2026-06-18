@@ -43,6 +43,7 @@
 #' @param legend_position Position of the legend ("none", "left", "right", "bottom", "top", or two-element numeric vector for x and y position). Default is "top".
 #' @param line_type A vector of linetypes (e.g. "solid", "dashed") for median lines.
 #' @param colours A vector of colours used (character).
+#' @param boxplot_outliers Set to FALSE to remove outlier points from boxplot. Default is TRUE.
 #'
 #' @return Fishing mortality plot
 #' @export
@@ -85,8 +86,8 @@ Fplot <- function(data,
                   legend_position= "top",
                   band_colour = "black",
                   line_type = c("solid","dashed"),
-                  colours = c("black","darkred")
-
+                  colours = c("black","darkred"),
+                  boxplot_outliers = TRUE
 ){
 
   MCMC <- "med" %in% names(data)
@@ -185,7 +186,7 @@ Fplot <- function(data,
       xlim[2] <- xlim[2]+0.5
 
       p <- ggplot2::ggplot(data) +
-        ggplot2::geom_boxplot(data = databox, ggplot2::aes(x=year, y=value, group=year))
+        ggplot2::geom_boxplot(data = databox, ggplot2::aes(x=year, y=value, group=year), outliers = boxplot_outliers)
     }
 
     # Banded plot

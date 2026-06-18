@@ -58,6 +58,7 @@
 #' @param band_colour Colour of bands (character). Only used when mcmc_style=="banded". Input one colour, bands will be distinguished using an alpha.
 #' @param band_labels Labels for bands. Default is NULL and interval is used.
 #' @param show_final_biomass Set to TRUE to show final biomass value at the end of the time series.
+#' @param boxplot_outliers Set to FALSE to remove outlier points from boxplot. Default is TRUE.
 #'
 #' @return Biomass plot
 #' @export
@@ -112,7 +113,8 @@ biomassplot <- function(data,
                         shapes = c(16,18,17),
                         band_colour = "black",
                         band_labels = NULL,
-                        show_final_biomass = FALSE) {
+                        show_final_biomass = FALSE,
+                        boxplot_outliers = TRUE) {
 
   # Standard plot data set up
   MCMC <- "med" %in% names(data)
@@ -245,7 +247,7 @@ biomassplot <- function(data,
         xlim[2] <- xlim[2]+0.5
 
         p <- ggplot2::ggplot(data) +
-          ggplot2::geom_boxplot(data = databox, ggplot2::aes(x=year, y=value, group=year))
+          ggplot2::geom_boxplot(data = databox, ggplot2::aes(x=year, y=value, group=year), outliers = boxplot_outliers)
       }
 
       # Banded plot
