@@ -7,6 +7,7 @@
 biomasstable(
   data,
   label,
+  include_median = TRUE,
   row_names = NULL,
   column_names = NULL,
   caption = NULL,
@@ -17,6 +18,8 @@ biomasstable(
 \item{data}{Dataframe output from biomasstable_prep()}
 
 \item{label}{A label for the table that can be referenced elsewhere in the report using LaTeX syntax}
+
+\item{include_median}{Set to FALSE to exclude median biomass estimates. Default is TRUE, which includes median biomass estimates.}
 
 \item{row_names}{An option to customise the text in the Indicator columns}
 
@@ -36,5 +39,10 @@ Biomass table
 # <<table_biomass, results='asis', echo=FALSE>>=
 data <- biomasstable_prep_SS(ss_mle,ss_mcmc)
 biomasstable(data, label="tab:biomass")
+# @
+
+# <<table_biomass, results='asis', echo=FALSE>>=
+data <- biomasstable_prep_SS(ss_mle,ss_mcmc)
+biomasstable(data, label="tab:biomass",include_median=FALSE)
 # @
 }

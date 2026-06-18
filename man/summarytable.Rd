@@ -7,6 +7,7 @@
 summarytable(
   data,
   label,
+  rows_to_include = NULL,
   row_names = NULL,
   column_names = NULL,
   caption = "Stock status indicators",
@@ -18,6 +19,8 @@ summarytable(
 \item{data}{Dataframe output from summarytable_prep()}
 
 \item{label}{A label for the table that can be referenced elsewhere in the report using LaTeX syntax}
+
+\item{rows_to_include}{A vector of rows of data to include in the table (e.g. c(1,2,3) or 1:4). Default is NULL, which includes all rows.}
 
 \item{row_names}{An option to customise the text in the Indicator columns}
 

@@ -81,7 +81,7 @@ Any scenarios not included in "scenario_order" will be tacked on in the order th
 
 \item{financial_year}{Set to TRUE if the assessment was based on financial year (logical). Adjusts the x-axis to show full financial year notation.}
 
-\item{mcmc_style}{The type of MCMC plot to be displayed (character). Options are "banded", "hairy", "boxplot", "CI" and "joy", the default is "banded". Only one option can be selected.}
+\item{mcmc_style}{The type of MCMC plot to be displayed (character). Options are "banded", "hairy", "boxplot" and "CI", the default is "banded". Only one option can be selected.}
 
 \item{show_median}{Logical, TRUE to show median line}
 
