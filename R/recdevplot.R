@@ -32,7 +32,7 @@
 #' @param ylabels A vector of labels for the y-axis breaks.
 #' @param xangle Set to 90 to rotate x-axis labels 90 degrees.
 #' @param line_type A vector of linetypes (e.g. "solid", "dashed") for median lines.
-#' @param mcmc_style The type of MCMC plot to be displayed (character). Options are "banded", "hairy", "boxplot", "CI" and "joy", the default is "banded". Only one option can be selected.
+#' @param mcmc_style The type of MCMC plot to be displayed (character). Options are "banded", "hairy", "boxplot" and "CI", the default is "banded". Only one option can be selected.
 #' @param aggregate_scenarios Set to TRUE to calculate credible intervals across all scenarios (logical). Only activated if mcmc_style==CI.
 #' @param alpha Transparency for range (numeric) used in ggplot2::geom_density_ridges(). Default is 0.7.
 #' @param line_width Width of median lines (numeric). Default is 1.

@@ -9,6 +9,7 @@
 #'
 #' @param data Dataframe output from summarytable_prep()
 #' @param label A label for the table that can be referenced elsewhere in the report using LaTeX syntax
+#' @param rows_to_include A vector of rows of data to include in the table (e.g. c(1,2,3) or 1:4). Default is NULL, which includes all rows.
 #' @param row_names An option to customise the text in the Indicator columns
 #' @param column_names An optional vector of column names
 #' @param caption Caption for table
@@ -25,6 +26,7 @@
 #' # @
 summarytable <- function (data,
                           label,
+                          rows_to_include = NULL,
                           row_names = NULL,
                           column_names = NULL,
                           caption = "Stock status indicators",
@@ -38,6 +40,8 @@ summarytable <- function (data,
   if (missing(align)) {align = paste(rep("l",ncol(data)+1), collapse = '')}
 
   if (!missing(column_names)) {colnames(data) <- column_names}
+
+  if (!missing(rows_to_include)) {data <- data[rows_to_include,]}
 
   print(xtable::xtable(data,
                        caption = caption,
