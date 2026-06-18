@@ -14,7 +14,12 @@
 #' @param legend_position Position of the legend ("none", "left", "right", "bottom", "top", or two-element numeric vector for x and y position). Default is "top".
 #' @param line_type Linetype for vertical lines. Default is "dashed".
 #' @param line_type_label Label for linetype legend. Default is "X% falls within this range" where X is the credible_interval specified in the input data.
-#' @param CI_label_position Specify position for labels for 95% confidence interval percentages. Default "bottom", alternative is "top".
+#' @param CI_label_position Specify position for labels for 95% confidence interval percentages. Default "bottom", alternatives are "top" or "none".
+#' @param show_median Default is TRUE. Set to FALSE to remove median line.
+#' @param annotation_text_size Size of annotation text (e.g. median and CI). Default is 5.
+#' @param legend_text_size Size of legend text. Default is 11.5.
+#' @param axis_title_size Sie of axis title. Default is 13.
+#' @param axis_text_size Size of axis text. Default is 12.
 #' @return A posterior plot for final biomass ratio with risk area (below B20) highlighted
 #' @export
 #'
@@ -28,8 +33,14 @@ mcmc_finalbiomassposteriorplot <- function (data,
                                             ylab = NULL,
                                             legend_position = "top",
                                             CI_label_position = "bottom",
-                                            line_type = "dashed",
-                                            line_type_label = NULL) {
+                                            line_type = NULL,
+                                            line_type_label = NULL,
+                                            show_median = TRUE,
+                                            annotation_text_size = 5,
+                                            legend_text_size = 11.5,
+                                            axis_title_size = 13,
+                                            axis_text_size = 12
+) {
   density <- data$density
   quant_lower <- data$quant_lower
   quant_upper <- data$quant_upper
@@ -38,7 +49,22 @@ mcmc_finalbiomassposteriorplot <- function (data,
   credible_interval <- data$credible_interval
 
   if (missing(xlab)) {xlab = paste0("Biomass at end of ",end_year-1)}
-  if (missing(line_type_label)) {line_type_label = paste0(credible_interval*100,"% falls within this range")}
+
+  if (missing(line_type_label)) {
+    if (CI_label_position != "none") {
+      line_type_label = c(paste0(credible_interval*100,"% falls within this range"),"Median")
+    } else {
+      line_type_label = c("Median")
+    }
+  }
+
+  if (missing(line_type)) {
+    if (CI_label_position != "none") {
+      line_type = c("dashed","solid")
+    } else {
+      line_type = c("solid")
+    }
+  }
 
   # Keep all levels in legend by making fill a factor
   density <- density |>
@@ -57,17 +83,38 @@ mcmc_finalbiomassposteriorplot <- function (data,
     breaks <- sort(c(seq(0,max(signif(max(data$density$x),2)+10,100),20),quant_lower,quant_upper))
     labels <- scales::percent(sort(c(seq(0,max(signif(max(data$density$x),2)+10,100),20),
                                      round(quant_lower),round(quant_upper))/100))
+  } else if (CI_label_position == "none"){
+    limits <- c(0,max(signif(max(data$density$x),2)+10,100))
+    breaks <- sort(c(seq(0,max(signif(max(data$density$x),2)+10,100),20)))
+    labels <- scales::percent(sort(c(seq(0,max(signif(max(data$density$x),2)+10,100),20)))/100)
   }
-
 
   p <- ggplot2::ggplot() +
     ggplot2::theme_bw() +
     ggplot2::geom_area(data=density |> dplyr::filter(x<=20), ggplot2::aes(x=x,y=y,fill=fill)) +
     ggplot2::geom_area(data=density |> dplyr::filter(x>=20 & x<=40), ggplot2::aes(x=x,y=y,fill=fill)) +
     ggplot2::geom_area(data=density |> dplyr::filter(x>=40 & x<=60), ggplot2::aes(x=x,y=y,fill=fill)) +
-    ggplot2::geom_area(data=density |> dplyr::filter(x>=60), ggplot2::aes(x=x,y=y,fill=fill)) +
-    ggplot2::geom_vline(ggplot2::aes(linetype="E", xintercept = quant_lower)) +
-    ggplot2::geom_vline(ggplot2::aes(linetype="E", xintercept = quant_upper)) +
+    ggplot2::geom_area(data=density |> dplyr::filter(x>=60), ggplot2::aes(x=x,y=y,fill=fill))
+
+  if (CI_label_position != "none") {
+    p <- p +
+      ggplot2::geom_vline(ggplot2::aes(linetype="E", xintercept = quant_lower)) +
+      ggplot2::geom_vline(ggplot2::aes(linetype="E", xintercept = quant_upper))
+  }
+
+  if (show_median) {
+    p <- p +
+      ggplot2::geom_vline(ggplot2::aes(linetype="F", xintercept = data$median)) +
+      ggplot2::annotate('text', x=data$median+4, y=max(density$y), label = scales::percent(round(data$median)/100), size = annotation_text_size) # , family="Meta"
+  }
+
+  #   if (show_median) {
+  #   p <- p +
+  #     ggplot2::geom_vline(xintercept = data$median) +
+  #     ggplot2::annotate('text', x=data$median+4, y=max(density$y), label = scales::percent(round(data$median)/100), size = annotation_text_size) # , family="Meta"
+  # }
+
+  p <- p +
     ggplot2::scale_fill_manual(drop = FALSE,
                                name="",
                                labels = c(
@@ -79,7 +126,10 @@ mcmc_finalbiomassposteriorplot <- function (data,
                                values=colours)+
     ggplot2::scale_linetype_manual(name="",values=line_type, labels = line_type_label) +
     ggplot2::theme(legend.position = legend_position,
-                   panel.grid.minor.x = ggplot2::element_blank()) +
+                   panel.grid.minor.x = ggplot2::element_blank(),
+                   legend.text = ggplot2::element_text(size = legend_text_size),
+                   axis.title.x = ggplot2::element_text(size = axis_title_size),
+                   axis.text.x = ggplot2::element_text(size = axis_text_size)) +
     ggplot2::xlab(xlab) +
     ggplot2::ylab(ylab) +
     ggplot2::scale_x_continuous(limits = limits,
@@ -93,8 +143,13 @@ mcmc_finalbiomassposteriorplot <- function (data,
                        y = c(Inf, Inf),
                        label = scales::percent(sort(c(round(quant_lower),round(quant_upper))/100)))
     p <- p +
-      ggplot2::annotate('text', x=quant_lower+4, y=max(density$y), label = scales::percent(round(quant_lower)/100), size = 3) +
-      ggplot2::annotate('text', x=quant_upper+4, y=max(density$y), label = scales::percent(round(quant_upper)/100), size = 3)
+      ggplot2::annotate('text', x=quant_lower-4, y=max(density$y), label = scales::percent(round(quant_lower)/100), size = annotation_text_size) + # , family="Meta"
+      ggplot2::annotate('text', x=quant_upper+4, y=max(density$y), label = scales::percent(round(quant_upper)/100), size = annotation_text_size)
   }
+
+  # Reorder legends so fill is on top
+  p <- p +
+    ggplot2::guides(fill = ggplot2::guide_legend(order = 1), linetype = ggplot2::guide_legend(order = 2))
+
   return(p)
 }

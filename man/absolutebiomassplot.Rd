@@ -49,7 +49,8 @@ absolutebiomassplot(
   input_range_colour = "black",
   aggregate_scenarios = FALSE,
   CI_range = 0.95,
-  alpha = NULL
+  alpha = NULL,
+  boxplot_outliers = TRUE
 )
 }
 \arguments{
@@ -146,6 +147,8 @@ Any scenarios not included in "scenario_order" will be tacked on in the order th
 \item{CI_range}{Specify credible interval range (numeric). Only activated if mcmc_style==CI.}
 
 \item{alpha}{Transparency for range (numeric) used in ggplot2::geom_density_ridges(). Default is 0.7.}
+
+\item{boxplot_outliers}{Set to FALSE to remove outlier points from boxplot. Default is TRUE.}
 }
 \value{
 A plot that shows input data and model fits to CPUE data

@@ -9,11 +9,12 @@
 #'
 #' @param data Dataframe output from summarytable_prep()
 #' @param label A label for the table that can be referenced elsewhere in the report using LaTeX syntax
+#' @param rows_to_include A vector of rows of data to include in the table (e.g. c(1,2,3) or 1:4). Default is NULL, which includes all rows.
 #' @param row_names An option to customise the text in the Indicator columns
 #' @param column_names An optional vector of column names
 #' @param caption Caption for table
-#' @param caption_placement Placement of table caption. Default is "top"
 #' @param align An optional vector of alignment for the table, input as a character string that is one character longer than the number of columns in the table. Default is centered.
+#' @param caption_placement Location of caption relative to table. Default is "top".
 #'
 #' @return Code that can be used within a code chunk in a RMarkdown style document to produce a summary table
 #' @export
@@ -25,11 +26,12 @@
 #' # @
 summarytable <- function (data,
                           label,
+                          rows_to_include = NULL,
                           row_names = NULL,
                           column_names = NULL,
                           caption = "Stock status indicators",
-                          caption_placement = "top",
-                          align = NULL) {
+                          align = NULL,
+                          caption_placement = "top") {
 
   if (missing(label)) {warning("Please specify a label for your table (e.g. label=\"tab:summary\")" )  }
 
@@ -39,6 +41,8 @@ summarytable <- function (data,
 
   if (!missing(column_names)) {colnames(data) <- column_names}
 
+  if (!missing(rows_to_include)) {data <- data[rows_to_include,]}
+
   print(xtable::xtable(data,
                        caption = caption,
                        align = align,
@@ -47,5 +51,6 @@ summarytable <- function (data,
         sanitize.colnames.function=function(x) paste('{\\textbf{',x,'}}', sep =''),
         sanitize.text.function= function(x) x,
         table.placement = "H",
-        caption.placement = caption_placement)
+        caption.placement = caption_placement
+  )
 }

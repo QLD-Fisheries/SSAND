@@ -7,11 +7,12 @@
 summarytable(
   data,
   label,
+  rows_to_include = NULL,
   row_names = NULL,
   column_names = NULL,
   caption = "Stock status indicators",
-  caption_placement = "top",
-  align = NULL
+  align = NULL,
+  caption_placement = "top"
 )
 }
 \arguments{
@@ -19,15 +20,17 @@ summarytable(
 
 \item{label}{A label for the table that can be referenced elsewhere in the report using LaTeX syntax}
 
+\item{rows_to_include}{A vector of rows of data to include in the table (e.g. c(1,2,3) or 1:4). Default is NULL, which includes all rows.}
+
 \item{row_names}{An option to customise the text in the Indicator columns}
 
 \item{column_names}{An optional vector of column names}
 
 \item{caption}{Caption for table}
 
-\item{caption_placement}{Placement of table caption. Default is "top"}
-
 \item{align}{An optional vector of alignment for the table, input as a character string that is one character longer than the number of columns in the table. Default is centered.}
+
+\item{caption_placement}{Location of caption relative to table. Default is "top".}
 }
 \value{
 Code that can be used within a code chunk in a RMarkdown style document to produce a summary table

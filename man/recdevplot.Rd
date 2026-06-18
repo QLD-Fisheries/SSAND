@@ -33,7 +33,8 @@ recdevplot(
   hair_width = 0.5,
   legend_box = "horizontal",
   legend_position = "top",
-  band_colour = "black"
+  band_colour = "black",
+  boxplot_outliers = TRUE
 )
 }
 \arguments{
@@ -81,7 +82,7 @@ Any scenarios not included in "scenario_order" will be tacked on in the order th
 
 \item{financial_year}{Set to TRUE if the assessment was based on financial year (logical). Adjusts the x-axis to show full financial year notation.}
 
-\item{mcmc_style}{The type of MCMC plot to be displayed (character). Options are "banded", "hairy", "boxplot", "CI" and "joy", the default is "banded". Only one option can be selected.}
+\item{mcmc_style}{The type of MCMC plot to be displayed (character). Options are "banded", "hairy", "boxplot" and "CI", the default is "banded". Only one option can be selected.}
 
 \item{show_median}{Logical, TRUE to show median line}
 
@@ -98,6 +99,8 @@ Any scenarios not included in "scenario_order" will be tacked on in the order th
 \item{legend_position}{Position of the legend ("none", "left", "right", "bottom", "top", or two-element numeric vector for x and y position). Default is "top".}
 
 \item{band_colour}{Colour of bands (character). Only used when mcmc_style=="banded". Input one colour, bands will be distinguished using an alpha.}
+
+\item{boxplot_outliers}{Set to FALSE to remove outlier points from boxplot. Default is TRUE.}
 }
 \value{
 Plot grid of recruitment deviations

@@ -11,8 +11,13 @@ mcmc_finalbiomassposteriorplot(
   ylab = NULL,
   legend_position = "top",
   CI_label_position = "bottom",
-  line_type = "dashed",
-  line_type_label = NULL
+  line_type = NULL,
+  line_type_label = NULL,
+  show_median = TRUE,
+  annotation_text_size = 5,
+  legend_text_size = 11.5,
+  axis_title_size = 13,
+  axis_text_size = 12
 )
 }
 \arguments{
@@ -26,11 +31,21 @@ mcmc_finalbiomassposteriorplot(
 
 \item{legend_position}{Position of the legend ("none", "left", "right", "bottom", "top", or two-element numeric vector for x and y position). Default is "top".}
 
-\item{CI_label_position}{Specify position for labels for 95\% confidence interval percentages. Default "bottom", alternative is "top".}
+\item{CI_label_position}{Specify position for labels for 95\% confidence interval percentages. Default "bottom", alternatives are "top" or "none".}
 
 \item{line_type}{Linetype for vertical lines. Default is "dashed".}
 
 \item{line_type_label}{Label for linetype legend. Default is "X\% falls within this range" where X is the credible_interval specified in the input data.}
+
+\item{show_median}{Default is TRUE. Set to FALSE to remove median line.}
+
+\item{annotation_text_size}{Size of annotation text (e.g. median and CI). Default is 5.}
+
+\item{legend_text_size}{Size of legend text. Default is 11.5.}
+
+\item{axis_title_size}{Sie of axis title. Default is 13.}
+
+\item{axis_text_size}{Size of axis text. Default is 12.}
 }
 \value{
 A posterior plot for final biomass ratio with risk area (below B20) highlighted

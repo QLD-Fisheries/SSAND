@@ -2,6 +2,7 @@
 #'
 #' @param data Dataframe output from biomasstable_prep()
 #' @param label A label for the table that can be referenced elsewhere in the report using LaTeX syntax
+#' @param include_median Set to FALSE to exclude median biomass estimates. Default is TRUE, which includes median biomass estimates.
 #' @param row_names An option to customise the text in the Indicator columns
 #' @param column_names An optional vector of column names
 #' @param caption Caption for table
@@ -15,8 +16,14 @@
 #' data <- biomasstable_prep_SS(ss_mle,ss_mcmc)
 #' biomasstable(data, label="tab:biomass")
 #' # @
+#'
+#' # <<table_biomass, results='asis', echo=FALSE>>=
+#' data <- biomasstable_prep_SS(ss_mle,ss_mcmc)
+#' biomasstable(data, label="tab:biomass",include_median=FALSE)
+#' # @
 biomasstable <- function (data,
                           label,
+                          include_median = TRUE,
                           row_names = NULL,
                           column_names = NULL,
                           caption = NULL,
@@ -26,13 +33,23 @@ biomasstable <- function (data,
 
   if (!missing(row_names) & length(row_names) != nrow(data[[1]])) {warning("If customising the row names, you must specify the label for every row in the table.")}
 
-  if (missing(align)) {align = paste(rep("c",ncol(data[[1]])+1), collapse = '')}
 
   if (missing(caption)) {caption = paste0("Summary of model outcomes for all scenarios.$B_{",
                                           data[[3]],"}$\\% is the most likely biomass in ",
                                           data[[3]]," relative to unfished in ",
                                           data[[2]]," with the 95\\% confidence interval for maximum likelihoods estimations and 95\\% credible interval for MCMC estimations.")
   }
+
+  if (!include_median) {
+    cols <- c(1,3,4,6,7)
+    original_names <- colnames(data[[1]])
+
+    data[[1]] <- data[[1]][, cols, drop = FALSE]
+    colnames(data[[1]]) <- original_names[cols]
+    rm(original_names)
+  }
+
+  if (missing(align)) {align = paste(rep("c",ncol(data[[1]])+1), collapse = '')}
 
   # Create xtable object
   xtable_obj <- xtable::xtable(data[[1]], caption = caption, label = label, align = align, collapse = "")
@@ -52,23 +69,40 @@ biomasstable <- function (data,
   # Convert the captured output to a single string
   tab <- paste(tab, collapse = "\n")
 
-  # Add the table environment manually
-  tab <- paste0("\\rowcolors{2}{light-gray}{white} \n",
-                       "\\begin{table}[H] \n",
-                       "\\small \n",
-                       "\\centering \n",
-                       "\\caption{",caption,"} \n",
-                       "\\begin{tabular}{m{0.08\\textwidth}  m{0.1\\textwidth} m{0.1\\textwidth} m{0.1\\textwidth}  | m{0.1\\textwidth} m{0.1\\textwidth} m{0.1\\textwidth}  } \n",
-                       "\\hline \n",
-                       "\\rowcolor{white} \n",
-                       "\\multicolumn{1}{l}{\\textbf{Scenario}} &  \\multicolumn{3}{c}{\\textbf{MLE}} & \\multicolumn{3}{c}{\\textbf{MCMC}}\\\\ \n",
-                       "\\cmidrule(l){2-4} \\cmidrule(l){5-7} \n",
-
-                       tab,
-                       "\\end{tabular} \n",
-                       "\\label{",label,"} \n",
-                       "\\end{table} \n"
-  )
+  if (include_median) {
+    # Add the table environment manually
+    tab <- paste0("\\rowcolors{2}{light-gray}{white} \n",
+                  "\\begin{table}[H] \n",
+                  "\\small \n",
+                  "\\centering \n",
+                  "\\caption{",caption,"} \n",
+                  "\\begin{tabular}{m{0.08\\textwidth}  m{0.1\\textwidth} m{0.1\\textwidth} m{0.1\\textwidth}  | m{0.1\\textwidth} m{0.1\\textwidth} m{0.1\\textwidth}  } \n",
+                  "\\hline \n",
+                  "\\rowcolor{white} \n",
+                  "\\multicolumn{1}{l}{\\textbf{Scenario}} &  \\multicolumn{3}{c}{\\textbf{MLE}} & \\multicolumn{3}{c}{\\textbf{MCMC}}\\\\ \n",
+                  "\\cmidrule(l){2-4} \\cmidrule(l){5-7} \n",
+                  tab,
+                  "\\end{tabular} \n",
+                  "\\label{",label,"} \n",
+                  "\\end{table} \n"
+    )
+  } else {
+    tab <- paste0("\\rowcolors{2}{light-gray}{white} \n",
+                  "\\begin{table}[H] \n",
+                  "\\small \n",
+                  "\\centering \n",
+                  "\\caption{",caption,"} \n",
+                  "\\begin{tabular}{m{0.08\\textwidth}  m{0.15\\textwidth} m{0.15\\textwidth}  | m{0.15\\textwidth} m{0.15\\textwidth}  } \n",
+                  "\\hline \n",
+                  "\\rowcolor{white} \n",
+                  "\\multicolumn{1}{l}{\\textbf{Scenario}} &  \\multicolumn{2}{c}{\\textbf{MLE}} & \\multicolumn{2}{c}{\\textbf{MCMC}}\\\\ \n",
+                  "\\cmidrule(l){2-3} \\cmidrule(l){4-5} \n",
+                  tab,
+                  "\\end{tabular} \n",
+                  "\\label{",label,"} \n",
+                  "\\end{table} \n"
+    )
+  }
 
   return(cat(tab))
 }
