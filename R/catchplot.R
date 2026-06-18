@@ -44,43 +44,34 @@
 #' data <- catchplot_prep_DD(dd_mle)
 #' catchplot(data)
 catchplot <- function(data,
-  xlab = "Year",
-  ylab = NULL,
-  xbreaks = NULL,
-  ybreaks = NULL,
-  xlabels = NULL,
-  ylabels = NULL,
-  xlim = NULL,
-  ylim = NULL,
-  xangle = NULL,
-  financial_year = FALSE,
-  fleet_names = NULL,
-  colours = NULL,
-  legend_position = "top",
-  reverse = FALSE,
-  strip_position = NA,
-  show_annual_aggregate = FALSE,
-  show_dates_on_axis = FALSE,
-  scenarios = NULL,
-  scenario_labels = NULL,
-  scenario_order = NULL,
-  scales = 'free',
-  ncol = 2
+                      xlab = "Year",
+                      ylab = NULL,
+                      xbreaks = NULL,
+                      ybreaks = NULL,
+                      xlabels = NULL,
+                      ylabels = NULL,
+                      xlim = NULL,
+                      ylim = NULL,
+                      xangle = NULL,
+                      financial_year = FALSE,
+                      fleet_names = NULL,
+                      colours = NULL,
+                      legend_position = "top",
+                      reverse = FALSE,
+                      strip_position = NA,
+                      show_annual_aggregate = FALSE,
+                      show_dates_on_axis = FALSE,
+                      scenarios = NULL,
+                      scenario_labels = NULL,
+                      scenario_order = NULL,
+                      scales = 'free',
+                      ncol = 2
 ) { # function name with default values
 
   # Data input warnings
-  if(!"date" %in% names(data)) {
-    warning("Input data is missing date column")
-  }
-  if(!"value" %in% names(data)) {
-    warning("Input data is missing value column")
-  }
-  if(!"fleet" %in% names(data)) {
-    warning("Input data is missing fleet column")
-  }
-  if(!"scenario" %in% names(data)) {
-    warning("Input data is missing scenario column")
-  }
+  check_data_columns(c("date","value","fleet","scenario"))
+
+
 
   if(missing(ylab)) {
     if("partition" %in% names(data)) {
@@ -153,6 +144,7 @@ catchplot <- function(data,
   # if(!show_dates_on_axis) {
   #   data <- dplyr::mutate(data, date = lubridate::year(date))
   # }
+
   if(missing(xlim)) {
     xlim <- c(min(data$date), max(data$date) + 1)
   }
@@ -163,6 +155,7 @@ catchplot <- function(data,
   if(missing(xbreaks)) {
     xbreaks <- pretty(xlim)
   }
+
   if(missing(ybreaks)) {
     ybreaks <- pretty(ylim)
   }
@@ -170,6 +163,7 @@ catchplot <- function(data,
   # if(missing(xlabels)) {
   #   xlabels <- xbreaks
   # }
+
   if(missing(ylabels)) {
     ylabels <- ybreaks
   }
@@ -193,25 +187,25 @@ catchplot <- function(data,
   }
 
   p <- ggplot2::ggplot(data) +
+    get_theme_ssand() +
     ggplot2::geom_bar(data,
-      mapping  = ggplot2::aes(x = date, y = value, fill = as.factor(fleet)),
-      position = ggplot2::position_stack(reverse = reverse),
-      stat     = 'identity'
+                      mapping  = ggplot2::aes(x = date, y = value, fill = as.factor(fleet)),
+                      position = ggplot2::position_stack(reverse = reverse),
+                      stat     = 'identity'
     ) +
     ggplot2::xlab(xlab) +
     ggplot2::ylab(ylab) +
-    ggplot2::theme_bw() +
     ggplot2::scale_fill_manual(values = colours) +
     ggplot2::scale_colour_manual(values = "#3d4040") +
-    ggplot2::theme(
-      panel.background = ggplot2::element_rect(fill = NA, colour = "black"),
-      legend.title     = ggplot2::element_blank(),
-      legend.position  = legend_position
-    ) +
-    ggplot2::theme(text = ggplot2::element_text(size = 12), legend.text = ggplot2::element_text(size = 12)) +
     ggplot2::scale_x_continuous(limits = as.numeric(xlim), breaks = xbreaks, labels = xlabels) +
-    ggplot2::scale_y_continuous(limits = as.numeric(ylim), breaks = ybreaks, labels = ylabels) +
-    ggplot2::theme(axis.text.x = ggplot2::element_text(angle = xangle, vjust = 0.5, hjust = ifelse(xangle == 90, 0, 0.5)))
+    ggplot2::scale_y_continuous(limits = as.numeric(ylim), breaks = ybreaks, labels = ylabels)
+    # ggplot2::theme(
+    #   panel.background = ggplot2::element_rect(fill = NA, colour = "black"),
+    #   legend.title     = ggplot2::element_blank(),
+    #   legend.position  = legend_position
+    # ) +
+    # ggplot2::theme(text = ggplot2::element_text(size = 12), legend.text = ggplot2::element_text(size = 12)) +
+    # ggplot2::theme(axis.text.x = ggplot2::element_text(angle = xangle, vjust = 0.5, hjust = ifelse(xangle == 90, 0, 0.5)))
 
   if(length(unique(data$scenario)) > 1){
     p <- p +

@@ -120,21 +120,12 @@ biomassplot <- function(data,
   MCMC <- "med" %in% names(data)
 
   # Data input warnings
-  if (!MCMC & !"year"          %in% names(data)) {warning("Input data is missing year column")}
-  if (!MCMC & !"value"         %in% names(data)) {warning("Input data is missing value column")}
-  if (!MCMC & !"upper"         %in% names(data)) {warning("Input data is missing upper column")}
-  if (!MCMC & !"lower"         %in% names(data)) {warning("Input data is missing lower column")}
-  if (!MCMC & !"scenario"      %in% names(data)) {warning("Input data is missing scenario column")}
-  if (!MCMC & !"biomass_type"  %in% names(data)) {warning("Input data is missing biomass_type column")}
+  if (!MCMC) {
+    check_data_columns(c("year","value","upper","lower","scenario","biomass_type"))
+  } else {
+    check_data_columns(c("rownum","scenario","year","value","interval","prob_lower","prob_upper","biomass_type"))
+  }
 
-  if (MCMC & !"rownum"        %in% names(data)) {warning("Input data is missing rownum column")}
-  if (MCMC & !"scenario"      %in% names(data)) {warning("Input data is missing scenario column")}
-  if (MCMC & !"year"          %in% names(data)) {warning("Input data is missing year column")}
-  if (MCMC & !"value"         %in% names(data)) {warning("Input data is missing value column")}
-  if (MCMC & !"interval"      %in% names(data)) {warning("Input data is missing interval column")}
-  if (MCMC & !"prob_lower"    %in% names(data)) {warning("Input data is missing prob_lower column")}
-  if (MCMC & !"prob_upper"    %in% names(data)) {warning("Input data is missing prob_upper column")}
-  if (MCMC & !"biomass_type"  %in% names(data)) {warning("Input data is missing biomass_type column")}
 
   biomass_type <- data$biomass_type[1]
   biomass_definition_label <- ifelse(data$biomass_definition == 'spawning', 'Spawning', 'Vulnerable')

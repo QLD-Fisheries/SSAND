@@ -124,37 +124,22 @@ cpueplot <- function(data,
                      boxplot_outliers = TRUE) {
 
   # 📐Set up ----
-  if ("med" %in% names(data)) {MCMC <- TRUE} else {MCMC <- FALSE}
+  MCMC <- "med" %in% names(data)
 
   # Data input warnings
-  if (!MCMC & !"date" %in% names(data)) {warning("Input data is missing date column")}
-  if (!MCMC & !"fleet" %in% names(data)) {warning("Input data is missing fleet column")}
-  if (!MCMC & !"obs" %in% names(data)) {warning("Input data is missing obs column")}
-  if (!MCMC & !"exp" %in% names(data)) {warning("Input data is missing exp column")}
-  if (!MCMC & !"ub" %in% names(data)) {warning("Input data is missing ub column")}
-  if (!MCMC & !"lb" %in% names(data)) {warning("Input data is missing lb column")}
-  if (!MCMC & !"scenario" %in% names(data)) {warning("Input data is missing scenario column")}
+  if (!MCMC) {
+    check_data_columns(c("date","fleet","obs","exp","ub","lb","scenario"))
+  } else {
+    check_data_columns(c("year","month","fleet","obs","exp","ub","lb","rownum","med","interval","date","scenario"))
+  }
 
-  if (MCMC & !"year" %in% names(data)) {warning("Input data is missing year column")}
-  if (MCMC & !"month" %in% names(data)) {warning("Input data is missing month column")}
-  if (MCMC & !"fleet" %in% names(data)) {warning("Input data is missing fleet column")}
-  if (MCMC & !"obs" %in% names(data)) {warning("Input data is missing obs column")}
-  if (MCMC & !"exp" %in% names(data)) {warning("Input data is missing exp column")}
-  if (MCMC & !"ub" %in% names(data)) {warning("Input data is missing ub column")}
-  if (MCMC & !"lb" %in% names(data)) {warning("Input data is missing lb column")}
-  if (MCMC & !"rownum" %in% names(data)) {warning("Input data is missing rownum column")}
-  if (MCMC & !"med" %in% names(data)) {warning("Input data is missing med column")}
-  if (MCMC & !"interval" %in% names(data)) {warning("Input data is missing interval column")}
-  if (MCMC & !"date" %in% names(data)) {warning("Input data is missing date column")}
-  if (MCMC & !"scenario" %in% names(data)) {warning("Input data is missing scenario column")}
 
-  if (!show_negative) {data <- dplyr::mutate(data, lb = ifelse(lb<0,0,lb))}
+
+    if (!show_negative) {data <- dplyr::mutate(data, lb = ifelse(lb<0,0,lb))}
 
   if (financial_year & xlab=="Year") {warning("Your x-axis implies calendar year, but you've indicated you're using financial year.")}
 
   if (!missing(fleets)) {data <- data |> dplyr::filter(fleet %in% fleets)}
-
-
 
 
   # If "date" column is entered as just years, convert to dates
@@ -236,11 +221,11 @@ cpueplot <- function(data,
 
     # General
     p <- ggplot2::ggplot(data[which(data$fleet %in% as.character(fleets)),]) +
-      ggplot2::theme_bw() +
+      get_theme_ssand() +
       ggplot2::xlab(xlab) +
-      ggplot2::ylab(ylab) +
-      ggplot2::theme(text = ggplot2::element_text(size=text_size)) +
-      ggplot2::theme(legend.title=ggplot2::element_blank(), legend.position = legend_position)
+      ggplot2::ylab(ylab)
+      # ggplot2::theme(text = ggplot2::element_text(size=text_size)) +
+      # ggplot2::theme(legend.title=ggplot2::element_blank(), legend.position = legend_position)
 
     # Model inputs
     if (show_CI_ribbon){
@@ -283,16 +268,16 @@ cpueplot <- function(data,
     # General
     p <- p +
       ggplot2::scale_x_date(limits = xlim, breaks = xbreaks, labels = xlabels) +
-      ggplot2::scale_y_continuous(limits = ylim) +
-      ggplot2::theme(axis.text.x = ggplot2::element_text(angle = xangle, vjust = 0.5, hjust=ifelse(xangle==90,0,0.5)))
+      ggplot2::scale_y_continuous(limits = ylim)
+      # ggplot2::theme(axis.text.x = ggplot2::element_text(angle = xangle, vjust = 0.5, hjust=ifelse(xangle==90,0,0.5)))
 
     if (length(unique(data$scenario))>1){
       p <- p +
         ggplot2::facet_wrap(~scenario_labels, scales = scales, ncol = ncol)
     }
 
-    p <- p +
-      ggplot2::theme(legend.title=ggplot2::element_blank(), legend.position = legend_position)
+    # p <- p +
+      # ggplot2::theme(legend.title=ggplot2::element_blank(), legend.position = legend_position)
 
     p <- p +
       ggplot2::scale_colour_manual(values = colours, labels = fleet_names)
@@ -418,14 +403,14 @@ cpueplot <- function(data,
     p <- p +
       ggplot2::scale_x_date(limits = xlim, breaks = xbreaks, labels = xlabels) +
       ggplot2::scale_y_continuous(limits = ylim, breaks = ybreaks, labels = ylabels) +
-      ggplot2::theme_bw() +
+      # ggplot2::theme_bw() +
       ggplot2::xlab(xlab) +
-      ggplot2::ylab(ylab) +
-      ggplot2::theme(legend.position=legend_position) +
-      ggplot2::theme(legend.text = ggplot2::element_text(size=text_size)) +
-      ggplot2::theme(text = ggplot2::element_text(size=text_size)) +
-      ggplot2::theme(legend.box=legend_box) +
-      ggplot2::theme(axis.text.x = ggplot2::element_text(angle = xangle, vjust = 0.5, hjust=ifelse(xangle==90,0,0.5)))
+      ggplot2::ylab(ylab)
+      # ggplot2::theme(legend.position=legend_position) +
+      # ggplot2::theme(legend.text = ggplot2::element_text(size=text_size)) +
+      # ggplot2::theme(text = ggplot2::element_text(size=text_size)) +
+      # ggplot2::theme(legend.box=legend_box) +
+      # ggplot2::theme(axis.text.x = ggplot2::element_text(angle = xangle, vjust = 0.5, hjust=ifelse(xangle==90,0,0.5)))
 
     # Facet wrap
     if (length(unique(data$scenario))>1) {
