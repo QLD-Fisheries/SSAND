@@ -40,6 +40,7 @@
 #' @param legend_box Display option for legend (character). Choose "vertical" to stack legend types vertically, or "horizontal" to keep legends in one row.
 #' @param legend_position Position of the legend ("none", "left", "right", "bottom", "top", or two-element numeric vector for x and y position). Default is "top".
 #' @param band_colour Colour of bands (character). Only used when mcmc_style=="banded". Input one colour, bands will be distinguished using an alpha.
+#' @param boxplot_outliers Set to FALSE to remove outlier points from boxplot. Default is TRUE.
 #'
 #' @return Plot grid of recruitment deviations
 #' @export
@@ -80,7 +81,8 @@ recdevplot <- function(data,
                        hair_width = 0.5,
                        legend_box = "horizontal",
                        legend_position= "top",
-                       band_colour = "black"
+                       band_colour = "black",
+                       boxplot_outliers = TRUE
                        ){
 
   MCMC <- "med" %in% names(data)
@@ -178,7 +180,7 @@ recdevplot <- function(data,
       xlim[2] <- xlim[2]+0.5
 
       p <- ggplot2::ggplot(data) +
-        ggplot2::geom_boxplot(data = databox, ggplot2::aes(x=year, y=value, group=year))
+        ggplot2::geom_boxplot(data = databox, ggplot2::aes(x=year, y=value, group=year), outliers = boxplot_outliers)
     }
 
     # Banded plot

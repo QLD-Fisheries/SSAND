@@ -50,7 +50,8 @@ cpueplot(
   aggregate_scenarios = FALSE,
   CI_range = 0.95,
   alpha = NULL,
-  fit_colour = NULL
+  fit_colour = NULL,
+  boxplot_outliers = TRUE
 )
 }
 \arguments{
@@ -149,6 +150,8 @@ Any scenarios not included in "scenario_order" will be tacked on in the order th
 \item{alpha}{Transparency for range (numeric) used in ggplot2::geom_density_ridges(). Default is 0.7.}
 
 \item{fit_colour}{Default is fleet colour. Otherwise input a colour here (useful when displaying fleets in a facet_wrap)}
+
+\item{boxplot_outliers}{Set to FALSE to remove outlier points from boxplot. Default is TRUE.}
 }
 \value{
 A plot that shows input data and model fits to CPUE data

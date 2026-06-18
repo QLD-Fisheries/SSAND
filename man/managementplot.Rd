@@ -43,7 +43,8 @@ managementplot(
   show_median = "none",
   legend_name = "Legend",
   legend_entries = c("Biomass estimate", "Range of biomass estimates",
-    "PLEASE CUSTOMISE legend_entries", "x", "x", "x", "x", "x", "x", "x", "x", "x")
+    "PLEASE CUSTOMISE legend_entries", "x", "x", "x", "x", "x", "x", "x", "x", "x"),
+  boxplot_outliers = TRUE
 )
 }
 \arguments{
@@ -124,6 +125,8 @@ managementplot(
 \item{legend_name}{Name of legend}
 
 \item{legend_entries}{A vector of labels for the legend.}
+
+\item{boxplot_outliers}{Set to FALSE to remove outlier points from boxplot. Default is TRUE.}
 }
 \value{
 A management plot, saved in the location specified in plotdir

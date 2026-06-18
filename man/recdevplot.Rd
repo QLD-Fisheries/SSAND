@@ -33,7 +33,8 @@ recdevplot(
   hair_width = 0.5,
   legend_box = "horizontal",
   legend_position = "top",
-  band_colour = "black"
+  band_colour = "black",
+  boxplot_outliers = TRUE
 )
 }
 \arguments{
@@ -98,6 +99,8 @@ Any scenarios not included in "scenario_order" will be tacked on in the order th
 \item{legend_position}{Position of the legend ("none", "left", "right", "bottom", "top", or two-element numeric vector for x and y position). Default is "top".}
 
 \item{band_colour}{Colour of bands (character). Only used when mcmc_style=="banded". Input one colour, bands will be distinguished using an alpha.}
+
+\item{boxplot_outliers}{Set to FALSE to remove outlier points from boxplot. Default is TRUE.}
 }
 \value{
 Plot grid of recruitment deviations

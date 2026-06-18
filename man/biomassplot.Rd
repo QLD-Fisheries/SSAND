@@ -45,7 +45,8 @@ biomassplot(
   shapes = c(16, 18, 17),
   band_colour = "black",
   band_labels = NULL,
-  show_final_biomass = FALSE
+  show_final_biomass = FALSE,
+  boxplot_outliers = TRUE
 )
 }
 \arguments{
@@ -134,6 +135,8 @@ Any scenarios not included in "scenario_order" will be tacked on in the order th
 \item{band_labels}{Labels for bands. Default is NULL and interval is used.}
 
 \item{show_final_biomass}{Set to TRUE to show final biomass value at the end of the time series.}
+
+\item{boxplot_outliers}{Set to FALSE to remove outlier points from boxplot. Default is TRUE.}
 }
 \value{
 Biomass plot

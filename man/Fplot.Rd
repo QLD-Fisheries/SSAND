@@ -34,7 +34,8 @@ Fplot(
   legend_position = "top",
   band_colour = "black",
   line_type = c("solid", "dashed"),
-  colours = c("black", "darkred")
+  colours = c("black", "darkred"),
+  boxplot_outliers = TRUE
 )
 }
 \arguments{
@@ -103,6 +104,8 @@ Any scenarios not included in "scenario_order" will be tacked on in the order th
 \item{line_type}{A vector of linetypes (e.g. "solid", "dashed") for median lines.}
 
 \item{colours}{A vector of colours used (character).}
+
+\item{boxplot_outliers}{Set to FALSE to remove outlier points from boxplot. Default is TRUE.}
 }
 \value{
 Fishing mortality plot

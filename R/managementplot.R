@@ -47,6 +47,7 @@
 #' "parameters" uses median of each parameter (not yet implemented)
 #' @param legend_name Name of legend
 #' @param legend_entries A vector of labels for the legend.
+#' @param boxplot_outliers Set to FALSE to remove outlier points from boxplot. Default is TRUE.
 #'
 #' @return A management plot, saved in the location specified in plotdir
 #' @export
@@ -125,7 +126,8 @@ managementplot <- function(data,
                            band_colour = "black",
                            show_median = "none",
                            legend_name = "Legend",
-                           legend_entries = c("Biomass estimate","Range of biomass estimates","PLEASE CUSTOMISE legend_entries","x","x","x","x","x","x","x","x","x")
+                           legend_entries = c("Biomass estimate","Range of biomass estimates","PLEASE CUSTOMISE legend_entries","x","x","x","x","x","x","x","x","x"),
+                           boxplot_outliers = TRUE
 ) {
 
   # Magick (image overlay) code adapted from https://themockup.blog/posts/2019-01-09-add-a-logo-to-your-plot/
@@ -306,7 +308,7 @@ managementplot <- function(data,
       xlim[2] <- xlim[2]+0.5
 
       p <- ggplot2::ggplot(data) +
-        ggplot2::geom_boxplot(data = databox, ggplot2::aes(x=year, y=value, group=year))
+        ggplot2::geom_boxplot(data = databox, ggplot2::aes(x=year, y=value, group=year), outliers = boxplot_outliers)
     }
 
     # Banded plot

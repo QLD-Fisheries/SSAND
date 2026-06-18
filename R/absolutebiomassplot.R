@@ -56,6 +56,7 @@
 #' @param aggregate_scenarios Set to TRUE to calculate credible intervals across all scenarios (logical). Only activated if mcmc_style==CI.
 #' @param CI_range Specify credible interval range (numeric). Only activated if mcmc_style==CI.
 #' @param alpha Transparency for range (numeric) used in ggplot2::geom_density_ridges(). Default is 0.7.
+#' @param boxplot_outliers Set to FALSE to remove outlier points from boxplot. Default is TRUE.
 #'
 #' @return A plot that shows input data and model fits to CPUE data
 #' @export
@@ -110,7 +111,8 @@ absolutebiomassplot <- function(data,
                                 input_range_colour = "black",
                                 aggregate_scenarios = FALSE,
                                 CI_range = 0.95,
-                                alpha = NULL) {
+                                alpha = NULL,
+                                boxplot_outliers = TRUE) {
 
   # 📐Set up ----
   if ("med" %in% names(data)) {MCMC <- TRUE} else {MCMC <- FALSE}
@@ -308,7 +310,7 @@ absolutebiomassplot <- function(data,
       xlim[2] <- xlim[2]+0.5
 
       p <- ggplot2::ggplot(data) +
-        ggplot2::geom_boxplot(data = databox, ggplot2::aes(x=year, y=obs, group=date))
+        ggplot2::geom_boxplot(data = databox, ggplot2::aes(x=year, y=obs, group=date), outliers = boxplot_outliers)
     }
 
     # Banded plot
