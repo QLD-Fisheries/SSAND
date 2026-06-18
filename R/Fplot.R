@@ -87,26 +87,17 @@ Fplot <- function(data,
                   band_colour = "black",
                   line_type = c("solid","dashed"),
                   colours = c("black","darkred"),
-                  boxplot_outliers = TRUE
-){
+                  boxplot_outliers = TRUE){
 
+  # Identify MCMC or MLE
   MCMC <- "med" %in% names(data)
 
   # Data input warnings
-  if (!MCMC & !"year" %in% names(data)) {warning("Input data is missing year column")}
-  if (!MCMC & !"value" %in% names(data)) {warning("Input data is missing value column")}
-  if (!MCMC & !"upper" %in% names(data)) {warning("Input data is missing upper column")}
-  if (!MCMC & !"lower" %in% names(data)) {warning("Input data is missing lower column")}
-  if (!MCMC & !"scenario" %in% names(data)) {warning("Input data is missing scenario column")}
-
-  if (MCMC & !"rownum" %in% names(data)) {warning("Input data is missing rownum column")}
-  if (MCMC & !"scenario" %in% names(data)) {warning("Input data is missing scenario column")}
-  if (MCMC & !"year" %in% names(data)) {warning("Input data is missing year column")}
-  if (MCMC & !"value" %in% names(data)) {warning("Input data is missing value column")}
-  if (MCMC & !"med" %in% names(data)) {warning("Input data is missing med column")}
-  if (MCMC & !"interval" %in% names(data)) {warning("Input data is missing interval column")}
-  if (MCMC & !"prob_lower" %in% names(data)) {warning("Input data is missing prob_lower column")}
-  if (MCMC & !"prob_upper" %in% names(data)) {warning("Input data is missing prob_upper column")}
+  if (!MCMC) {
+    check_data_columns(data, c("year","value","upper","lower","scenario"))
+  } else {
+    check_data_columns(data, c("rownum","scenario","year","value","med","interval","prob_lower","prob_upper"))
+  }
 
   if (!missing(scenarios)){data <- data |> dplyr::filter(scenario %in% scenarios)}
 

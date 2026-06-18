@@ -33,6 +33,11 @@ andreplot <- function(data,
                       legend_position = "top",
                       legend_ratio = c(1,10)) {
 
+  # Data input warnings
+  check_data_columns(data, c("year","length","obs","pred","low","upp","label","scenario","CI"))
+
+
+
   if (!missing(years)) {data <- data |> dplyr::filter(year %in% years)}
   scenario_var <- scenario
   fleet_var <- fleet

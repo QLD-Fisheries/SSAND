@@ -39,14 +39,11 @@ srplot <- function(data,
                    scenario_order = NULL,
                    scales = 'free',
                    ncol = 2){
+
   # Data input warnings
-  if (!"year" %in% names(data)) {warning("Input data is missing year column")}
-  if (!"spawn_bio" %in% names(data)) {warning("Input data is missing spawn_bio column")}
-  if (!"pred_recr" %in% names(data)) {warning("Input data is missing pred_recr column")}
-  if (!"exp_recr" %in% names(data)) {warning("Input data is missing exp_recr column")}
-  if (!"dev" %in% names(data)) {warning("Input data is missing dev column")}
-  if (!"bias_adjusted" %in% names(data)) {warning("Input data is missing bias_adjusted column")}
-  if (!"scenario" %in% names(data)) {warning("Input data is missing scenario column")}
+  check_data_columns(data, c("year","spawn_bio","pred_recr","exp_recr","dev","bias_adjusted","scenario"))
+
+
 
   if (missing(xbreaks)) {xbreaks <- seq(0,1,0.2)}
 

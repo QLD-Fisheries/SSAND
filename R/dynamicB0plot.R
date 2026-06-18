@@ -63,11 +63,8 @@ dynamicB0plot <- function(data,
                           line_width = 0.7) {
 
   # Data input warnings
-  if (!"year" %in% names(data)) {warning("Input data is missing year column")}
-  if (!"era" %in% names(data)) {warning("Input data is missing era column")}
-  if (!"type" %in% names(data)) {warning("Input data is missing type column")}
-  if (!"value" %in% names(data)) {warning("Input data is missing value column")}
-  if (!"scenario" %in% names(data)) {warning("Input data is missing scenario column")}
+  check_data_columns(data, c("year","era","type","value","scenario"))
+
 
   if (!missing(scenarios)){data <- data |> dplyr::filter(scenario %in% scenarios)}
 

@@ -75,16 +75,13 @@ selectivityplot <- function(data,
                             show_ribbon = TRUE,
                             time_blocks = FALSE,
                             years = NULL) {
-  if (data$scenario[1]=="Ensemble") {MCMC<-TRUE}else{MCMC<-FALSE}
+
+  # Identify MCMC or MLE
+  MCMC <- data$scenario[1]=="Ensemble"
 
   # Data input warnings
-  if (!"fleet" %in% names(data)) {warning("Input data is missing fleet column")}
-  if (!"year" %in% names(data)) {warning("Input data is missing year column")}
-  if (!"sex" %in% names(data)) {warning("Input data is missing sex column")}
-  if (!"value" %in% names(data)) {warning("Input data is missing value column")}
-  if (!"type" %in% names(data)) {warning("Input data is missing type column")}
-  if (!"selectivity" %in% names(data)) {warning("Input data is missing selectivity column")}
-  if (!"scenario" %in% names(data)) {warning("Input data is missing scenario column")}
+  check_data_columns(data, c("fleet","year","sex","value","type","selectivity","scenario"))
+
 
   if (missing(fleets)) {fleets <- unique(data$fleet)}
 

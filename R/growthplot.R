@@ -44,21 +44,16 @@ growthplot <- function(data,
                        ncol = 2,
                        variation_on_variation = FALSE) {
 
-  if ("CV_lower"%in%names(data)) {MCMC<-TRUE} else {MCMC<-FALSE}
+
+  # Identify MCMC or MLE
+  MCMC <- "CV_lower" %in% names(data)
 
   # Data input warnings
-  if (!"age" %in% names(data)) {warning("Input data is missing age column")}
-  if (!"value" %in% names(data)) {warning("Input data is missing value column")}
-  if (!"lower" %in% names(data)) {warning("Input data is missing lower column")}
-  if (!"upper" %in% names(data)) {warning("Input data is missing upper column")}
-  if (!"sex" %in% names(data)) {warning("Input data is missing sex column")}
-  if (!"scenario" %in% names(data)) {warning("Input data is missing scenario column")}
+  check_data_columns(data, c("age","value","lower","upper","sex","scenario"))
   if (MCMC) {
-    if (!"CV_lower" %in% names(data)) {warning("Input data is missing CV_lower column")}
-    if (!"CV_middle" %in% names(data)) {warning("Input data is missing CV_middle column")}
-    if (!"CV_upper" %in% names(data)) {warning("Input data is missing CV_upper column")}
-    if (!"growthCVtype" %in% names(data)) {warning("Input data is missing growthCVtype column")}
+    check_data_columns(data, c("CV_lower","CV_middle","CV_upper","growthCVtype"))
   }
+
 
   if (missing(show_two_sex)) {
     tmp1 <- 1 %in% data$sex

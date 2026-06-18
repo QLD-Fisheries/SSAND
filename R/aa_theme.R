@@ -37,7 +37,7 @@ theme_ssand <- function(
 get_theme_ssand <- function() {
   getOption("ssand.theme", theme_ssand())
 }
-# Use     get_theme_ssand()  in each plot function
+# Use get_theme_ssand()  in each plot function
 
 set_theme_ssand <- function(theme) {
   options(ssand.theme = theme)

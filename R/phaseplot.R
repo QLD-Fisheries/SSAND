@@ -45,12 +45,9 @@ phaseplot <- function(data,
                       ylab = expression(Fishing~pressure~ratio~(relative~to~F[MSY]))) {
 
   # Data input warnings
-  if (!"year" %in% names(data)) {warning("Input data is missing year column")}
-  if (!"Bratio" %in% names(data)) {warning("Input data is missing Bratio column")}
-  if (!"F_" %in% names(data)) {warning("Input data is missing F_ column")}
-  if (!"scenario" %in% names(data)) {warning("Input data is missing scenario column")}
-  if (!"B_MSY" %in% names(data)) {warning("Input data is missing B_MSY column")}
-  if (!"F_max" %in% names(data)) {warning("Input data is missing F_max column")}
+  check_data_columns(data, c("year","Bratio","F_","scenario","B_MSY","F_max"))
+
+
   if (!missing(scenarios)){data <- data |> dplyr::filter(scenario %in% scenarios)}
 
   if (missing(scenario_labels)) {

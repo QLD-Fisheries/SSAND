@@ -38,10 +38,9 @@ weightplot <- function(data,
                        ncol = 2) {
 
   # Data input warnings
-  if (!"xvar" %in% names(data)) {warning("Input data is missing xvar column")}
-  if (!"weight" %in% names(data)) {warning("Input data is missing weight column")}
-  if (!"scenario" %in% names(data)) {warning("Input data is missing scenario column")}
-  if (!"sex" %in% names(data)) {warning("Input data is missing sex column")}
+  check_data_columns(data, c("xvar","weight","scenario","sex"))
+
+
 
   if (!missing(scenarios)){data <- data |> dplyr::filter(scenario %in% scenarios)}
 

@@ -41,12 +41,8 @@ catchabilityplot <- function(data,
                              scenario_order = NULL) {
 
   # Data input warnings
-  if (!"q" %in% names(data)) {warning("Input data is missing q column")}
-  if (!"month" %in% names(data)) {warning("Input data is missing month column")}
-  if (!"fleet" %in% names(data)) {warning("Input data is missing fleet column")}
-  if (!"scenario" %in% names(data)) {warning("Input data is missing scenario column")}
-  if (!"month_point" %in% names(data)) {warning("Input data is missing month_point column")}
-  if (!"monthnames" %in% names(data)) {warning("Input data is missing monthnames  column")}
+  check_data_columns(data, c("q","month","fleet","scenario","month_point","monthnames"))
+
 
   ylim <- c(0,max(data$q))
   ybreaks <- pretty(ylim)

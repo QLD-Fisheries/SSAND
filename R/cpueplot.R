@@ -123,14 +123,14 @@ cpueplot <- function(data,
                      fit_colour = NULL,
                      boxplot_outliers = TRUE) {
 
-  # 📐Set up ----
+  # Identify MCMC or MLE
   MCMC <- "med" %in% names(data)
 
   # Data input warnings
   if (!MCMC) {
-    check_data_columns(c("date","fleet","obs","exp","ub","lb","scenario"))
+    check_data_columns(data, c("date","fleet","obs","exp","ub","lb","scenario"))
   } else {
-    check_data_columns(c("year","month","fleet","obs","exp","ub","lb","rownum","med","interval","date","scenario"))
+    check_data_columns(data, c("year","month","fleet","obs","exp","ub","lb","rownum","med","interval","date","scenario"))
   }
 
 

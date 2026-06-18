@@ -53,12 +53,8 @@ sensitivityplot <- function(data,
                             ylab = "") {
 
   # Data input warnings
-  if (!"scenario" %in% names(data)) {warning("Input data is missing scenario column")}
-  if (!"name" %in% names(data)) {warning("Input data is missing name column")}
-  if (!"value" %in% names(data)) {warning("Input data is missing value column")}
-  if (!"ub" %in% names(data)) {warning("Input data is missing ub column")}
-  if (!"lb" %in% names(data)) {warning("Input data is missing lb column")}
-  if (!"fixed" %in% names(data)) {warning("Input data is missing fixed column")}
+  check_data_columns(data, c("scenario","name","value","ub","lb","fixed"))
+
 
   if (!missing(scenarios)){data <- data |> dplyr::filter(scenario %in% scenarios)}
 

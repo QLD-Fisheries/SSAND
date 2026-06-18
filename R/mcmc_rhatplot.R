@@ -36,11 +36,8 @@ mcmc_rhatplot <- function(data,
                           ) {
 
   # Data input warnings
-  if (!"parameter" %in% names(data)) {warning("Input data is missing parameter column")}
-  if (!"Rhat" %in% names(data)) {warning("Input data is missing Rhat column")}
-  if (!"scenario" %in% names(data)) {warning("Input data is missing scenario column")}
-  if (!"group" %in% names(data)) {warning("Input data is missing group column")}
-  if (!"xmax" %in% names(data)) {warning("Input data is missing xmax column")}
+  check_data_columns(data, c("parameter","Rhat","scenario","group","xmax"))
+
 
   if (!missing(scenarios)){data <- data |> dplyr::filter(scenario %in% scenarios)}
 

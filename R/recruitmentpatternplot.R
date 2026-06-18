@@ -37,10 +37,7 @@ recruitmentpatternplot <- function(data,
                                    scales = 'free',
                                    colours= c("black","grey80","grey20","grey60","grey40")){
   # Data input warnings
-  if (!"recruitment" %in% names(data)) {warning("Input data is missing recruitment column")}
-  if (!"months" %in% names(data)) {warning("Input data is missing months column")}
-  if (!"monthnames" %in% names(data)) {warning("Input data is missing monthnames column")}
-  if (!"scenario" %in% names(data)) {warning("Input data is missing scenario column")}
+  check_data_columns(data, c("recruitment","months","monthnames","scenario"))
 
   if (!missing(scenarios)){data <- data |> dplyr::filter(scenario %in% scenarios)}
 

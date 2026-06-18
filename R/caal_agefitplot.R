@@ -39,6 +39,11 @@ caal_agefitplot <- function(data,
                             ylab = "Proportion",
                             show_fits = TRUE) {
 
+  # Data input warnings
+  check_data_columns(data, c("year","bin","obs","exp","scenario","sex","fleet"))
+
+
+
   fleet_val <- fleet
   scenario_val <- scenario
   data <- data |>

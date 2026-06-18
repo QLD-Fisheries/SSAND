@@ -40,10 +40,8 @@ yieldplot <- function(data,
                       ncol = 2) {
 
   # Data input warnings
-  if (!"Final_bio" %in% names(data)) {warning("Input data is missing Final_bio column")}
-  if (!"yield" %in% names(data)) {warning("Input data is missing yield column")}
-  if (!"data" %in% names(data)) {warning("Input data is missing data column")}
-  if (!"scenario" %in% names(data)) {warning("Input data is missing scenario column")}
+  check_data_columns(data, c("Final_bio","yield","data","scenario"))
+
 
   if (!missing(scenarios)){data <- data |> dplyr::filter(scenario %in% scenarios)}
 

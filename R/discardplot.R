@@ -61,18 +61,16 @@ discardplot <- function(data,
                         point_size = 1.5,
                         show_dates_on_axis = FALSE,
                         colours = NULL) {
+  # Data input warnings
+  check_data_columns(data, c("year","fleet","obs","upper","lower","exp"))
+
 
   if (!missing(fleets)) {
     data <- data |> dplyr::filter(fleet %in% fleets)
   }
 
-  # Data input warnings
-  if (!"year" %in% names(data)) {warning("Input data is missing year column")}
-  if (!"fleet" %in% names(data)) {warning("Input data is missing fleet column")}
-  if (!"obs" %in% names(data)) {warning("Input data is missing obs column")}
-  if (!"upper" %in% names(data)) {warning("Input data is missing upper column")}
-  if (!"lower" %in% names(data)) {warning("Input data is missing lower column")}
-  if (!"exp" %in% names(data)) {warning("Input data is missing exp column")}
+
+
 
   if (financial_year & xlab=="Year") {warning("Your x-axis implies calendar year, but you've indicated you're using financial year.")}
 

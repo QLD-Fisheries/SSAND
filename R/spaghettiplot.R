@@ -104,10 +104,9 @@ spaghettiplot <- function(data,
 ) {
 
   # Data input warnings
-  if (!"year" %in% names(data)) {warning("Input data is missing year column")}
-  if (!"scenario" %in% names(data)) {warning("Input data is missing scenario column")}
-  if (!"value" %in% names(data)) {warning("Input data is missing value column")}
-  if (!"base" %in% names(data)) {warning("Input data is missing base column")}
+  check_data_columns(data, c("year","scenario","value","base"))
+
+
 
   if (financial_year & xlab=="Year") {warning("Your x-axis implies calendar year, but you've indicated you're using financial year.")}
 

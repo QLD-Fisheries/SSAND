@@ -87,9 +87,8 @@ likelihoodprofileplot <- function(data,
                                   legend_position = "top"
                                   ) {
 
-  if (!"x_vector" %in% names(data)) {warning("Input data is missing x_vector column")}
-  if (!"component" %in% names(data)) {warning("Input data is missing component column")}
-  if (!"likelihood" %in% names(data)) {warning("Input data is missing likelihood column")}
+  check_data_columns(data, c("x_vector","component","likelihood"))
+
 
   if (missing(xlab)) {
     xlab = expression(log(italic(R)[0]))

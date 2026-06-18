@@ -76,12 +76,8 @@ catchdatasourcesplot <- function(data,
                                  legend_size = 6){
 
   # Data input warnings
-  if (!"sector" %in% names(data)) {warning("Input data is missing sector column")}
-  if (!"source" %in% names(data)) {warning("Input data is missing source column")}
-  if (!"startyr" %in% names(data)) {warning("Input data is missing startyr column")}
-  if (!"endyr" %in% names(data)) {warning("Input data is missing endyr column")}
-  if (!"col" %in% names(data)) {warning("Input data is missing col column")}
-  if (!"label" %in% names(data)) {warning("Input data is missing label column")}
+  check_data_columns(data, c("sector","source","startyr","endyr","col","label"))
+
 
   xlim <- c(min(data$startyr),max(data$endyr))
   xbreaks <- pretty(xlim)

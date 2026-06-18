@@ -51,9 +51,9 @@ pinerplot <- function(data,
                       legend_position = "top"
 ) {
 
-  if (!"x_vector" %in% names(data)) {warning("Input data is missing x_vector column")}
-  if (!"fleet" %in% names(data)) {warning("Input data is missing fleet column")}
-  if (!"likelihood" %in% names(data)) {warning("Input data is missing likelihood column")}
+  # Data input warnings
+  check_data_columns(data, c("x_vector","fleet","likelihood"))
+
 
   if (missing(xlab)) {
     xlab = expression(log(italic(R)[0]))

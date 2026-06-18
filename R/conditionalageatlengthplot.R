@@ -43,14 +43,8 @@ conditionalageatlengthplot <- function(data,
                                        colours = fq_palette("alisecolours")[c(2,10)]){
 
   # Data input warnings
-  if (!"year" %in% names(data)) {warning("Input data is missing year column")}
-  if (!"bin" %in% names(data)) {warning("Input data is missing bin column")}
-  if (!"fleet" %in% names(data)) {warning("Input data is missing fleet column")}
-  if (!"lbin_low" %in% names(data)) {warning("Input data is missing lbin_low column")}
-  if (!"pearson" %in% names(data)) {warning("Input data is missing pearson column")}
-  if (!"obs" %in% names(data)) {warning("Input data is missing obs column")}
-  if (!"sex" %in% names(data)) {warning("Input data is missing sex column")}
-  if (!"scenario" %in% names(data)) {warning("Input data is missing scenario column")}
+  check_data_columns(data, c("year","bin","fleet","lbin_low","pearson","obs","sex","scenario"))
+
 
   fleet_filter <- fleet
   data <- data |> dplyr::filter(fleet == fleet_filter)

@@ -62,13 +62,8 @@ ageplot <- function(data,
                     MLS_label = "MLS") {
 
   # Data input warnings
-  if (!"year" %in% names(data)) {warning("Input data is missing year column")}
-  if (!"fleet" %in% names(data)) {warning("Input data is missing fleet column")}
-  if (!"bin" %in% names(data)) {warning("Input data is missing bin column")}
-  if (!"sex" %in% names(data)) {warning("Input data is missing sex column")}
-  if (!"obs" %in% names(data)) {warning("Input data is missing obs column")}
-  if (!"exp" %in% names(data)) {warning("Input data is missing exp column")}
-  if (!"scenario" %in% names(data)) {warning("Input data is missing scenario column")}
+  check_data_columns(data, c("year","fleet","bin","sex","obs","exp","scenario"))
+
 
   if (direction == "vertical") {direction = "v"}
   if (direction == "horizontal") {direction = "h"}

@@ -70,28 +70,19 @@ recruitmentdistributiondeviationplot <- function(data,
                        hair_width = 0.5,
                        legend_box = "horizontal",
                        legend_position= "top",
-                       band_colour = "black"
-){
+                       band_colour = "black"){
 
+  # Identify MCMC or MLE
   MCMC <- "med" %in% names(data)
 
   # Data input warnings
-  if (!MCMC & !"year" %in% names(data)) {warning("Input data is missing year column")}
-  if (!MCMC & !"value" %in% names(data)) {warning("Input data is missing value column")}
-  if (!MCMC & !"ub" %in% names(data)) {warning("Input data is missing ub column")}
-  if (!MCMC & !"lb" %in% names(data)) {warning("Input data is missing lb column")}
-  if (!MCMC & !"scenario" %in% names(data)) {warning("Input data is missing scenario column")}
-  if (!MCMC & !"method" %in% names(data)) {warning("Input data is missing method column")}
+  if (!MCMC) {
+    check_data_columns(data, c("year","value","ub","lb","scenario","method"))
+  } else {
+    check_data_columns(data, c("rownum","scenario","year","value","med","interval","prob_lower","prob_upper"))
+  }
 
 
-  if (MCMC & !"rownum" %in% names(data)) {warning("Input data is missing rownum column")}
-  if (MCMC & !"scenario" %in% names(data)) {warning("Input data is missing scenario column")}
-  if (MCMC & !"year" %in% names(data)) {warning("Input data is missing year column")}
-  if (MCMC & !"value" %in% names(data)) {warning("Input data is missing value column")}
-  if (MCMC & !"med" %in% names(data)) {warning("Input data is missing med column")}
-  if (MCMC & !"interval" %in% names(data)) {warning("Input data is missing interval column")}
-  if (MCMC & !"prob_lower" %in% names(data)) {warning("Input data is missing prob_lower column")}
-  if (MCMC & !"prob_upper" %in% names(data)) {warning("Input data is missing prob_upper column")}
 
   if (!missing(scenarios)){data <- data |> dplyr::filter(scenario %in% scenarios)}
 

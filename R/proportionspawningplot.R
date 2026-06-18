@@ -40,9 +40,7 @@ proportionspawningplot <- function(data,
                                    ylab = "Proportion spawning"){
 
   # Data input warnings
-  if (!"month" %in% names(data)) {warning("Input data is missing month column")}
-  if (!"value" %in% names(data)) {warning("Input data is missing value column")}
-  if (!"scenario" %in% names(data)) {warning("Input data is missing scenario column")}
+  check_data_columns(data, c("month","value","scenario"))
 
   if (!missing(scenarios)){data <- data |> dplyr::filter(scenario %in% scenarios)}
 

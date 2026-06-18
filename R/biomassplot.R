@@ -116,16 +116,17 @@ biomassplot <- function(data,
                         show_final_biomass = FALSE,
                         boxplot_outliers = TRUE) {
 
-  # Standard plot data set up
+  # Identify MCMC or MLE
   MCMC <- "med" %in% names(data)
 
   # Data input warnings
   if (!MCMC) {
-    check_data_columns(c("year","value","upper","lower","scenario","biomass_type"))
+    check_data_columns(data, c("year","value","upper","lower","scenario","biomass_type"))
   } else {
-    check_data_columns(c("rownum","scenario","year","value","interval","prob_lower","prob_upper","biomass_type"))
+    check_data_columns(data, c("rownum","scenario","year","value","interval","prob_lower","prob_upper","biomass_type"))
   }
 
+  # ______________________
 
   biomass_type <- data$biomass_type[1]
   biomass_definition_label <- ifelse(data$biomass_definition == 'spawning', 'Spawning', 'Vulnerable')

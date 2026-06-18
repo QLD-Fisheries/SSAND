@@ -37,10 +37,8 @@ spawningoutputplot <- function(data,
                                scales = 'free',
                                ncol = 2) {
   # Data input warnings
-  if (!"xvar" %in% names(data)) {warning("Input data is missing xvar column")}
-  if (!"maturityxfecundity" %in% names(data)) {warning("Input data is missing maturityxfecundity column")}
-  if (!"x" %in% names(data)) {warning("Input data is missing x column")}
-  if (!"scenario" %in% names(data)) {warning("Input data is missing scenario column")}
+  check_data_columns(data, c("xvar","maturityxfecundity","x","scenario"))
+
 
   data <- data |> dplyr::filter(x %in% xaxis)
 

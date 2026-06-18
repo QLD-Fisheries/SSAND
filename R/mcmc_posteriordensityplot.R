@@ -30,16 +30,25 @@ mcmc_posteriordensityplot <- function(data,
                                       parameter_labels = NULL,
                                       xmax = NULL) {
   # Data input warnings
-  if (!"chain" %in% names(data[[1]])) {warning("Input data is missing chain column")}
-  if (!"iter" %in% names(data[[1]])) {warning("Input data is missing iter column")}
-  if (!"parameter" %in% names(data[[1]])) {warning("Input data is missing parameter column")}
-  if (!"value" %in% names(data[[1]])) {warning("Input data is missing value column")}
-  if (!"parameter" %in% names(data[[2]])) {warning("Input data is missing parameter column")}
-  if (!"value" %in% names(data[[2]])) {warning("Input data is missing value column")}
-  if (!"parameter" %in% names(data[[3]])) {warning("Input data is missing parameter column")}
-  if (!"value" %in% names(data[[3]])) {warning("Input data is missing value column")}
-  if (!"parameter" %in% names(data[[4]])) {warning("Input data is missing parameter column")}
-  if (!"value" %in% names(data[[4]])) {warning("Input data is missing value column")}
+  # if (!"chain" %in% names(data[[1]])) {warning("Input data is missing chain column")}
+  # if (!"iter" %in% names(data[[1]])) {warning("Input data is missing iter column")}
+  # if (!"parameter" %in% names(data[[1]])) {warning("Input data is missing parameter column")}
+  # if (!"value" %in% names(data[[1]])) {warning("Input data is missing value column")}
+  #
+  # if (!"parameter" %in% names(data[[2]])) {warning("Input data is missing parameter column")}
+  # if (!"value" %in% names(data[[2]])) {warning("Input data is missing value column")}
+  #
+  # if (!"parameter" %in% names(data[[3]])) {warning("Input data is missing parameter column")}
+  # if (!"value" %in% names(data[[3]])) {warning("Input data is missing value column")}
+  #
+  # if (!"parameter" %in% names(data[[4]])) {warning("Input data is missing parameter column")}
+  # if (!"value" %in% names(data[[4]])) {warning("Input data is missing value column")}
+
+  check_data_columns(data[[1]], c("chain","iter","parameter","value"))
+  check_data_columns(data[[2]], c("parameter","value"))
+  check_data_columns(data[[3]], c("parameter","value"))
+  check_data_columns(data[[4]], c("parameter","value"))
+
 
 
   mcmc_df_trace <- data[[1]]

@@ -115,29 +115,17 @@ absolutebiomassplot <- function(data,
                                 boxplot_outliers = TRUE) {
 
   # 📐Set up ----
-  if ("med" %in% names(data)) {MCMC <- TRUE} else {MCMC <- FALSE}
+  # Identify MCMC or MLE
+  MCMC <- "med" %in% names(data)
 
   # Data input warnings
-  if (!MCMC & !"date" %in% names(data)) {warning("Input data is missing date column")}
-  if (!MCMC & !"fleet" %in% names(data)) {warning("Input data is missing fleet column")}
-  if (!MCMC & !"obs" %in% names(data)) {warning("Input data is missing obs column")}
-  if (!MCMC & !"exp" %in% names(data)) {warning("Input data is missing exp column")}
-  if (!MCMC & !"ub" %in% names(data)) {warning("Input data is missing ub column")}
-  if (!MCMC & !"lb" %in% names(data)) {warning("Input data is missing lb column")}
-  if (!MCMC & !"scenario" %in% names(data)) {warning("Input data is missing scenario column")}
+  if (!MCMC) {
+    check_data_columns(data, c("date","fleet","obs","exp","ub","lb","scenario"))
+  } else {
+    check_data_columns(data, c("year","month","fleet","obs","exp","ub","lb","rownum","med","interval","date","scenario"))
+  }
 
-  if (MCMC & !"year" %in% names(data)) {warning("Input data is missing year column")}
-  if (MCMC & !"month" %in% names(data)) {warning("Input data is missing month column")}
-  if (MCMC & !"fleet" %in% names(data)) {warning("Input data is missing fleet column")}
-  if (MCMC & !"obs" %in% names(data)) {warning("Input data is missing obs column")}
-  if (MCMC & !"exp" %in% names(data)) {warning("Input data is missing exp column")}
-  if (MCMC & !"ub" %in% names(data)) {warning("Input data is missing ub column")}
-  if (MCMC & !"lb" %in% names(data)) {warning("Input data is missing lb column")}
-  if (MCMC & !"rownum" %in% names(data)) {warning("Input data is missing rownum column")}
-  if (MCMC & !"med" %in% names(data)) {warning("Input data is missing med column")}
-  if (MCMC & !"interval" %in% names(data)) {warning("Input data is missing interval column")}
-  if (MCMC & !"date" %in% names(data)) {warning("Input data is missing date column")}
-  if (MCMC & !"scenario" %in% names(data)) {warning("Input data is missing scenario column")}
+
 
   if (!show_negative) {data <- dplyr::mutate(data, lb = ifelse(lb<0,0,lb))}
 

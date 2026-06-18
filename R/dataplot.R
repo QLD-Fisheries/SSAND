@@ -57,11 +57,7 @@ dataplot <- function(data,
                      hollow = TRUE) {
 
   # Data input warnings
-  if (!"year" %in% names(data)) {warning("Input data is missing year column")}
-  if (!"typename" %in% names(data)) {warning("Input data is missing typename column")}
-  if (!"size" %in% names(data)) {warning("Input data is missing size column")}
-  if (!"fleet" %in% names(data)) {warning("Input data is missing fleet column")}
-  if (!"scenario" %in% names(data)) {warning("Input data is missing scenario column")}
+  check_data_columns(data, c("year","typename","size","fleet","scenario"))
 
 
   if (financial_year & xlab=="Year") {warning("Your x-axis implies calendar year, but you've indicated you're using financial year.")}

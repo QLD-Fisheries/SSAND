@@ -43,11 +43,7 @@ maturityplot <- function(data,
                          ncol = 2) {
 
   # Data input warnings
-  if (!"value" %in% names(data)) {warning("Input data is missing value column")}
-  if (!"maturity" %in% names(data)) {warning("Input data is missing maturity column")}
-  if (!"sex" %in% names(data)) {warning("Input data is missing sex column")}
-  if (!"scenario" %in% names(data)) {warning("Input data is missing scenario column")}
-  if (!"type" %in% names(data)) {warning("Input data is missing type column")}
+  check_data_columns(data, c("value","maturity","sex","scenario","type"))
 
 
   data <- data |>
