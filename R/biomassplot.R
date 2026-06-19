@@ -59,6 +59,9 @@
 #' @param show_final_biomass Set to TRUE to show final biomass value at the end of the time series.
 #' @param boxplot_outliers Set to FALSE to remove outlier points from boxplot. Default is TRUE.
 #'
+#' @param text_size,legend_text_size,text_colour,legend_text_colour,legend_position,legend_box,legend_title_blank,panel_border,panel_border_colour,xangle Optional plotting theme overrides. Defaults are controlled by `theme_ssand()`
+#'   and can be set globally via `set_ssand_style()`.
+#'
 #' @return Biomass plot
 #' @export
 #'
@@ -72,7 +75,15 @@
 #' biomassplot(data, mcmc_style = "hairy", show_median = c("annual_biomass","trajectory"))
 #' biomassplot(data, mcmc_style = "CI", show_median = c("annual_biomass","trajectory"), CI_range = 0.9)
 #' biomassplot(data, mcmc_style = "joy", show_median = c("none"))
+#'
+#' # Theme setting:
+#' biomassplot(data)
+#' biomassplot(data, text_size = 16)
+#' set_ssand_style(text_colour = "red")
+#' biomassplot(data)
+
 biomassplot <- function(data,
+
                         xlab = "Year",
                         ylab = NULL,
                         xbreaks = NULL,
@@ -81,40 +92,54 @@ biomassplot <- function(data,
                         ylabels = NULL,
                         xlim = NULL,
                         ylim = NULL,
+
+                        colours = NULL,
+                        alpha = NULL,
+                        line_width = 1,
+                        hair_width = 0.5,
+
                         xangle = NULL,
                         colours = NULL,
-                        legend_position= "top",
-                        annotation_position = min(data$year)+1,
+                        legend_position = NULL,
                         financial_year = FALSE,
-                        text_size = 12,
+                        text_size = NULL,
+                        legend_text_size = NULL,
+                        text_colour = NULL,
+                        legend_text_colour = NULL,
+                        legend_box = NULL,
+                        panel_border = NULL,
+                        panel_border_colour = NULL,
+
+                        annotation_position = min(data$year)+1,
+
                         show_target_line = TRUE,
                         target_value = 0.6,
                         show_limit_line = TRUE,
                         limit_value = 0.2,
+
                         scenarios = NULL,
                         scenario_labels = NULL,
                         scenario_order = NULL,
+
                         scales = 'fixed',
                         ncol = 2,
+
                         sample = NULL,
-                        alpha = NULL,
                         show_median = c("trajectory","annual_biomass"),
-                        mcmc_style = "banded", # hairy, boxplot, banded, CI, joy
+                        mcmc_style = "banded",
                         aggregate_scenarios = FALSE,
                         CI_range = 0.95,
                         show_CI = TRUE,
-                        line_width = 1,
-                        hair_width = 0.5,
-                        legend_box = "horizontal",
+                        band_colour = "black",
+                        band_labels = NULL,
                         rel_min_height = 0.01,
                         ridge_scale = 4.5,
                         ridge_colour = c("grey30","black"),
                         shapes = c(16,18,17),
-                        band_colour = "black",
-                        band_labels = NULL,
-                        show_final_biomass = FALSE,
-                        boxplot_outliers = TRUE) {
 
+                        show_final_biomass = FALSE,
+                        boxplot_outliers = TRUE
+) {
   # ___________________
   # Data validation
   # ___________________
@@ -135,7 +160,6 @@ biomassplot <- function(data,
   if (MCMC) {data$upper <- data$prob_upper; data$lower <- data$prob_lower}
   if (MCMC) data$med[startsWith(data$med, "annual_")] <- "annual"
   if (MCMC) data <- sample_mcmc_runs(data, sample)
-
 
   # ___________________
   # Custom to this plot
@@ -171,7 +195,6 @@ biomassplot <- function(data,
   # ___________________
   # Basic plot set up
   # ___________________
-
   data <- apply_scenarios(data, scenarios, scenario_labels, scenario_order)
 
   x_axis <- build_x_axis(x = data$xvar,
@@ -193,7 +216,7 @@ biomassplot <- function(data,
                          upper = data$upper)
 
 
-  p <- ggplot2::ggplot(data) + get_theme_ssand()
+  p <- ggplot2::ggplot(data)
   p <- add_x_scale_continuous(p, x_axis)
   p <- add_y_scale_continuous(p, y_axis)
 
@@ -229,7 +252,6 @@ biomassplot <- function(data,
     p <- show_median_lines("biomass",p,data,show_median,line_width,colours)
   }
 
-
   # ___________________
   # Final layers
   # ___________________
@@ -238,6 +260,25 @@ biomassplot <- function(data,
   if (show_target_line)   p <- add_reference_line(p, data[1,], target_value, "#127B06", annotation_position, "Target reference point")
   if (show_limit_line)    p <- add_reference_line(p, data[1,], limit_value, "#AD3D25", annotation_position, "Limit reference point")
   if (facet_wrap)         p <- add_scenario_facets(p, data, scales = scales, ncol = ncol)
+
+  # ___________________
+  # Theme
+  # ___________________
+  # set plot-specific override ONLY if user didn't specify
+  # if (is.null(text_colour)) text_colour <- "blue"
+
+  p <- add_ssand_theme(p,
+                       text_size = text_size,
+                       legend_text_size = legend_text_size,
+                       text_colour = text_colour,
+                       legend_text_colour = legend_text_colour,
+                       legend_position = legend_position,
+                       legend_box = legend_box,
+                       legend_title_blank = legend_title_blank,
+                       panel_border = panel_border,
+                       panel_border_colour = panel_border_colour,
+                       xangle = x_axis$angle)
+
 
   return(p)
 }

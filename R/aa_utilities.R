@@ -2,6 +2,7 @@
 
 
 
+
 # Data input warnings ----
 check_data_columns <- function(data,variables) {
   for (i in 1:length(variables)) {
@@ -79,7 +80,6 @@ build_x_axis <- function(
     xangle = NULL,
     is_date = inherits(x, "Date")
 ) {
-
   # if (missing(xbreaks) & xlim[1]!=xlim[2]) {xbreaks <- unique(floor(pretty(xlim)))} # unique(floor()) ensures integers only
 
   if(financial_year & xlab == "Year") {
@@ -163,13 +163,6 @@ add_x_scale_date <- function(p, axis) {
       limits = axis$limits,
       breaks = axis$breaks,
       labels = axis$labels
-    ) +
-    ggplot2::theme(
-      axis.text.x = ggplot2::element_text(
-        angle = axis$angle,
-        vjust = 0.5,
-        hjust = ifelse(axis$angle == 90, 0, 0.5)
-      )
     )
 }
 
@@ -180,13 +173,6 @@ add_x_scale_continuous <- function(p, axis) {
       limits = axis$limits,
       breaks = axis$breaks,
       labels = axis$labels
-    ) +
-    ggplot2::theme(
-      axis.text.x = ggplot2::element_text(
-        angle = axis$angle,
-        vjust = 0.5,
-        hjust = ifelse(axis$angle == 90, 0, 0.5)
-      )
     )
 }
 
@@ -199,8 +185,6 @@ add_y_scale_continuous <- function(p,
       breaks = axis$breaks,
       labels = axis$labels
     )
-
-
   # ggplot2::coord_cartesian(ylim = c(-0, NA), xlim = c(0,NA)) # alternative to ylim that doesn't cut off ribbons
 
 }

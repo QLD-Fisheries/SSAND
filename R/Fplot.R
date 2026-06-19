@@ -87,7 +87,20 @@ Fplot <- function(data,
                   band_labels = NULL,
                   line_type = c("solid","dashed"),
                   colours = c("black","darkred"),
-                  boxplot_outliers = TRUE){
+                  boxplot_outliers = TRUE,
+
+                  xangle = NULL,
+                  colours = NULL,
+                  legend_position = NULL,
+                  financial_year = FALSE,
+                  text_size = NULL,
+                  legend_text_size = NULL,
+                  text_colour = NULL,
+                  legend_text_colour = NULL,
+                  legend_box = NULL,
+                  panel_border = NULL,
+                  panel_border_colour = NULL,
+                  ){
 
   # ___________________
   # Data validation
@@ -143,7 +156,7 @@ Fplot <- function(data,
                          lower = 0,
                          upper = data$upper)
 
-  p <- ggplot2::ggplot(data) + get_theme_ssand()
+  p <- ggplot2::ggplot(data)
   p <- add_x_scale_continuous(p, x_axis)
   p <- add_y_scale_continuous(p, y_axis)
 
@@ -181,6 +194,25 @@ Fplot <- function(data,
   # Final layers
   # ___________________
   if (facet_wrap) p <- add_scenario_facets(p, data, scales = scales, ncol = ncol)
+
+  # ___________________
+  # Theme
+  # ___________________
+
+  # set plot-specific override ONLY if user didn't specify
+  # text_colour <- text_colour %||% "blue"
+  # if (is.null(text_colour)) text_colour <- "blue"
+  p <- add_ssand_theme(p,
+                       text_size = text_size,
+                       legend_text_size = legend_text_size,
+                       text_colour = text_colour,
+                       legend_text_colour = legend_text_colour,
+                       legend_position = legend_position,
+                       legend_box = legend_box,
+                       legend_title_blank = legend_title_blank,
+                       panel_border = panel_border,
+                       panel_border_colour = panel_border_colour,
+                       xangle = x_axis$angle)
 
   return(p)
 }
