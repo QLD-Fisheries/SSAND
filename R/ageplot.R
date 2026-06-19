@@ -61,37 +61,65 @@ ageplot <- function(data,
                     MLS_colour = "black",
                     MLS_label = "MLS") {
 
+  # ___________________
+  # Data validation
+  # ___________________
+
   # Data input warnings
   check_data_columns(data, c("year","fleet","bin","sex","obs","exp","scenario"))
-
-
   if (direction == "vertical") {direction = "v"}
   if (direction == "horizontal") {direction = "h"}
 
-  if (financial_year) {data <- data |> dplyr::mutate(year = paste0(year-1,"\U2013",year))}
-  data <- data |> dplyr::filter(fleet==fleet)
+  data$xvar <- data$bin
+  data$upper <- mutate(data,max())
 
-  if (missing(xlim)) {xlim <- c(min(data$bin),max(data$bin))}
-  if (missing(ylim)) {ylim <- c(min(min(data$obs),min(data$exp)),
+  if (is.null(xlim)) {xlim <- c(min(data$bin),max(data$bin))}
+  if (is.null(ylim)) {ylim <- c(min(min(data$obs),min(data$exp)),
                                 max(max(data$obs),max(data$exp)))}
 
-  if (missing(xbreaks)) {xbreaks <- pretty(xlim)}
-  if (missing(ybreaks)) {ybreaks <- pretty(ylim)}
-  if (missing(xlabels)) {xlabels <- xbreaks}
-  if (missing(ylabels)) {ylabels <- ybreaks}
+  # ___________________
+  # Custom to this plot
+  # ___________________
+  data <- data |> dplyr::filter(fleet==fleet)
 
 
-  p <- ggplot2::ggplot(data) +
+  # ___________________
+  # Basic plot set up
+  # ___________________
+  data <- apply_scenarios(data, scenarios, scenario_labels, scenario_order)
+
+  x_axis <- build_x_axis(x = data$xvar,
+                         xlab = xlab,
+                         xlim = xlim,
+                         xbreaks = xbreaks,
+                         xlabels = xlabels,
+                         financial_year = financial_year,
+                         expand_upper = 0,
+                         xangle = xangle,
+                         is_date = FALSE)
+
+  y_axis <- build_y_axis(y = data$value,
+                         ylab = ylab,
+                         ylim = ylim,
+                         ybreaks = ybreaks,
+                         ylabels = ylabels,
+                         lower = 0,
+                         upper = data$upper)
+
+
+  p <- ggplot2::ggplot(data) + get_theme_ssand()
+  p <- add_x_scale_continuous(p, x_axis)
+  p <- add_y_scale_continuous(p, y_axis)
+
+  # ___________________
+  # Build MLE plot
+  # ___________________
+
+  p <- p +
     ggplot2::geom_area( ggplot2::aes(x=bin, y=obs, group=sex, fill=as.factor(sex)),alpha=0.7, colour="black", outline.type = "full") +
     ggplot2::geom_point(ggplot2::aes(x=bin, y=obs, group=sex), size = point_size) +
     ggplot2::facet_wrap(~year, scales=scales, ncol = ncol, dir = direction) +
-    ggplot2::theme_bw() +
-    ggplot2::scale_fill_manual(name = "Sex", values=c("grey60", "grey30", "grey80")) +
-    ggplot2::theme(legend.position = legend_position) +
-    ggplot2::xlab(xlab) +
-    ggplot2::ylab(ylab) +
-    ggplot2::scale_x_continuous(limits = xlim, breaks = xbreaks, labels = xlabels) +
-    ggplot2::scale_y_continuous(limits = ylim, breaks = ybreaks, labels = ylabels)
+    ggplot2::scale_fill_manual(name = "Sex", values=c("grey60", "grey30", "grey80"))
 
   if (show_fits) {
     p <- p +
@@ -105,6 +133,7 @@ ageplot <- function(data,
       ggplot2::geom_vline(aes(xintercept = MLS, linetype = MLS_label), colour = MLS_colour) +
       ggplot2::scale_linetype_manual(values = "dashed", name = ggplot2::element_blank())
   }
+
   return(p)
 }
 

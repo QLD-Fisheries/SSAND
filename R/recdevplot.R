@@ -86,6 +86,10 @@ recdevplot <- function(data,
                        boxplot_outliers = TRUE,
                        CI_range = 0.95) {
 
+  # ___________________
+  # Data validation
+  # ___________________
+
   # Identify MCMC or MLE
   MCMC <- "med" %in% names(data)
 
@@ -108,12 +112,15 @@ recdevplot <- function(data,
 
   if (is.null(alpha) & mcmc_style !="banded") {alpha=0.7}
 
-  # __________________
+  # ___________________
+  # Custom to this plot
+  # ___________________
 
-  data <- apply_scenarios(data,
-                          scenarios = scenarios,
-                          scenario_labels = scenario_labels,
-                          scenario_order = scenario_order)
+  # ___________________
+  # Basic plot set up
+  # ___________________
+
+  data <- apply_scenarios(data, scenarios, scenario_labels, scenario_order)
 
   x_axis <- build_x_axis(x = data$xvar,
                          xlab = xlab,
@@ -134,14 +141,13 @@ recdevplot <- function(data,
                          lower = data$lower,
                          upper = data$upper)
 
-
-  # ___________________
-  # Initiate plot
   p <- ggplot2::ggplot(data) + get_theme_ssand()
   p <- add_x_scale_continuous(p, x_axis)
   p <- add_y_scale_continuous(p, y_axis)
 
-
+  # ___________________
+  # Build MLE plot
+  # ___________________
   if (!MCMC) {
     p <- p +
       ggplot2::geom_point(ggplot2::aes(x=year,y=value), size=point_size)+
@@ -151,6 +157,9 @@ recdevplot <- function(data,
       ggplot2::geom_hline(yintercept=0, colour="grey")
   }
 
+  # ___________________
+  # Build MCMC plot
+  # ___________________
   if (MCMC) {
     if (mcmc_style == "boxplot") p <- mcmc_boxplot(p, data, xlim, boxplot_outliers)
     if (mcmc_style == "banded")  p <- mcmc_banded(p, data, alpha, band_labels, band_colour)
@@ -161,13 +170,11 @@ recdevplot <- function(data,
                                                show_median,xlabels,ylabels)
     # Add median lines
     p <- show_median_lines("recruitment deviations",p,data,show_median,line_width,colours)
-
-    # p <- p +
-    #   ggplot2::geom_line(data=data_med, ggplot2::aes(x=year,y=value, colour=med, linetype=med), linewidth=line_width) +
-    #   ggplot2::scale_color_manual(values = colours, name = ggplot2::element_blank()) +
-    #   ggplot2::scale_linetype_manual(values= line_type, name=ggplot2::element_blank())
   }
 
+  # ___________________
+  # Final layers
+  # ___________________
   if (facet_wrap)  p <- add_scenario_facets(p, data, scales = scales, ncol = ncol)
 
   return(p)

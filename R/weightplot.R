@@ -29,7 +29,7 @@
 weightplot <- function(data,
                        xlab = "Length (cm)",
                        ylab = "Mean weight (kg) in last year",
-                       colours = NULL,
+                       colours = "black",
                        scenarios = NULL,
                        scenario_labels = NULL,
                        scenario_order = NULL,
@@ -37,51 +37,41 @@ weightplot <- function(data,
                        scales = 'free',
                        ncol = 2) {
 
-  # Data input warnings
+  # ___________________
+  # Data validation
+  # ___________________
+
   check_data_columns(data, c("xvar","weight","scenario","sex"))
 
+  # ___________________
+  # Custom to this plot
+  # ___________________
 
 
-  if (!missing(scenarios)){data <- data |> dplyr::filter(scenario %in% scenarios)}
+  # ___________________
+  # Basic plot set up
+  # ___________________
 
-  if (missing(scenario_labels)) {
-    data <- data |> dplyr::mutate(scenario_labels = as.factor(paste0("Scenario ",scenario)))
-  } else {
-    scenario.lookup<- data.frame(scenario = unique(data$scenario), scenario_labels = scenario_labels)
-    data <- data |>
-      dplyr::left_join(scenario.lookup, by = "scenario") |>
-      dplyr::mutate(scenario_labels = as.factor(scenario_labels))
-  }
+  data <- apply_scenarios(data, scenarios, scenario_labels, scenario_order)
 
-  if (!missing(scenario_order)) {
-    # Add on any scenarios not included in the scenario_order list
-    scenario_order = c(scenario_order, setdiff(scenario_labels, scenario_order))
-    # Reorder scenarios
-    data$scenario_labels <- factor(data$scenario_labels, levels = scenario_order)
-  }
-
-  if (missing(colours)) {colours <- "black"}
-
+  # ___________________
+  # Build MLE plot
+  # ___________________
 
   p <- ggplot2::ggplot(data, ggplot2::aes(x=xvar, y=weight), colour=colours) +
+    get_theme_ssand() +
     ggplot2::geom_line() +
     ggplot2::geom_point() +
     ggplot2::xlab(xlab) +
-    ggplot2::ylab(ylab) +
-    ggplot2::theme_bw()
-
-  if (length(unique(data$scenario))>1){
-    p <- p +
-      ggplot2::facet_wrap(~scenario_labels, scales = scales, ncol = ncol)
-  }
+    ggplot2::ylab(ylab)
 
   if (show_two_sex){
     p <- p + (aes(colour = sex)) +
-      ggplot2::theme(legend.position = "top", legend.title = ggplot2::element_blank()) +
+      # ggplot2::theme(legend.position = "top", legend.title = ggplot2::element_blank()) +
       ggplot2::scale_colour_manual(values = colours)
   }
 
+  p <- add_scenario_facets(p, data, scales = scales, ncol = ncol)
+
   return(p)
-
-
 }

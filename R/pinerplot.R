@@ -71,6 +71,7 @@ pinerplot <- function(data,
   }
 
   p <- ggplot2::ggplot(data) +
+    get_theme_ssand() +
     ggplot2::geom_line(ggplot2::aes(x=x_vector,
                                     y=likelihood,
                                     colour=fleet)) +
@@ -78,7 +79,6 @@ pinerplot <- function(data,
                                      y=likelihood,
                                      colour=fleet,
                                      shape=fleet)) +
-    ggplot2::theme_bw() +
     ggplot2::scale_x_continuous(breaks=sort(unique(data$x_vector)),
                                 name=xlab,
                                 limits=xlim) +

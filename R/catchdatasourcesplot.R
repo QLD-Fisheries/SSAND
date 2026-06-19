@@ -69,38 +69,68 @@ catchdatasourcesplot <- function(data,
                                  ylab = "",
                                  xlab = "",
                                  legend_position = "none",
-                                 colours = NULL,
+                                 colours = c("#FFC000","#9D9D9D","#FFE699"),
                                  text_size = 12,
                                  xangle = NULL,
                                  financial_year = FALSE,
                                  legend_size = 6){
+  # ___________________
+  # Data validation
+  # ___________________
 
   # Data input warnings
   check_data_columns(data, c("sector","source","startyr","endyr","col","label"))
 
 
+  # ___________________
+  # Custom to this plot
+  # ___________________
+
+
+  # ___________________
+  # Basic plot set up
+  # ___________________
   xlim <- c(min(data$startyr),max(data$endyr))
-  xbreaks <- pretty(xlim)
-  if (financial_year) {xlabels <- paste0(xbreaks-1,"-",xbreaks)} else {xlabels <- xbreaks}
-  if (missing(xangle)) {xangle <- ifelse(financial_year,90,0)}
 
-  if (missing(colours)) {colours = c("#FFC000","#9D9D9D","#FFE699")}
+  x_axis <- build_x_axis(x = data$xvar,
+                         xlab = xlab,
+                         xlim = xlim,
+                         xbreaks = xbreaks,
+                         xlabels = xlabels,
+                         financial_year = financial_year,
+                         expand_upper = as.numeric(show_final_biomass),
+                         xangle = xangle,
+                         is_date = FALSE)
 
-  p <- ggplot2::ggplot(data) +
+  y_axis <- build_y_axis(y = data$value,
+                         ylab = ylab,
+                         ylim = ylim,
+                         ybreaks = ybreaks,
+                         ylabels = ylabels,
+                         lower = 0,
+                         upper = data$upper)
+
+
+  p <- ggplot2::ggplot(data) + get_theme_ssand()
+  p <- add_x_scale_continuous(p, x_axis)
+  p <- add_y_scale_continuous(p, y_axis)
+
+  # p <- p +
+  #   ggplot2::guides(color = ggplot2::guide_legend(override.aes = list(linewidth = legend_size)))
+
+  p <- p +
+    ggplot2::scale_x_continuous(breaks=xbreaks, labels = xlabels, expand = c(0,0))
+  # ___________________
+  # Build MLE plot
+  # ___________________
+
+
+  p <- p +
     ggplot2::geom_segment(ggplot2::aes(x=startyr-0.5,xend=endyr+0.5,y=sector,yend=sector,color=col),linewidth=30) +
-    ggplot2::scale_x_continuous(breaks=xbreaks, labels = xlabels, expand = c(0,0)) +
     ggplot2::scale_colour_manual(values=c(colours,"#C1C0C0")) +
     ggplot2::geom_text(data=data|>dplyr::filter(label==1),ggplot2::aes(x=startyr-0.5 + 0.5*(endyr - (startyr)), y=sector, label=source),color="#000000") +
     ggplot2::geom_text(data=data|>dplyr::filter(label==2),ggplot2::aes(x=startyr-0.5 + 0.5*(endyr - (startyr)), y=sector, label=source),color="#000000", angle = 90) +
-    ggplot2::geom_text(data=data|>dplyr::filter(label==4),ggplot2::aes(x=startyr-0.5 + 0.5*(endyr - (startyr)), y=sector, label=source),color="#000000", angle = 90, size=3)+
-    ggplot2::theme_bw() +
-    ggplot2::theme(text = ggplot2::element_text(size=text_size)) +
-    ggplot2::theme(legend.position = legend_position) +
-    ggplot2::ylab(ylab) +
-    ggplot2::xlab(xlab) +
-    ggplot2::theme(axis.text.x = ggplot2::element_text(angle = xangle, vjust = 0.5, hjust=ifelse(xangle==90,0,0.5))) +
-    ggplot2::guides(color = ggplot2::guide_legend(override.aes = list(linewidth = legend_size))) +
-    ggplot2::theme(legend.title = ggplot2::element_blank())
+    ggplot2::geom_text(data=data|>dplyr::filter(label==4),ggplot2::aes(x=startyr-0.5 + 0.5*(endyr - (startyr)), y=sector, label=source),color="#000000", angle = 90, size=3)
 
   return(p)
 }

@@ -67,10 +67,18 @@ catchplot <- function(data,
                       scales = 'free',
                       ncol = 2) {
 
+  # ___________________
+  # Data validation
+  # ___________________
+
   check_data_columns(data,c("date","value","fleet","scenario"))
+  data$xvar <- data$date
+
 
   # ___________________
   # Custom to this plot
+  # ___________________
+
   if (is.null(ylab)) {
     if ("partition" %in% names(data)) {
       if (data$partition[1] == "sel")    ylab <- "Catch (retained and total discarded) (t)"
@@ -99,17 +107,15 @@ catchplot <- function(data,
   }
 
   # ___________________
-  check_data_columns(data,c("date","value","fleet","scenario"))
+  # Basic plot set up
+  # ___________________
 
-  data <- apply_scenarios(data,
-                          scenarios = scenarios,
-                          scenario_labels = scenario_labels,
-                          scenario_order = scenario_order)
+  data <- apply_scenarios(data, scenarios, scenario_labels, scenario_order)
 
   data <- apply_fleet_names(data, fleet_names)
 
 
-  x_axis <- build_x_axis(x = data$date,
+  x_axis <- build_x_axis(x = data$xvar,
                          xlab = xlab,
                          xlim = xlim,
                          xbreaks = xbreaks,
@@ -129,7 +135,6 @@ catchplot <- function(data,
                          lower = 0
   )
 
-  # ___________________
   p <- ggplot2::ggplot(data) +
     get_theme_ssand() +
     ggplot2::geom_bar(data,
@@ -140,10 +145,13 @@ catchplot <- function(data,
     ggplot2::scale_fill_manual(values = colours) +
     ggplot2::scale_colour_manual(values = "#3d4040")
 
-
   p <- add_x_scale_continuous(p, x_axis)  # or date version depending on representation
   p <- add_y_scale_continuous(p, y_axis)
   p <- add_scenario_facets(p, data, scales = scales, ncol = ncol)
+
+  # ___________________
+  # Final layers
+  # ___________________
 
   return(p)
 }

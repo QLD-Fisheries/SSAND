@@ -47,23 +47,8 @@ srplot <- function(data,
 
   if (missing(xbreaks)) {xbreaks <- seq(0,1,0.2)}
 
-  if (!missing(scenarios)){data <- data |> dplyr::filter(scenario %in% scenarios)}
+  data <- apply_scenarios(data, scenarios, scenario_labels, scenario_order)
 
-  if (missing(scenario_labels)) {
-    data <- data |> dplyr::mutate(scenario_labels = as.factor(paste0("Scenario ",scenario)))
-  } else {
-    scenario.lookup<- data.frame(scenario = unique(data$scenario), scenario_labels = scenario_labels)
-    data <- data |>
-      dplyr::left_join(scenario.lookup, by = "scenario") |>
-      dplyr::mutate(scenario_labels = as.factor(scenario_labels))
-  }
-
-  if (!missing(scenario_order)) {
-    # Add on any scenarios not included in the scenario_order list
-    scenario_order = c(scenario_order, setdiff(scenario_labels, scenario_order))
-    # Reorder scenarios
-    data$scenario_labels <- factor(data$scenario_labels, levels = scenario_order)
-  }
 
   data2 = data[order(data$spawn_bio),]
   data$year = as.numeric(data$year)
@@ -92,12 +77,9 @@ srplot <- function(data,
     ggplot2::scale_x_continuous(breaks = xbreaks, limits = c(0,NA)) +
     ggplot2::labs(x = xlab, y = ylab) +
     ggplot2::ylim(0,NA) +
-    ggplot2::theme_bw()
+    get_theme_ssand()
 
-  if (length(unique(data$scenario))>1){
-    p <- p +
-      ggplot2::facet_wrap(~scenario_labels, scales = scales, ncol = ncol, drop = TRUE)
-  }
+  p <- add_scenario_facets(p, data, scales = scales, ncol = ncol)
 
   if(show_bias_adjust) {
     p <- p + ggplot2::geom_path(data = data, ggplot2::aes(x = spawn_bio, y = bias_adjusted, linetype = "B", colour = "B"))

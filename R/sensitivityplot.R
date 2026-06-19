@@ -40,7 +40,7 @@
 #' sensitivityplot(data)
 sensitivityplot <- function(data,
                             parameters = NULL,
-                            colours = NULL,
+                            colours = fq_palette("cols"),
                             parameter_labels = NULL,
                             scenarios = NULL,
                             scenario_labels = NULL,
@@ -67,21 +67,8 @@ sensitivityplot <- function(data,
     hjust <- 1
   }
 
-  if (missing(scenario_labels)) {
-    data <- data |> dplyr::mutate(scenario_labels = as.factor(paste0("Scenario ",scenario)))
-  } else {
-    scenario.lookup<- data.frame(scenario = unique(data$scenario), scenario_labels = scenario_labels)
-    data <- data |>
-      dplyr::left_join(scenario.lookup, by = "scenario") |>
-      dplyr::mutate(scenario_labels = as.factor(scenario_labels))
-  }
+  data <- apply_scenarios(data, scenarios, scenario_labels, scenario_order)
 
-  if (!missing(scenario_order)) {
-    # Add on any scenarios not included in the scenario_order list
-    scenario_order = c(scenario_order, setdiff(scenario_labels, scenario_order))
-    # Reorder scenarios
-    data$scenario_labels <- factor(data$scenario_labels, levels = scenario_order)
-  }
 
   # Filter if specific list of parameters is given
   if (!missing(parameters)) {
@@ -107,7 +94,7 @@ sensitivityplot <- function(data,
 
   data <- dplyr::left_join(data, ylimits, by='name')
 
-  data$scenario_labels <- as.factor(data$scenario_labels)
+  # data$scenario_labels <- as.factor(data$scenario_labels)
   data$name <- as.factor(data$name)
 
   if (!missing(parameter_labels)) {
@@ -118,24 +105,15 @@ sensitivityplot <- function(data,
   p <- ggplot2::ggplot(data, ggplot2::aes(x=scenario_labels, y = value)) +
     ggplot2::geom_errorbar(ggplot2::aes(ymin=lb, ymax=ub, colour=as.factor(scenario_labels)), width = .2) +
     ggplot2::geom_point(ggplot2::aes(x=scenario_labels, y=value, colour=as.factor(scenario_labels), shape = fixed),size=3) +
-    # ggplot2::facet_wrap(~name, ncol=ncol, scales=scales, labeller = ggplot2::label_parsed(parameter_labels))
     ggplot2::facet_wrap(~name, ncol=ncol, scales=scales, labeller = ggplot2::label_parsed)
-
-  if (missing(colours)) {
-    p <- p +
-      ggplot2::scale_colour_manual(values=fq_palette("cols"))
-  } else {
-    p <- p +
-      ggplot2::scale_colour_manual(values=colours)
-  }
-
 
 
   p <- p +
+    get_theme_ssand() +
+    ggplot2::scale_colour_manual(values=colours)
     ggplot2::scale_shape_manual(values=c(19,15), labels=c("Estimated","Fixed")) +
     ggplot2::geom_blank(ggplot2::aes(y = ymin)) +
     ggplot2::geom_blank(ggplot2::aes(y = ymax)) +
-    ggplot2::theme_bw() +
     ggplot2::theme(legend.position="top", legend.title = ggplot2::element_blank(),
                    axis.text.x = ggplot2::element_text(angle = xangle, hjust = hjust)) +
     ggplot2::xlab(xlab) +

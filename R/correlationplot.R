@@ -42,7 +42,7 @@ correlationplot <- function(data,
       ggplot2::ylab('')+
       ggplot2::xlab('')+
       ggplot2::labs(fill="Correlation")+
-      ggplot2::theme_bw()+
+      get_theme_ssand() +
       ggplot2::geom_text(ggplot2::aes(label=round(value,2)), colour = 'grey30')
 
 
@@ -73,7 +73,7 @@ correlationplot <- function(data,
                            columns = columns,
                            ggplot2::aes(col=chain),
                            labeller = "label_parsed") +
-        ggplot2::theme_bw() +
+        get_theme_ssand() +
         ggplot2::scale_colour_manual(values=colours) +
         ggplot2::scale_fill_manual(values=colours)
     } else {
@@ -84,7 +84,7 @@ correlationplot <- function(data,
                            diag = NULL,
                            ggplot2::aes(col=chain),
                            labeller = "label_parsed") +
-        ggplot2::theme_bw() +
+        get_theme_ssand() +
         ggplot2::scale_colour_manual(values=colours)
     }
   }

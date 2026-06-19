@@ -46,7 +46,7 @@ dataplot <- function(data,
                      ylim = NULL,
                      xangle = NULL,
                      financial_year = FALSE,
-                     colours = NULL,
+                     colours = fq_palette("alisecolours"),
                      size_range=c(0.5,5),
                      scenarios = 1,
                      scenario_labels = NULL,
@@ -56,30 +56,18 @@ dataplot <- function(data,
                      fleet_names = NULL,
                      hollow = TRUE) {
 
+  # ___________________
+  # Data validation
+  # ___________________
+
   # Data input warnings
   check_data_columns(data, c("year","typename","size","fleet","scenario"))
+  data$xvar <- data$year
 
 
-  if (financial_year & xlab=="Year") {warning("Your x-axis implies calendar year, but you've indicated you're using financial year.")}
-
-  if (missing(xlim)) {xlim <- c(min(data$year),max(data$year))}
-  if (missing(xbreaks)) {xbreaks <- pretty(xlim)}
-  if (financial_year) {xlabels <- paste0(xbreaks-1,"\U2013",xbreaks)} else {xlabels <- xbreaks}
-  if (missing(xangle)) {xangle <- ifelse(financial_year,90,0)}
-
-  if (missing(colours)) {colours = fq_palette("alisecolours")}
-
-  if (!missing(scenarios)){data <- data |> dplyr::filter(scenario %in% scenarios)}
-
-  if (missing(scenario_labels)) {
-    data <- data |> dplyr::mutate(scenario_labels = as.factor(paste0("Scenario ",scenario)))
-  } else {
-    scenario.lookup<- data.frame(scenario = unique(data$scenario), scenario_labels = scenario_labels)
-    data <- data |>
-      dplyr::left_join(scenario.lookup, by = "scenario") |>
-      dplyr::mutate(scenario_labels = as.factor(scenario_labels))
-  }
-
+  # ___________________
+  # Custom to this plot
+  # ___________________
   if (missing(fleet_names)) {fleet_names <- paste0('Fleet ',sort(unique(data$fleet)))}
 
   fleet_names.lookup <- data.frame(fleet = unique(data$fleet),
@@ -87,6 +75,46 @@ dataplot <- function(data,
   data <- data |>
     dplyr::left_join(fleet_names.lookup, by="fleet")
 
+
+  # ___________________
+  # Basic plot set up
+  # ___________________
+  # if (is.null(ylab)) {
+  #   p <- p +
+  #     ggplot2::ylab(ggplot2::element_blank())
+  # } else {
+  #   p <- p +
+  #     ggplot2::ylab(ylab)
+  # }
+
+  data <- apply_scenarios(data, scenarios, scenario_labels, scenario_order)
+
+  x_axis <- build_x_axis(x = data$xvar,
+                         xlab = xlab,
+                         xlim = xlim,
+                         xbreaks = xbreaks,
+                         xlabels = xlabels,
+                         financial_year = financial_year,
+                         expand_upper = as.numeric(show_final_biomass),
+                         xangle = xangle,
+                         is_date = FALSE)
+
+  y_axis <- build_y_axis(y = data$value,
+                         ylab = ylab,
+                         ylim = ylim,
+                         ybreaks = ybreaks,
+                         ylabels = ylabels,
+                         lower = 0,
+                         upper = data$upper)
+
+
+  p <- ggplot2::ggplot(data) + get_theme_ssand()
+  p <- add_x_scale_continuous(p, x_axis)
+  p <- add_y_scale_continuous(p, y_axis)
+
+  # ___________________
+  # Build plot
+  # ___________________
 
   p <- ggplot2::ggplot(data) +
     ggplot2::theme_bw()
@@ -109,21 +137,12 @@ dataplot <- function(data,
     ggplot2::theme(axis.text = ggplot2::element_text(face="bold"),
                    strip.text.x = ggplot2::element_text(face="bold")) +
     ggplot2::guides(size="none",colour="none") +
-    ggplot2::xlab(xlab) +
+    # ggplot2::xlab(xlab) +
     ggplot2::scale_color_manual(values=colours) +
-    ggplot2::theme(legend.text = ggplot2::element_text(size=10)) +
-    ggplot2::theme(text = ggplot2::element_text(size=10)) +
-    ggplot2::scale_size_continuous(range = size_range) +
-    ggplot2::theme(axis.text.x = ggplot2::element_text(angle = xangle, vjust = 0.5, hjust=ifelse(xangle==90,0,0.5)))
-
-
-  if (missing(ylab)) {
-    p <- p +
-      ggplot2::ylab(ggplot2::element_blank())
-  } else {
-    p <- p +
-      ggplot2::ylab(ylab)
-  }
+    # ggplot2::theme(legend.text = ggplot2::element_text(size=10)) +
+    # ggplot2::theme(text = ggplot2::element_text(size=10)) +
+    ggplot2::scale_size_continuous(range = size_range)
+    # ggplot2::theme(axis.text.x = ggplot2::element_text(angle = xangle, vjust = 0.5, hjust=ifelse(xangle==90,0,0.5)))
 
   # If only one fleet, remove fleet names
   if (length(unique(data$fleet))==1) {

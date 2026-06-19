@@ -11,7 +11,7 @@
 #' @param show_fits Set to TRUE to show model fits.
 #' @param fleet Specify which fleet to plot (numeric). By default, fleet 1 will be shown.
 #' @param partition Specify which partition to plot (numeric). By default, partition 0 will be shown.
-#' @param scenario A scenario numbers to be shown on plot (numeric). This was already specified in prep file, but this is a manual override to save running the prep function again.
+#' @param scenario A scenario number to be shown on plot (numeric). This was already specified in prep file, but this is a manual override to save running the prep function again.
 #' @param point_size Size of points used in ggplot2::geom_line(). Default is 1.
 #' @param colours A vector of colours used for sex types (character).
 #' @param legend_position Position of the legend ("none", "left", "right", "bottom", "top", or two-element numeric vector for x and y position). Default is "top".
@@ -62,11 +62,20 @@ lengthplot <- function(data,
                        MLS_label = "MLS",
                        show_fits = TRUE) {
 
+  # ___________________
+  # Data validation
+  # ___________________
+
   # Data input warnings
   check_data_columns(data, c("year","fleet","bin","sex","obs","exp","scenario"))
-
   if (direction == "vertical") {direction = "v"}
   if (direction == "horizontal") {direction = "h"}
+
+  data$xvar <- data$bin
+
+  # ___________________
+  # Custom to this plot
+  # ___________________
 
   fleet_val <- fleet
   data <- data |> dplyr::filter(fleet==fleet_val)
@@ -77,27 +86,45 @@ lengthplot <- function(data,
   partition_val <- partition
   data <- data |> dplyr::filter(partition==partition_val)
 
-  if (financial_year) {data <- data |> dplyr::mutate(year = paste0(year-1,"\U2013",year))}
-
   if (missing(xlim)) {xlim <- c(min(data$bin)-1,max(data$bin)+1)}
   if (missing(ylim)) {ylim <- c(min(min(data$obs),min(data$exp))-0.0001,
                                 max(max(data$obs),max(data$exp)))}
 
-  if (missing(xbreaks)) {xbreaks <- pretty(xlim)}
-  if (missing(ybreaks)) {ybreaks <- pretty(ylim)}
+  # ___________________
+  # Basic plot set up
+  # ___________________
 
-  if (missing(xlabels)) {xlabels <- xbreaks}
-  if (missing(ylabels)) {ylabels <- abs(ybreaks)}
+  x_axis <- build_x_axis(x = data$xvar,
+                         xlab = xlab,
+                         xlim = xlim,
+                         xbreaks = xbreaks,
+                         xlabels = xlabels,
+                         financial_year = financial_year,
+                         expand_upper = 0,
+                         xangle = xangle,
+                         is_date = FALSE)
 
-  p <- ggplot2::ggplot(data) +
+  y_axis <- build_y_axis(y = data$value,
+                         ylab = ylab,
+                         ylim = ylim,
+                         ybreaks = ybreaks,
+                         ylabels = ylabels,
+                         lower = 0,
+                         upper = data$upper)
+
+
+  p <- ggplot2::ggplot(data) + get_theme_ssand()
+  p <- add_x_scale_continuous(p, x_axis)
+  p <- add_y_scale_continuous(p, y_axis)
+
+  # ___________________
+  # Build MLE plot
+  # ___________________
+
+
+  p <- p +
     ggplot2::facet_wrap(~year, scales=scales, ncol = ncol, dir = direction) +
-    ggplot2::theme_bw() +
-    ggplot2::scale_fill_manual(name = "Sex", values=c("grey60", "grey30", "grey80")) +
-    ggplot2::theme(legend.position = legend_position) +
-    ggplot2::xlab(xlab) +
-    ggplot2::ylab(ylab) +
-    ggplot2::scale_x_continuous(limits = xlim, breaks = xbreaks, labels = xlabels) +
-    ggplot2::scale_y_continuous(limits = ylim, breaks = ybreaks, labels = ylabels)
+    ggplot2::scale_fill_manual(name = "Sex", values=c("grey60", "grey30", "grey80"))
 
   if (!show_fits) {
     p <- p +
@@ -118,6 +145,7 @@ lengthplot <- function(data,
       ggplot2::geom_vline(aes(xintercept = MLS, linetype = MLS_label), colour = MLS_colour) +
       ggplot2::scale_linetype_manual(values = "dashed", name = ggplot2::element_blank())
   }
+
   return(p)
 }
 

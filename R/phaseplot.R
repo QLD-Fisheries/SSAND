@@ -47,24 +47,8 @@ phaseplot <- function(data,
   # Data input warnings
   check_data_columns(data, c("year","Bratio","F_","scenario","B_MSY","F_max"))
 
+  data <- apply_scenarios(data, scenarios, scenario_labels, scenario_order)
 
-  if (!missing(scenarios)){data <- data |> dplyr::filter(scenario %in% scenarios)}
-
-  if (missing(scenario_labels)) {
-    data <- data |> dplyr::mutate(scenario_labels = as.factor(paste0("Scenario ",scenario)))
-  } else {
-    scenario.lookup<- data.frame(scenario = unique(data$scenario), scenario_labels = scenario_labels)
-    data <- data |>
-      dplyr::left_join(scenario.lookup, by = "scenario") |>
-      dplyr::mutate(scenario_labels = as.factor(scenario_labels))
-  }
-
-  if (!missing(scenario_order)) {
-    # Add on any scenarios not included in the scenario_order list
-    scenario_order = c(scenario_order, setdiff(scenario_labels, scenario_order))
-    # Reorder scenarios
-    data$scenario_labels <- factor(data$scenario_labels, levels = scenario_order)
-  }
 
   PhaseData <- data
   cols <- c("#ECB1A2","#FFD699","#FFE699","#C6DEB5","#CC6677")
@@ -95,7 +79,7 @@ phaseplot <- function(data,
                              max.overlaps = Inf) +
     ggplot2::xlab(xlab) +
     ggplot2::ylab(ylab) +
-    ggplot2::theme_bw() +
+    get_theme_ssand() +
     ggplot2::scale_x_continuous(breaks=xbreaks)+
     ggplot2::theme(text = ggplot2::element_text(size=text_size))
   if (length(unique(PhaseData$scenario))>1){

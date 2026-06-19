@@ -30,54 +30,30 @@ spawningoutputplot <- function(data,
                                xaxis = "age", # length
                                xlab = "Age (years)",
                                ylab = "Spawning output",
-                               colours = NULL,
+                               colours = "black",
                                scenarios = NULL,
                                scenario_labels = NULL,
                                scenario_order = NULL,
                                scales = 'free',
                                ncol = 2) {
-  # Data input warnings
-  check_data_columns(data, c("xvar","maturityxfecundity","x","scenario"))
 
+  check_data_columns(data, c("xvar","maturityxfecundity","x","scenario"))
 
   data <- data |> dplyr::filter(x %in% xaxis)
 
   if (missing(xlab) & xaxis=="length") {xlab="Length (cm)"}
 
-  if (!missing(scenarios)){data <- data |> dplyr::filter(scenario %in% scenarios)}
-
-  if (missing(scenario_labels)) {
-    data <- data |> dplyr::mutate(scenario_labels = as.factor(paste0("Scenario ",scenario)))
-  } else {
-    scenario.lookup<- data.frame(scenario = unique(data$scenario), scenario_labels = scenario_labels)
-    data <- data |>
-      dplyr::left_join(scenario.lookup, by = "scenario") |>
-      dplyr::mutate(scenario_labels = as.factor(scenario_labels))
-  }
-
-  if (!missing(scenario_order)) {
-    # Add on any scenarios not included in the scenario_order list
-    scenario_order = c(scenario_order, setdiff(scenario_labels, scenario_order))
-    # Reorder scenarios
-    data$scenario_labels <- factor(data$scenario_labels, levels = scenario_order)
-  }
-
-  if (missing(colours)) {colours <- "black"}
+  data <- apply_scenarios(data, scenarios, scenario_labels, scenario_order)
 
 
   p <- ggplot2::ggplot(data, ggplot2::aes(x=xvar, y=maturityxfecundity)) +
+    get_theme_ssand() +
     ggplot2::geom_line(colour=colours) +
     ggplot2::geom_point(colour=colours) +
     ggplot2::xlab(xlab) +
-    ggplot2::ylab(ylab) +
-    ggplot2::theme_bw()
+    ggplot2::ylab(ylab)
 
-  if (length(unique(data$scenario))>1){
-    p <- p +
-      ggplot2::facet_wrap(~scenario_labels, scales = scales, ncol = ncol)
-  }
+  p <- add_scenario_facets(p, data, scales = scales, ncol = ncol)
 
   return(p)
-
-
 }

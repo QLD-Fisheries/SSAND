@@ -49,8 +49,6 @@ mcmc_posteriordensityplot <- function(data,
   check_data_columns(data[[3]], c("parameter","value"))
   check_data_columns(data[[4]], c("parameter","value"))
 
-
-
   mcmc_df_trace <- data[[1]]
   opt_df <- data[[2]]
   med_par_df <- data[[3]]
@@ -89,10 +87,10 @@ mcmc_posteriordensityplot <- function(data,
   }
 
   p <- ggplot2::ggplot(mcmc_df_trace) +
+    get_theme_ssand()
     ggplot2::geom_density(ggplot2::aes(x = value, fill = chain), linewidth = 0.5, alpha = 0.5) +
     ggplot2::labs(linetype = NULL) +
     ggplot2::facet_wrap(~parameter, scales = "free", labeller = ggplot2::label_parsed, ncol = ncol) +
-    ggplot2::theme_bw() +
     ggplot2::theme(legend.position = "bottom")+
     ggplot2::xlab(xlab) +
     ggplot2::ylab(ylab)

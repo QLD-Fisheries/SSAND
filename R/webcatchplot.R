@@ -64,6 +64,7 @@ webcatchplot <- function(data,
 
 
   p <- ggplot2::ggplot() +
+    get_theme_ssand() +
     ggplot2::geom_line(data = data |> dplyr::filter(method%in%c("Commercial data","Commercial plot adjust")), ggplot2::aes(x=year,y=value,linetype="a",colour="a",size="a")) +
     ggplot2::geom_point(data= data |> dplyr::filter(method%in%c("Commercial data","Commercial plot adjust")), ggplot2::aes(x=year,y=value,shape="a",colour="a",size="a")) +
 
@@ -90,7 +91,6 @@ webcatchplot <- function(data,
 
     ggplot2::xlab(xlab) +
     ggplot2::ylab(ylab) +
-    ggplot2::theme_bw() +
     ggplot2::theme(panel.grid.major.x = ggplot2::element_line(color = "gray70")) +
     ggplot2::theme(panel.grid.minor.x = ggplot2::element_line(color = "gray95")) +
     ggplot2::theme(panel.grid.major.y = ggplot2::element_line(color = "gray70")) +

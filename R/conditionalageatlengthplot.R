@@ -42,52 +42,73 @@ conditionalageatlengthplot <- function(data,
                                        ncol = 3,
                                        colours = fq_palette("alisecolours")[c(2,10)]){
 
+  # ___________________
+  # Data validation
+  # ___________________
+
   # Data input warnings
   check_data_columns(data, c("year","bin","fleet","lbin_low","pearson","obs","sex","scenario"))
+  data$xvar <- data$bin
 
-
+  # ___________________
+  # Custom to this plot
+  # ___________________
   fleet_filter <- fleet
   data <- data |> dplyr::filter(fleet == fleet_filter)
 
+  # ___________________
+  # Basic plot set up
+  # ___________________
+
+  data <- apply_scenarios(data, scenarios, scenario_labels, scenario_order)
+
+  x_axis <- build_x_axis(x = data$xvar,
+                         xlab = xlab,
+                         xlim = xlim,
+                         xbreaks = xbreaks,
+                         xlabels = xlabels,
+                         financial_year = financial_year,
+                         expand_upper = 0,
+                         xangle = xangle,
+                         is_date = FALSE)
+
+  y_axis <- build_y_axis(y = data$value,
+                         ylab = ylab,
+                         ylim = ylim,
+                         ybreaks = ybreaks,
+                         ylabels = ylabels,
+                         lower = 0,
+                         upper = data$upper)
+
+
+  p <- ggplot2::ggplot(data) + get_theme_ssand()
+  p <- add_x_scale_continuous(p, x_axis)
+  p <- add_y_scale_continuous(p, y_axis)
+
+  p <- p +
+    ggplot2::scale_size_continuous(breaks = size_breaks, range = size_range) +
+    ggplot2::facet_wrap(~year, dir = "v" , ncol = ncol) +
+    ggplot2::scale_fill_manual(values = colours)
+
+  # ___________________
+  # Build MLE plot
+  # ___________________
+
   if (!show_fits) {
-    p <- ggplot2::ggplot(data) +
-      ggplot2::geom_point(ggplot2::aes(x=bin, y=lbin_low, size=ifelse(obs==0, NA, abs(obs))), shape=1) +
-      ggplot2::scale_size_continuous(breaks = size_breaks, range = size_range) +
-      ggplot2::scale_y_continuous(limits=ylim)+
-      ggplot2::scale_x_continuous(limits=xlim)+
-      ggplot2::facet_wrap(~year, dir = "v" , ncol = ncol) +
-      ggplot2::xlab(xlab) +
-      ggplot2::ylab(ylab) +
-      ggplot2::theme_bw() +
-      ggplot2::theme(legend.position=legend_position, legend.title = ggplot2::element_blank()) +
-      ggplot2::theme(text = ggplot2::element_text(size=text_size), legend.text = ggplot2::element_text(size=text_size))
+    p <- p +
+      ggplot2::geom_point(ggplot2::aes(x=bin, y=lbin_low, size=ifelse(obs==0, NA, abs(obs))),
+                          shape=1)
   }
 
   if (show_fits) {
     temp_data <- data |>
       dplyr::mutate(posneg = ifelse(pearson>0,"Positive","Negative"))
 
-    p <- ggplot2::ggplot(temp_data) +
-      ggplot2:: geom_point(ggplot2::aes(x = bin, y = lbin_low, size = ifelse(pearson==0, NA, abs(pearson)), fill = posneg), alpha = 0.5, shape = 21) +
-      ggplot2::scale_size_continuous(breaks = size_breaks, range = size_range) +
-      ggplot2::scale_fill_manual(values = colours) +
-      ggplot2::scale_x_continuous(limits=xlim) +
-      ggplot2::facet_wrap(~year, dir = "v", ncol = ncol, strip.position = "top") +
-      ggplot2::xlab(xlab) +
-      ggplot2::ylab(ylab) +
-      ggplot2::theme_bw() +
-      ggplot2::theme(panel.grid.major = ggplot2::element_blank(),
-                     panel.grid.minor = ggplot2::element_blank(),
-                     legend.position = legend_position,
-                     legend.justification = c(0.5,1),
-                     legend.box = "horizontal",
-                     legend.box.just = "left",
-                     legend.key.size = ggplot2::unit(1,"lines"),
-                     legend.text.align = 0,
-                     legend.key = ggplot2::element_blank(),
-                     legend.title = ggplot2::element_blank(),
-                     legend.background = ggplot2::element_blank(),
-                     legend.text = ggplot2::element_text(size = text_size))
+    p <- p +
+      ggplot2:: geom_point(data = temp_data,
+                           ggplot2::aes(x = bin, y = lbin_low, size = ifelse(pearson==0, NA, abs(pearson)), fill = posneg),
+                           alpha = 0.5,
+                           shape = 21)
   }
   return(p)
 }

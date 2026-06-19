@@ -89,6 +89,10 @@ Fplot <- function(data,
                   colours = c("black","darkred"),
                   boxplot_outliers = TRUE){
 
+  # ___________________
+  # Data validation
+  # ___________________
+
   # Identify MCMC or MLE
   MCMC <- "med" %in% names(data)
 
@@ -110,12 +114,15 @@ Fplot <- function(data,
   # Determine axis settings if missing
   facet_wrap <- length(unique(data$scenario))>1 & !aggregate_scenarios
 
-  # Set up data and axes
-  data <- apply_scenarios(data,
-                          scenarios = scenarios,
-                          scenario_labels = scenario_labels,
-                          scenario_order = scenario_order)
+  # ___________________
+  # Custom to this plot
+  # ___________________
 
+
+  # ___________________
+  # Basic plot set up
+  # ___________________
+  data <- apply_scenarios(data, scenarios, scenario_labels, scenario_order)
 
   x_axis <- build_x_axis(x = data$xvar,
                          xlab = xlab,
@@ -136,11 +143,13 @@ Fplot <- function(data,
                          lower = 0,
                          upper = data$upper)
 
-  # ___________________
-  # Initiate plot
   p <- ggplot2::ggplot(data) + get_theme_ssand()
   p <- add_x_scale_continuous(p, x_axis)
   p <- add_y_scale_continuous(p, y_axis)
+
+  # ___________________
+  # Build MLE plot
+  # ___________________
 
   if (!MCMC) {
     p <- p +
@@ -151,6 +160,10 @@ Fplot <- function(data,
                                       position=ggplot2::position_dodge(0))
     }
   }
+
+  # ___________________
+  # Build MCMC plot
+  # ___________________
 
   if (MCMC) {
     if (mcmc_style == "boxplot") p <- mcmc_boxplot(p, data, xlim, boxplot_outliers)
@@ -164,8 +177,10 @@ Fplot <- function(data,
     p <- show_median_lines("fishing mortality",p,data,show_median,line_width,colours)
   }
 
-  # Facet wrap
-  if (facet_wrap)         p <- add_scenario_facets(p, data, scales = scales, ncol = ncol)
+  # ___________________
+  # Final layers
+  # ___________________
+  if (facet_wrap) p <- add_scenario_facets(p, data, scales = scales, ncol = ncol)
 
   return(p)
 }

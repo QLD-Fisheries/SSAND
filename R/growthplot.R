@@ -44,41 +44,28 @@ growthplot <- function(data,
                        ncol = 2,
                        variation_on_variation = FALSE) {
 
+  # ___________________
+  # Data validation
+  # ___________________
 
   # Identify MCMC or MLE
   MCMC <- "CV_lower" %in% names(data)
 
   # Data input warnings
   check_data_columns(data, c("age","value","lower","upper","sex","scenario"))
-  if (MCMC) {
-    check_data_columns(data, c("CV_lower","CV_middle","CV_upper","growthCVtype"))
-  }
+  if (MCMC) check_data_columns(data, c("CV_lower","CV_middle","CV_upper","growthCVtype"))
 
+  data$xvar <- data$age
+
+  # ___________________
+  # Custom to this plot
+  # ___________________
 
   if (missing(show_two_sex)) {
     tmp1 <- 1 %in% data$sex
     tmp2 <- 2 %in% data$sex
     show_two_sex <- tmp1 & tmp2
   }
-
-  if (!missing(scenarios)){data <- data |> dplyr::filter(scenario %in% scenarios)}
-
-  if (missing(scenario_labels)) {
-    data <- data |> dplyr::mutate(scenario_labels = as.factor(paste0("Scenario ",scenario)))
-  } else {
-    scenario.lookup<- data.frame(scenario = unique(data$scenario), scenario_labels = scenario_labels)
-    data <- data |>
-      dplyr::left_join(scenario.lookup, by = "scenario") |>
-      dplyr::mutate(scenario_labels = as.factor(scenario_labels))
-  }
-
-  if (!missing(scenario_order)) {
-    # Add on any scenarios not included in the scenario_order list
-    scenario_order = c(scenario_order, setdiff(scenario_labels, scenario_order))
-    # Reorder scenarios
-    data$scenario_labels <- factor(data$scenario_labels, levels = scenario_order)
-  }
-
 
   if (missing(colours)) {
     if (show_two_sex) {
@@ -88,62 +75,81 @@ growthplot <- function(data,
     }
   }
 
-  if(show_two_sex) {
-    dataF <- data[data$sex == 1, ]
-    dataM <- data[data$sex == 2, ]
-    p <- ggplot2::ggplot() +
-      ggplot2::theme_bw() +
-      ggplot2::xlab(xlab) +
-      ggplot2::ylab(ylab) +
-      ggplot2::geom_line(data = dataF, ggplot2::aes(x=age, y=value, colour = "A", linetype = "A"), linewidth=1.05) +
-      ggplot2::geom_line(data = dataF,ggplot2::aes(x=age, y=lower, colour = "A"), linetype="dotted") +
-      ggplot2::geom_line(data = dataF,ggplot2::aes(x=age, y=upper, colour = "A"), linetype="dotted") +
-      ggplot2::geom_ribbon(data = dataF,ggplot2::aes(x=age, ymin=lower, ymax=upper), fill=colours[1], alpha=0.2) +
-      ggplot2::theme(text = ggplot2::element_text(size=text_size)) +
-      ggplot2::geom_line(data = dataM, ggplot2::aes(x=age, y=value, colour = "B", linetype = "B"),  linewidth=1.05) +
-      ggplot2::geom_line(data = dataM, ggplot2::aes(x=age, y=lower, colour = "B"), linetype="dotted") +
-      ggplot2::geom_line(data = dataM, ggplot2::aes(x=age, y=upper, colour = "B"), linetype="dotted") +
-      ggplot2::geom_ribbon(data = dataM, ggplot2::aes(x=age, ymin=lower, ymax=upper), fill=colours[2], alpha=0.2) +
-      ggplot2::scale_colour_manual(c("", ""),values=colours, labels = c("Female", "Male")) +
-      ggplot2::scale_linetype_manual(c("", ""),values=c("solid","dashed"), labels = c("Female", "Male")) +
-      ggplot2::theme(legend.position = "top")
-  } else {
-    p <- ggplot2::ggplot(data) +
-      ggplot2::theme_bw() +
-      ggplot2::xlab(xlab) +
-      ggplot2::ylab(ylab) +
-      ggplot2::geom_line(ggplot2::aes(x=age, y=value), colour= colours, linewidth=1.05) +
-      ggplot2::theme(text = ggplot2::element_text(size=text_size))
+  # ___________________
+  # Basic plot set up
+  # ___________________
 
-    if (prod(!is.na(data$lower))){
+  data <- apply_scenarios(data, scenarios, scenario_labels, scenario_order)
+
+  x_axis <- build_x_axis(x = data$xvar,
+                         xlab = xlab,
+                         xlim = xlim,
+                         xbreaks = xbreaks,
+                         xlabels = xlabels,
+                         financial_year = financial_year,
+                         expand_upper = as.numeric(show_final_biomass),
+                         xangle = xangle,
+                         is_date = FALSE)
+
+  y_axis <- build_y_axis(y = data$value,
+                         ylab = ylab,
+                         ylim = ylim,
+                         ybreaks = ybreaks,
+                         ylabels = ylabels,
+                         lower = 0,
+                         upper = data$upper)
+
+
+  p <- ggplot2::ggplot(data) + get_theme_ssand()
+  p <- add_x_scale_continuous(p, x_axis)
+  p <- add_y_scale_continuous(p, y_axis)
+
+  # ___________________
+  # Build MLE plot
+  # ___________________
+
+  if (!MCMC) {
+    if(show_two_sex) {
+      dataF <- data[data$sex == 1, ]
+      dataM <- data[data$sex == 2, ]
       p <- p +
-        ggplot2::geom_line(ggplot2::aes(x=age, y=lower), colour=colours, linetype="dotted") +
-        ggplot2::geom_line(ggplot2::aes(x=age, y=upper), colour=colours, linetype="dotted") +
-        ggplot2::geom_ribbon(ggplot2::aes(x=age, ymin=lower, ymax=upper), fill=colours, alpha=0.2)
+        ggplot2::geom_line(data = dataF, ggplot2::aes(x=age, y=value, colour = "A", linetype = "A"), linewidth=1.05) +
+        ggplot2::geom_line(data = dataF,ggplot2::aes(x=age, y=lower, colour = "A"), linetype="dotted") +
+        ggplot2::geom_line(data = dataF,ggplot2::aes(x=age, y=upper, colour = "A"), linetype="dotted") +
+        ggplot2::geom_ribbon(data = dataF,ggplot2::aes(x=age, ymin=lower, ymax=upper), fill=colours[1], alpha=0.2) +
+        ggplot2::geom_line(data = dataM, ggplot2::aes(x=age, y=value, colour = "B", linetype = "B"),  linewidth=1.05) +
+        ggplot2::geom_line(data = dataM, ggplot2::aes(x=age, y=lower, colour = "B"), linetype="dotted") +
+        ggplot2::geom_line(data = dataM, ggplot2::aes(x=age, y=upper, colour = "B"), linetype="dotted") +
+        ggplot2::geom_ribbon(data = dataM, ggplot2::aes(x=age, ymin=lower, ymax=upper), fill=colours[2], alpha=0.2) +
+        ggplot2::scale_colour_manual(c("", ""),values=colours, labels = c("Female", "Male")) +
+        ggplot2::scale_linetype_manual(c("", ""),values=c("solid","dashed"), labels = c("Female", "Male"))
+    } else {
+      p <- p +
+        ggplot2::geom_line(ggplot2::aes(x=age, y=value), colour= colours, linewidth=1.05)
+
+      if (prod(!is.na(data$lower))){
+        p <- p +
+          ggplot2::geom_line(ggplot2::aes(x=age, y=lower), colour=colours, linetype="dotted") +
+          ggplot2::geom_line(ggplot2::aes(x=age, y=upper), colour=colours, linetype="dotted") +
+          ggplot2::geom_ribbon(ggplot2::aes(x=age, ymin=lower, ymax=upper), fill=colours, alpha=0.2)
+      }
     }
   }
 
-  if (length(unique(data$scenario))>1){
-    p <- p +
-      ggplot2::facet_wrap(~scenario_labels, scales = scales, ncol = ncol)
-  }
-
+  # ___________________
+  # Build MCMC plot
+  # ___________________
 
   if (MCMC) {
     if (!variation_on_variation) {
-      p <- ggplot2::ggplot(data) +
+      p <- p +
         ggplot2::geom_ribbon(ggplot2::aes(x = age, ymin = value-1.96*CV_middle, ymax= value+1.96*CV_middle, fill = "Variation in growth using median standard deviation")) +
         ggplot2::geom_ribbon(ggplot2::aes(x = age, ymin = lower, ymax= upper, fill = "95% credible interval")) +
         ggplot2::geom_line(ggplot2::aes(x = age, y = value, linetype = "Median growth"), colour = "grey30") +
         ggplot2::scale_fill_manual("", values=c("grey65","grey85")) +
-        ggplot2::scale_linetype_manual("", values=c("solid","dashed")) +
-        ggplot2::theme_bw() +
-        ggplot2::xlab(xlab) +
-        ggplot2::ylab(ylab) +
-        ggplot2::theme(legend.position="top") +
-        ggplot2::coord_cartesian(ylim = c(-0, NA), xlim = c(0,NA)) # alternative to ylim that doesn't cut off ribbons
+        ggplot2::scale_linetype_manual("", values=c("solid","dashed"))
     } else {
-      p <- ggplot2::ggplot(data) +
+      p <- p +
         ggplot2::geom_ribbon(ggplot2::aes(x = age, ymin = value-1.96*CV_lower, ymax = value-1.96*CV_upper, fill = "95% credible interval for variation in growth")) +
         ggplot2::geom_ribbon(ggplot2::aes(x = age, ymin = value+1.96*CV_lower, ymax = value+1.96*CV_upper, fill = "95% credible interval for variation in growth")) +
         ggplot2::geom_line(ggplot2::aes(x = age, y = value-1.96*CV_middle, linetype="Variation in growth")) +
@@ -151,13 +157,15 @@ growthplot <- function(data,
         ggplot2::geom_ribbon(ggplot2::aes(x = age, ymin = lower, ymax= upper, fill = "95% credible interval for growth")) +
         ggplot2::geom_line(ggplot2::aes(x = age, y = value, linetype = "Growth"), colour = "grey30") +
         ggplot2::scale_fill_manual("", values=c("grey65","grey85")) +
-        ggplot2::scale_linetype_manual("", values=c("solid","dashed")) +
-        ggplot2::theme_bw() +
-        ggplot2::xlab(xlab) +
-        ggplot2::ylab(ylab) +
-        ggplot2::theme(legend.position="top") +
-        ggplot2::coord_cartesian(ylim = c(-0, NA), xlim = c(0,NA)) # alternative to ylim that doesn't cut off ribbons
+        ggplot2::scale_linetype_manual("", values=c("solid","dashed"))
     }
   }
+
+  # ___________________
+  # Final layers
+  # ___________________
+
+  p <- add_scenario_facets(p, data, scales = scales, ncol = ncol)
+
   return(p)
 }

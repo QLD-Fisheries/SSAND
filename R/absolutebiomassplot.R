@@ -43,9 +43,8 @@
 #' @param show_dates_on_axis Set to TRUE to show full dates on x-axis as opposed to years.
 #' @param sample Number of samples to plot from each MCMC chain to ease burden of rendering dense plots (numeric).
 #' @param band_colour Colour of bands (character). Only used when mcmc_style=="banded". Input one colour, bands will be distinguished using an alpha.
-#' @param show_median Type of median shown. Default "median_cpue" shows the median of each year,
+#' @param show_median Type of median shown. Default "annual_biomass" shows the median of each year,
 #' "trajectory" shows median trajectory based on biomass in final year,
-#' "parameters" uses median of each parameter (not yet implemented)
 #' @param mcmc_style The type of MCMC plot to be displayed (character). Options are "banded", "hairy", "boxplot", "CI" and "joy", the default is "banded". Only one option can be selected.
 #' @param legend_box Display option for legend (character). Choose "vertical" to stack legend types vertically, or "horizontal" to keep legends in one row.
 #' @param show_observed_error Set to TRUE to display error bars around input data (MCMC only)
@@ -91,7 +90,7 @@ absolutebiomassplot <- function(data,
                                 show_negative = TRUE,
                                 point_size = 2,
                                 text_size = 12,
-                                colours = NULL,
+                                colours = c("black",fq_palette("cols")),
                                 legend_position = "top",
                                 ncol = 2,
                                 scales = "free",
@@ -102,7 +101,7 @@ absolutebiomassplot <- function(data,
                                 show_dates_on_axis = FALSE,
                                 sample = NULL,
                                 band_colour = "black",
-                                show_median = "median_cpue", # trajectory, median_cpue, parameters, none
+                                show_median = "median_cpue", # trajectory, annual_biomass, none
                                 mcmc_style = "banded", # hairy, boxplot, banded, CI, joy
                                 line_width = 1,
                                 hair_width = 0.5,
@@ -114,27 +113,33 @@ absolutebiomassplot <- function(data,
                                 alpha = NULL,
                                 boxplot_outliers = TRUE) {
 
-  # 📐Set up ----
+  # ___________________
+  # Data validation
+  # ___________________
+
   # Identify MCMC or MLE
   MCMC <- "med" %in% names(data)
 
   # Data input warnings
-  if (!MCMC) {
-    check_data_columns(data, c("date","fleet","obs","exp","ub","lb","scenario"))
-  } else {
-    check_data_columns(data, c("year","month","fleet","obs","exp","ub","lb","rownum","med","interval","date","scenario"))
-  }
+  if (!MCMC) check_data_columns(data, c("date","fleet","obs","exp","ub","lb","scenario"))
+  if (MCMC)  check_data_columns(data, c("year","month","fleet","obs","exp","ub","lb","rownum","med","interval","date","scenario"))
+  data$xvar <- data$year
+  if (is.null(alpha) & mcmc_style !="banded") {alpha=0.7}
 
+  # MCMC warnings
+  show_median <- simplify_show_median(show_median, c("median_cpue","trajectory","none"))
 
+  check_mcmc_style(mcmc_style)
+  if (MCMC) {data$upper <- data$prob_upper; data$lower <- data$prob_lower}
+  if (MCMC) data$med[startsWith(data$med, "median_")] <- "annual"
+  if (MCMC) data <- sample_mcmc_runs(data, sample)
 
+  # ___________________
+  # Custom to this plot
+  # ___________________
   if (!show_negative) {data <- dplyr::mutate(data, lb = ifelse(lb<0,0,lb))}
-
-  if (financial_year & xlab=="Year") {warning("Your x-axis implies calendar year, but you've indicated you're using financial year.")}
-
   if (!missing(fleets)) {data <- data |> dplyr::filter(fleet %in% fleets)}
 
-
-  # If xlim is entered as just years, convert to dates
   # If xlim is entered as just years, convert to dates
   if (!missing(xlim)) {
     if (nchar(xlim[1])==4) {
@@ -153,75 +158,60 @@ absolutebiomassplot <- function(data,
       dplyr::pull()
 
     if (min_n_obs==1) {show_line = FALSE} else {show_line = TRUE}
-
     if (min_n_obs==1 && missing(xlim)) {xlim <- c(min(data$date)-365,max(data$date)+365)}
   }
 
-
-  if (missing(xlim)) {xlim <- c(min(data$date),max(data$date)+1)}
-  if (missing(ylim)) {ylim <- c(0,max(data$ub, na.rm=TRUE))}
-
-  if (missing(xbreaks)) {xbreaks <- pretty(xlim)}
-  if (missing(ybreaks)) {ybreaks <- pretty(ylim)}
-  if (missing(ylabels)) {ylabels <- ybreaks}
-
-
-  if (missing(xlabels) & !financial_year & show_dates_on_axis) {xlabels <- xbreaks}
-  if (missing(xlabels) & !financial_year & !show_dates_on_axis) {xlabels <- lubridate::year(xbreaks)}
-
-  if (missing(xlabels) & financial_year & !show_dates_on_axis) {xlabels <- paste0(xbreaks-1,"\U2013",xbreaks)}
-  if (missing(xlabels) & financial_year & show_dates_on_axis) {xlabels <- xbreaks}
-
-  if (missing(xangle)) {xangle <- ifelse(financial_year,90,0)}
-
-  if (missing(colours)) {colours <- c("black",fq_palette("cols"))}
-
   if (missing(fleets)) {fleets <- sort(unique(data$fleet))}
-
   if (missing(fleet_names)) {fleet_names <- paste0('Fleet ',sort(unique(data$fleet)))}
+  data <- data[which(data$fleet %in% as.character(fleets)),]
 
-  if (!missing(scenarios)){data <- data |> dplyr::filter(scenario %in% scenarios)}
+  # ___________________
+  # Basic plot set up
+  # ___________________
 
-  if (missing(scenario_labels)) {
-    data <- data |> dplyr::mutate(scenario_labels = as.factor(paste0("Scenario ",scenario)))
-  } else {
-    scenario.lookup<- data.frame(scenario = unique(data$scenario), scenario_labels = scenario_labels)
-    data <- data |>
-      dplyr::left_join(scenario.lookup, by = "scenario") |>
-      dplyr::mutate(scenario_labels = as.factor(scenario_labels))
-  }
+  data <- apply_scenarios(data, scenarios, scenario_labels, scenario_order)
 
-  if (!missing(scenario_order)) {
-    # Add on any scenarios not included in the scenario_order list
-    scenario_order = c(scenario_order, setdiff(scenario_labels, scenario_order))
-    # Reorder scenarios
-    data$scenario_labels <- factor(data$scenario_labels, levels = scenario_order)
-  }
+  x_axis <- build_x_axis(x = data$xvar,
+                         xlab = xlab,
+                         xlim = xlim,
+                         xbreaks = xbreaks,
+                         xlabels = xlabels,
+                         financial_year = financial_year,
+                         expand_upper = 0,
+                         xangle = xangle,
+                         is_date = TRUE)
 
-  if (missing(alpha)) {alpha=0.7}
+  y_axis <- build_y_axis(y = data$value,
+                         ylab = ylab,
+                         ylim = ylim,
+                         ybreaks = ybreaks,
+                         ylabels = ylabels,
+                         lower = 0,
+                         upper = data$upper)
 
 
-  # 🧮 MLE ----
+  p <- ggplot2::ggplot(data) + get_theme_ssand()
+  p <- add_x_scale_continuous(p, x_axis)
+  p <- add_y_scale_continuous(p, y_axis)
+
+  p <- p +
+    ggplot2::scale_colour_manual(values = colours, labels = fleet_names)
+
+  # ___________________
+  # Build MLE plot
+  # ___________________
+
   if (!MCMC) {
-
-    # General
-    p <- ggplot2::ggplot(data[which(data$fleet %in% as.character(fleets)),]) +
-      ggplot2::theme_bw() +
-      ggplot2::xlab(xlab) +
-      ggplot2::ylab(ylab) +
-      ggplot2::theme(text = ggplot2::element_text(size=text_size)) +
-      ggplot2::theme(legend.title=ggplot2::element_blank(), legend.position = legend_position)
-
     # Model fits
     if (show_CI_ribbon){
       p <- p +
-        ggplot2::geom_ribbon(ggplot2::aes(x=date, ymin = lb, ymax= ub, group = fleet), alpha = 0.1, group = 1) +
+        ggplot2::geom_ribbon(ggplot2::aes(x=date, ymin = lower, ymax= upper, group = fleet), alpha = 0.1, group = 1) +
         ggplot2::scale_fill_manual(c(""),values="grey12", labels="95% confidence interval")
     }
 
     if (show_error_bar) {
       p <- p +
-        ggplot2::geom_errorbar(ggplot2::aes(x=date,ymin=lb, ymax=ub), width=.5, position=ggplot2::position_dodge(0))
+        ggplot2::geom_errorbar(ggplot2::aes(x=date,ymin=lower, ymax=upper), width=.5, position=ggplot2::position_dodge(0))
     }
 
     if (show_fits) { # Just line of model fits, no error on estimation
@@ -244,24 +234,6 @@ absolutebiomassplot <- function(data,
       }
     }
 
-    # General
-    p <- p +
-      ggplot2::scale_x_continuous(limits = as.numeric(xlim), breaks = xbreaks, labels = xlabels) +
-      ggplot2::scale_y_continuous(limits = as.numeric(ylim)) +
-      ggplot2::theme(axis.text.x = ggplot2::element_text(angle = xangle, vjust = 0.5, hjust=ifelse(xangle==90,0,0.5)))
-
-    if (length(unique(data$scenario))>1){
-      p <- p +
-        ggplot2::facet_wrap(~scenario_labels, scales = scales, ncol = ncol)
-    }
-
-    p <- p +
-      ggplot2::theme(legend.title=ggplot2::element_blank(), legend.position = legend_position)
-
-    p <- p +
-      ggplot2::scale_colour_manual(values = colours, labels = fleet_names)
-
-
     # Remove legend if there is one fleet and set up for summary
     if (length(fleets)==1 & show_inputs & !show_fits & !show_CI_ribbon & !show_error_bar & show_point){
       p <- p +
@@ -269,84 +241,20 @@ absolutebiomassplot <- function(data,
     }
   }
 
-  # 🍪 MCMC ----
+  # ___________________
+  # Build MCMC plot
+  # ___________________
+
   if (MCMC) {
-
-    # Warnings
-    if (MCMC & !any(show_median %in% c('median_cpue', 'trajectory', 'parameters', 'none'))){warning('Please check show_median options using ?cpueplot')}
-    if (MCMC & any(show_median %in% c('Parameters'))){warning('Median parameters feature not available yet.')}
-    if (MCMC & length(mcmc_style)>1) {warning("You can only select one mcmc_type at a time.")}
-
-    # Subset MCMC iterations
-    if (!missing(sample)) {
-      data2 <- data |> dplyr::filter(med == "trajectory")
-
-      data3 <- data |>
-        dplyr::filter(med == "MCMC") |>
-        dplyr::filter(rownum %in% sample(unique(data$rownum), size=sample))
-
-      data <- rbind(data2, data3)
-    }
-
-    # Box plot
-    if (mcmc_style == "boxplot") {
-      databox <- data |>
-        dplyr::filter(rownum > 0)
-
-      # Expand limits of x-axis to include box
-      xlim[1] <- xlim[1]-0.5
-      xlim[2] <- xlim[2]+0.5
-
-      p <- ggplot2::ggplot(data) +
-        ggplot2::geom_boxplot(data = databox, ggplot2::aes(x=year, y=obs, group=date), outliers = boxplot_outliers)
-    }
-
-    # Banded plot
-    if (mcmc_style == "banded") {
-      tmp <- unique(data$interval)[!is.na(unique(data$interval))]
-      alpha_scale <- seq(round(1/length(tmp),2),1,round(1/length(tmp),2))^2 + 0.1
-      alpha_scale <- alpha_scale/max(alpha_scale)
-
-      p <- ggplot2::ggplot(data) +
-        ggplot2::geom_ribbon(data = data |> dplyr::filter(!is.na(interval)),
-                             ggplot2::aes(x=date, ymin=lb, ymax=ub, group=interval, alpha=as.factor(-interval)),
-                             fill=band_colour) +
-        ggplot2::scale_alpha_manual(values = alpha_scale,
-                                    labels = rev(unique(data$interval)[!is.na(unique(data$interval))]),
-                                    name = "Credible interval")
-    }
-
-    # Hairy plot
-    if (mcmc_style == "hairy") {
-      p <- ggplot2::ggplot(data) +
-        ggplot2::geom_line(data = data |> dplyr::filter(med == "MCMC"),
-                           ggplot2::aes(x=date,y=exp, group=rownum), colour = 'grey20', linewidth=hair_width, alpha = 1)
-    }
-
-
-    # Credible interval
-    if (mcmc_style == "CI") {
-      if (aggregate_scenarios) {
-        dataCI <- data |>
-          dplyr::filter(med=="MCMC") |>
-          dplyr::group_by(date) |>
-          dplyr::summarise(upper = quantile(exp,probs=1-(1-CI_range)/2),
-                           lower = quantile(exp,probs=(1-CI_range)/2),
-                           .groups = 'drop') |>
-          dplyr::mutate(fill_label = paste0(CI_range*100,"% credible interval"))
-      } else {
-        dataCI <- data |>
-          dplyr::filter(med=="MCMC") |>
-          dplyr::group_by(scenario_labels,date) |>
-          dplyr::summarise(upper = quantile(exp,probs=1-(1-CI_range)/2),
-                           lower = quantile(exp,probs=(1-CI_range)/2),
-                           .groups = 'drop') |>
-          dplyr::mutate(fill_label = paste0(CI_range*100,"% credible interval"))
-      }
-      p <- ggplot2::ggplot(data) +
-        ggplot2::geom_ribbon(data = dataCI, ggplot2::aes(x=date, ymax=upper, ymin = lower, fill = fill_label), alpha = alpha) +
-        ggplot2::scale_fill_manual(values = "grey60", name="")
-    }
+    if (mcmc_style == "boxplot") p <- mcmc_boxplot(p, data, xlim, boxplot_outliers)
+    if (mcmc_style == "banded")  p <- mcmc_banded(p, data, alpha, band_labels, band_colour)
+    if (mcmc_style == "hairy")   p <- mcmc_hairy(p, data, hair_width)
+    if (mcmc_style == "CI")      p <- mcmc_CI(p, data, aggregate_scenarios, CI_range, alpha)
+    if (mcmc_style == "joy")     p <- mcmc_joy(p, data, CI_range, ridge_colour, rel_min_height, alpha, ridge_scale, show_CI,
+                                               ybreaks, ylin,ylab, xlab, legend_position, text_size,xbreaks,legend_box,facet_wrap,
+                                               show_median,xlabels,ylabels)
+    # Add median lines
+    p <- show_median_lines("annual biomass",p,data,show_median,line_width,colours)
 
     # Add input data
     if (show_inputs) {
@@ -362,46 +270,13 @@ absolutebiomassplot <- function(data,
         ggplot2::geom_point(data=data_fits, ggplot2::aes(x=date,y=obs,shape=med), colour=input_colour) +
         ggplot2::scale_shape_manual(values=1,name="")
     }
-
-
-    # Add median lines
-    if (!"none" %in% show_median) {
-      data_med <- data |>
-        dplyr::filter(med %in% show_median) |>
-        dplyr::mutate(med = dplyr::recode(med,
-                                          "median_cpue" = "Median catch rate",
-                                          "trajectory" = "Median trajectory",
-                                          "parameters" = "Median parameters"))
-
-      p <- p +
-        ggplot2::geom_line(data=data_med, ggplot2::aes(x=date,y=exp, colour=med), linewidth=line_width) +
-        ggplot2::scale_color_manual(values = colours, name = ggplot2::element_blank())
-    }
-
-    # Universal aesthetics
-    p <- p +
-      ggplot2::scale_x_continuous(limits = as.numeric(xlim), breaks = xbreaks, labels = xlabels) +
-      ggplot2::scale_y_continuous(limits = as.numeric(ylim), breaks = ybreaks, labels = ylabels) +
-      ggplot2::theme_bw() +
-      ggplot2::xlab(xlab) +
-      ggplot2::ylab(ylab) +
-      ggplot2::theme(legend.position=legend_position) +
-      ggplot2::theme(legend.text = ggplot2::element_text(size=text_size)) +
-      ggplot2::theme(text = ggplot2::element_text(size=text_size)) +
-      ggplot2::theme(legend.box=legend_box) +
-      ggplot2::theme(axis.text.x = ggplot2::element_text(angle = xangle, vjust = 0.5, hjust=ifelse(xangle==90,0,0.5)))
-
-    # Facet wrap
-    if (length(unique(data$scenario))>1) {
-      suppressMessages({
-        p <- p +
-          ggplot2::scale_x_continuous(limits = as.numeric(xlim), breaks = xbreaks, labels = xlabels) +
-          ggplot2::scale_y_continuous(limits = as.numeric(ylim), breaks = ybreaks, labels = ylabels) +
-          ggplot2::facet_wrap(~scenario_labels, ncol = ncol, scales = scales)
-
-      })
-    }
   }
+
+  # ___________________
+  # Final layers
+  # ___________________
+  if (facet_wrap) p <- add_scenario_facets(p, data, scales = scales, ncol = ncol)
+
   return(p)
 }
 

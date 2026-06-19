@@ -39,23 +39,8 @@ mcmc_rhatplot <- function(data,
   check_data_columns(data, c("parameter","Rhat","scenario","group","xmax"))
 
 
-  if (!missing(scenarios)){data <- data |> dplyr::filter(scenario %in% scenarios)}
+  data <- apply_scenarios(data, scenarios, scenario_labels, scenario_order)
 
-  if (missing(scenario_labels)) {
-    data <- data |> dplyr::mutate(scenario_labels = as.factor(paste0("Scenario ",scenario)))
-  } else {
-    scenario.lookup<- data.frame(scenario = unique(data$scenario), scenario_labels = scenario_labels)
-    data <- data |>
-      dplyr::left_join(scenario.lookup, by = "scenario") |>
-      dplyr::mutate(scenario_labels = as.factor(scenario_labels))
-  }
-
-  if (!missing(scenario_order)) {
-    # Add on any scenarios not included in the scenario_order list
-    scenario_order = c(scenario_order, setdiff(scenario_labels, scenario_order))
-    # Reorder scenarios
-    data$scenario_labels <- factor(data$scenario_labels, levels = scenario_order)
-  }
 
   if(!show_point) {
     p <- ggplot2::ggplot(data) +
@@ -80,7 +65,7 @@ mcmc_rhatplot <- function(data,
                                values = c("#b4d9eb", "#4facda", "#136993")) +
     ggplot2::xlab(expression(hat(R))) +
     ggplot2::ylab(ylab) +
-    ggplot2::theme_bw() +
+    get_theme_ssand() +
     ggplot2::theme(legend.position = 'top') +
     ggplot2::theme(legend.title = ggplot2::element_blank())
 

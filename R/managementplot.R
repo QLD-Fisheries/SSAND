@@ -387,13 +387,11 @@ managementplot <- function(data,
           show.legend  = FALSE,
           max.overlaps = Inf)
     }
-
   }
-
 
   # Theme and axes
   p <- p +
-    ggplot2::theme_bw() +
+    get_theme_ssand() +
     ggplot2::scale_x_continuous(limits = xlim,
                                 breaks = xbreaks,
                                 labels = xbreaks) +

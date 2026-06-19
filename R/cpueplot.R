@@ -121,8 +121,11 @@ cpueplot <- function(data,
                      CI_range = 0.95,
                      alpha = NULL,
                      fit_colour = NULL,
-                     boxplot_outliers = TRUE,
-                     sample = NULL) {
+                     boxplot_outliers = TRUE) {
+
+  # ___________________
+  # Data validation
+  # ___________________
 
   # Identify MCMC or MLE
   MCMC <- "med" %in% names(data)
@@ -131,21 +134,26 @@ cpueplot <- function(data,
   if (!MCMC) check_data_columns(data, c("date","fleet","obs","exp","ub","lb","scenario"))
   if (MCMC)  check_data_columns(data, c("year","month","fleet","obs","exp","ub","lb","rownum","med","interval","date","scenario"))
 
-  # MCMC warnings
-  show_median <- simplify_show_median(show_median, c("median_cpue","trajectory","none"))
 
-  check_mcmc_style(mcmc_style)
-  if (MCMC) {data$upper <- data$prob_upper; data$lower <- data$prob_lower}
-  if (MCMC) data$med[startsWith(data$med, "median_")] <- "annual"
-  if (MCMC) data <- sample_mcmc_runs(data, sample)
+  if (!MCMC) {data$upper <- data$ub; data$lower <- data$lb}
+
+  # MCMC warnings
+  # show_median <- simplify_show_median(show_median, c("median_cpue","trajectory","none"))
+  # check_mcmc_style(mcmc_style)
+  # if (MCMC) {data$upper <- data$prob_upper; data$lower <- data$prob_lower}
+  # if (MCMC) data$med[startsWith(data$med, "median_")] <- "annual"
+  # if (MCMC) data <- sample_mcmc_runs(data, sample)
 
   data$xvar <- data$date
 
   if (is.null(alpha) & mcmc_style !="banded") {alpha=0.7}
 
+  facet_wrap <- length(unique(data$scenario))>1 & !aggregate_scenarios
+
 
   # ___________________
   # Custom to this plot
+  # ___________________
 
   if (!show_negative) {data <- dplyr::mutate(data, lower = ifelse(lower<0,0,lower))}
   if (!is.null(fleets)) {data <- data |> dplyr::filter(fleet %in% fleets)}
@@ -184,10 +192,9 @@ cpueplot <- function(data,
 
 
   # ___________________
-  data <- apply_scenarios(data,
-                          scenarios = scenarios,
-                          scenario_labels = scenario_labels,
-                          scenario_order = scenario_order)
+  # Basic plot set up
+  # ___________________
+  data <- apply_scenarios(data, scenarios, scenario_labels, scenario_order)
 
   x_axis <- build_x_axis(x = data$date,
                          xlab = xlab,
@@ -200,7 +207,7 @@ cpueplot <- function(data,
                          xangle = xangle,
                          is_date = TRUE)
 
-  y_axis <- build_y_axis(y = data$value,
+  y_axis <- build_y_axis(y = data$exp,
                          ylab = ylab,
                          ylim = ylim,
                          ybreaks = ybreaks,
@@ -208,14 +215,14 @@ cpueplot <- function(data,
                          lower = 0,
                          upper = data$upper)
 
-  # ___________________
-  # Initiate plot
   p <- ggplot2::ggplot(data) + get_theme_ssand()
   p <- add_x_scale_date(p, x_axis)
   p <- add_y_scale_continuous(p, y_axis)
 
 
+  # ___________________
   # Build MLE plot
+  # ___________________
   if (!MCMC) {
     # Model inputs
     if (show_CI_ribbon){
@@ -264,39 +271,45 @@ cpueplot <- function(data,
     }
   }
 
+  # ___________________
   # Build MCMC plot
-  if (MCMC) {
-    if (mcmc_style == "boxplot") p <- mcmc_boxplot(p, data, xlim, boxplot_outliers)
-    if (mcmc_style == "banded")  p <- mcmc_banded(p, data, alpha, band_labels, band_colour)
-    if (mcmc_style == "hairy")   p <- mcmc_hairy(p, data, hair_width)
-    if (mcmc_style == "CI")      p <- mcmc_CI(p, data, aggregate_scenarios, CI_range, alpha)
-    if (mcmc_style == "joy")     p <- mcmc_joy(p, data, CI_range, ridge_colour, rel_min_height, alpha, ridge_scale, show_CI,
-                                               ybreaks, ylin,ylab, xlab, legend_position, text_size,xbreaks,legend_box,facet_wrap,
-                                               show_median,xlabels,ylabels)
-    # Add median lines
-    p <- show_median_lines("catch rate",p,data,show_median,line_width,colours)
+  # ___________________
 
+  # if (MCMC) {
+  #   if (mcmc_style == "boxplot") p <- mcmc_boxplot(p, data, xlim, boxplot_outliers)
+  #   if (mcmc_style == "banded")  p <- mcmc_banded(p, data, alpha, band_labels, band_colour)
+  #   if (mcmc_style == "hairy")   p <- mcmc_hairy(p, data, hair_width)
+  #   if (mcmc_style == "CI")      p <- mcmc_CI(p, data, aggregate_scenarios, CI_range, alpha)
+  #   if (mcmc_style == "joy")     p <- mcmc_joy(p, data, CI_range, ridge_colour, rel_min_height, alpha, ridge_scale, show_CI,
+  #                                              ybreaks, ylin,ylab, xlab, legend_position, text_size,xbreaks,legend_box,facet_wrap,
+  #                                              show_median,xlabels,ylabels)
+  #   # Add median lines
+  #   p <- show_median_lines("catch rate",p,data,show_median,line_width,colours)
+  #
+  #
+  #   # Add input data
+  #   if (show_inputs) {
+  #     data_fits <- data |> dplyr::filter(med=="trajectory") |> dplyr::mutate(med = "Input data")
+  #
+  #     if (show_observed_error) {
+  #       p <- p +
+  #         ggplot2::geom_linerange(data=data_fits, ggplot2::aes(x=date,y=obs,ymin=lower,ymax=upper), colour=input_range_colour)
+  #     }
+  #
+  #     p <- p +
+  #       ggplot2::geom_point(data=data_fits, ggplot2::aes(x=date,y=obs,shape=med), colour=input_colour) +
+  #       ggplot2::scale_shape_manual(values=1,name="")
+  #   }
+  #
+  #   # Add median lines
+  #   p <- show_median_lines("catch rate",p,data,show_median,line_width,colours)
+  #
+  # }
 
-    # Add input data
-    if (show_inputs) {
-      data_fits <- data |> dplyr::filter(med=="trajectory") |> dplyr::mutate(med = "Input data")
-
-      if (show_observed_error) {
-        p <- p +
-          ggplot2::geom_linerange(data=data_fits, ggplot2::aes(x=date,y=obs,ymin=lower,ymax=upper), colour=input_range_colour)
-      }
-
-      p <- p +
-        ggplot2::geom_point(data=data_fits, ggplot2::aes(x=date,y=obs,shape=med), colour=input_colour) +
-        ggplot2::scale_shape_manual(values=1,name="")
-    }
-
-    # Add median lines
-    p <- show_median_lines("catch rate",p,data,show_median,line_width,colours)
-
-  }
-
-  if (facet_wrap)         p <- add_scenario_facets(p, data, scales = scales, ncol = ncol)
+  # ___________________
+  # Final layers
+  # ___________________
+  if (facet_wrap) p <- add_scenario_facets(p, data, scales = scales, ncol = ncol)
 
   return(p)
 }

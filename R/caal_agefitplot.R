@@ -39,18 +39,30 @@ caal_agefitplot <- function(data,
                             ylab = "Proportion",
                             show_fits = TRUE) {
 
+  # ___________________
+  # Data validation
+  # ___________________
+
   # Data input warnings
   check_data_columns(data, c("year","bin","obs","exp","scenario","sex","fleet"))
 
 
+  data$xvar <- data$bin
+
+  # ___________________
+  # Custom to this plot
+  # ___________________
 
   fleet_val <- fleet
   scenario_val <- scenario
+
   data <- data |>
     dplyr::filter(scenario == scenario_val) |>
     dplyr::filter(fleet == fleet_val)
 
   if (length(colours) == 1) { colours = c(colours, 'black', 'black')}
+
+  if (length(scenario)>1) {warning("Please enter a single scenario to display on plot.")}
 
   data <- data |>
     dplyr::group_by(year) |>
@@ -62,9 +74,39 @@ caal_agefitplot <- function(data,
 
   if (!show_fits & missing(ylab)) {ylab = "Proportion"}
 
-  if (length(scenario)>1) {warning("Please enter a single scenario to display on plot.")}
+  # ___________________
+  # Basic plot set up
+  # ___________________
 
-  p <- ggplot2::ggplot(data) +
+  data <- apply_scenarios(data, scenarios, scenario_labels, scenario_order)
+
+  x_axis <- build_x_axis(x = data$xvar,
+                         xlab = xlab,
+                         xlim = xlim,
+                         xbreaks = xbreaks,
+                         xlabels = xlabels,
+                         financial_year = financial_year,
+                         expand_upper = 0,
+                         xangle = xangle,
+                         is_date = FALSE)
+
+  y_axis <- build_y_axis(y = data$value,
+                         ylab = ylab,
+                         ylim = ylim,
+                         ybreaks = ybreaks,
+                         ylabels = ylabels,
+                         lower = 0,
+                         upper = data$upper)
+
+
+  p <- ggplot2::ggplot(data) + get_theme_ssand()
+  p <- add_x_scale_continuous(p, x_axis)
+  p <- add_y_scale_continuous(p, y_axis)
+
+  # ___________________
+  # Build MLE plot
+  # ___________________
+  p <- p +
     ggplot2::geom_bar(ggplot2::aes(x=bin,y=obs), fill=colours[1], stat='identity')
 
   if (show_fits) {
@@ -73,11 +115,11 @@ caal_agefitplot <- function(data,
       ggplot2::geom_point(ggplot2::aes(x=bin,y=exp), colour=colours[3], size=point_size)
   }
 
-  p <- p +
-    ggplot2::facet_wrap(~year, scales=scales, ncol=ncol, dir="v") +
-    ggplot2::theme_bw() +
-    ggplot2::scale_x_continuous(name=xlab) +
-    ggplot2::scale_y_continuous(name=ylab)
+  # ___________________
+  # Final layers
+  # ___________________
+
+  p <- add_scenario_facets(p, data, scales = scales, ncol = ncol, dir="v")
 
   return(p)
 }

@@ -39,43 +39,57 @@ catchabilityplot <- function(data,
                              scenarios = NULL,
                              scenario_labels = NULL,
                              scenario_order = NULL) {
+  # ___________________
+  # Data validation
+  # ___________________
 
   # Data input warnings
   check_data_columns(data, c("q","month","fleet","scenario","month_point","monthnames"))
+  data$xvar <- data$month
+
+  # ___________________
+  # Custom to this plot
+  # ___________________
 
 
-  ylim <- c(0,max(data$q))
-  ybreaks <- pretty(ylim)
+  # ___________________
+  # Basic plot set up
+  # ___________________
 
-  if (!missing(scenarios)){data <- data |> dplyr::filter(scenario %in% scenarios)}
+  data <- apply_scenarios(data, scenarios, scenario_labels, scenario_order)
 
-  if (missing(scenario_labels)) {
-    data <- data |> dplyr::mutate(scenario_labels = as.factor(paste0("Scenario ",scenario)))
-  } else {
-    scenario.lookup<- data.frame(scenario = unique(data$scenario), scenario_labels = scenario_labels)
-    data <- data |>
-      dplyr::left_join(scenario.lookup, by = "scenario") |>
-      dplyr::mutate(scenario_labels = as.factor(scenario_labels))
-  }
+  x_axis <- build_x_axis(x = data$xvar,
+                         xlab = xlab,
+                         xlim = xlim,
+                         xbreaks = xbreaks,
+                         xlabels = xlabels,
+                         financial_year = financial_year,
+                         expand_upper = as.numeric(show_final_biomass),
+                         xangle = xangle,
+                         is_date = FALSE)
 
-  if (!missing(scenario_order)) {
-    # Add on any scenarios not included in the scenario_order list
-    scenario_order = c(scenario_order, setdiff(scenario_labels, scenario_order))
-    # Reorder scenarios
-    data$scenario_labels <- factor(data$scenario_labels, levels = scenario_order)
-  }
+  y_axis <- build_y_axis(y = data$q,
+                         ylab = ylab,
+                         ylim = ylim,
+                         ybreaks = ybreaks,
+                         ylabels = ylabels,
+                         lower = 0,
+                         upper = data$q) #
 
-  p <- ggplot2::ggplot(data)+
-    ggplot2::geom_line(ggplot2::aes(x=month,y=q,col=fleet))+
-    ggplot2::geom_point(ggplot2::aes(x=month_point,y=q,col=fleet))+
-    ggplot2::scale_x_discrete(limits=month.name)+
-    ggplot2::scale_y_continuous(limits=ylim, breaks = ybreaks)+
-    ggplot2::xlab(xlab)+
-    ggplot2::ylab(ylab)+
-    ggplot2::theme_bw()+
-    ggplot2::theme(legend.position = 'top',
-                   axis.text.x = ggplot2::element_text(angle = 90, vjust = 0.5, hjust=1))+
-    ggplot2::theme(text = ggplot2::element_text(size=text_size)) +
+
+  p <- ggplot2::ggplot(data) + get_theme_ssand()
+  p <- add_x_scale_continuous(p, x_axis)
+  p <- add_y_scale_continuous(p, y_axis)
+
+  # ___________________
+  # Build MLE plot
+  # ___________________
+
+  p <- p +
+    ggplot2::geom_line(ggplot2::aes(x=month,y=q,col=fleet)) +
+    ggplot2::geom_point(ggplot2::aes(x=month_point,y=q,col=fleet)) +
+    ggplot2::scale_x_discrete(limits=month.name) + ##########################
+    ggplot2::scale_y_continuous(limits=ylim, breaks = ybreaks) +
     ggplot2::scale_colour_manual(name = "Fleet", values = colours)
 
   if (length(unique(data$scenario))>1){

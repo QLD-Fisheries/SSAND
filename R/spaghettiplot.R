@@ -122,23 +122,7 @@ spaghettiplot <- function(data,
   if (financial_year) {xlabels <- paste0(xbreaks-1,"\U2013",xbreaks)} else {xlabels <- xbreaks}
   if (missing(xangle)) {xangle <- ifelse(financial_year,90,0)}
 
-  if (!missing(scenarios)){data <- data |> dplyr::filter(scenario %in% scenarios)}
-
-  if (missing(scenario_labels)) {
-    data <- data |> dplyr::mutate(scenario_labels = as.factor(paste0("Scenario ",scenario)))
-  } else {
-    scenario.lookup<- data.frame(scenario = unique(data$scenario), scenario_labels = scenario_labels)
-    data <- data |>
-      dplyr::left_join(scenario.lookup, by = "scenario") |>
-      dplyr::mutate(scenario_labels = as.factor(scenario_labels))
-  }
-
-  if (!missing(scenario_order)) {
-    # Add on any scenarios not included in the scenario_order list
-    scenario_order = c(scenario_order, setdiff(scenario_labels, scenario_order))
-    # Reorder scenarios
-    data$scenario_labels <- factor(data$scenario_labels, levels = scenario_order)
-  }
+  data <- apply_scenarios(data, scenarios, scenario_labels, scenario_order)
 
   if (!missing(linetype_categories) & length(linetype_categories) != length(unique(data$scenario))) {
     warning("You have not specified a line type category for each scenario")
@@ -281,7 +265,7 @@ spaghettiplot <- function(data,
 
   # Set up canvas
   p <- ggplot2::ggplot(data, ggplot2::aes(year, value, group=scenario)) +
-    ggplot2::theme_bw() +
+    get_theme_ssand() +
     ggplot2::coord_cartesian(xlim = c(min(data$year), max(data$year) + 5)) +
     ggplot2::xlab(xlab) +
     ggplot2::ylab(ylab) +

@@ -62,44 +62,19 @@ dynamicB0plot <- function(data,
                           legend_position = "top",
                           line_width = 0.7) {
 
+  # ___________________
+  # Data validation
+  # ___________________
+
   # Data input warnings
   check_data_columns(data, c("year","era","type","value","scenario"))
+  data$xvar <- data$year
 
+  # ___________________
+  # Custom to this plot
+  # ___________________
 
-  if (!missing(scenarios)){data <- data |> dplyr::filter(scenario %in% scenarios)}
-
-  if (missing(scenario_labels)) {
-    data <- data |> dplyr::mutate(scenario_labels = as.factor(paste0("Scenario ",scenario)))
-  } else {
-    scenario.lookup<- data.frame(scenario = unique(data$scenario), scenario_labels = scenario_labels)
-    data <- data |>
-      dplyr::left_join(scenario.lookup, by = "scenario") |>
-      dplyr::mutate(scenario_labels = as.factor(scenario_labels))
-  }
-
-  if (!missing(scenario_order)) {
-    # Add on any scenarios not included in the scenario_order list
-    scenario_order = c(scenario_order, setdiff(scenario_labels, scenario_order))
-    # Reorder scenarios
-    data$scenario_labels <- factor(data$scenario_labels, levels = scenario_order)
-  }
-
-  if (financial_year & xlab=="Year") {warning("Your x-axis implies calendar year, but you've indicated you're using financial year.")}
-
-  if (missing(xlim)) {xlim <- c(min(data$year),max(data$year))}
-  if (missing(ylim)) {ylim <- c(min(data$value),max(data$value))}
-
-  if (missing(xbreaks)) {xbreaks <- pretty(xlim)}
-  if (missing(ybreaks)) {ybreaks <- pretty(ylim)}
-
-  if (missing(xlabels)) {xlabels <- xbreaks}
-  if (missing(ylabels)) {ylabels <- ybreaks}
-
-  if (financial_year) {xlabels <- paste0(xbreaks-1,"\U2013",xbreaks)} else {xlabels <- xbreaks}
-  if (missing(xangle)) {xangle <- ifelse(financial_year,90,0)}
-
-
-  if (missing(area)) {
+  if (is.null(area)) {
     data <- data |> dplyr::filter(type %in% c("SSB", "SSB no fishing"))
   } else {
     data <- data |>
@@ -108,25 +83,44 @@ dynamicB0plot <- function(data,
       dplyr::mutate(type = ifelse(type==paste0("SSB_nofishing_area",area),"SSB no fishing",type))
   }
 
-  p <- ggplot2::ggplot() +
+  # ___________________
+  # Basic plot set up
+  # ___________________
+
+  data <- apply_scenarios(data, scenarios, scenario_labels, scenario_order)
+
+  x_axis <- build_x_axis(x = data$xvar,
+                         xlab = xlab,
+                         xlim = xlim,
+                         xbreaks = xbreaks,
+                         xlabels = xlabels,
+                         financial_year = financial_year,
+                         expand_upper = 0,
+                         xangle = xangle,
+                         is_date = FALSE)
+
+  y_axis <- build_y_axis(y = data$value,
+                         ylab = ylab,
+                         ylim = ylim,
+                         ybreaks = ybreaks,
+                         ylabels = ylabels,
+                         lower = 0,
+                         upper = data$upper)
+
+  p <- ggplot2::ggplot(data) + get_theme_ssand()
+  p <- add_x_scale_continuous(p, x_axis)
+  p <- add_y_scale_continuous(p, y_axis)
+
+  # ___________________
+  # Build MLE plot
+  # ___________________
+  p <- p +
     ggplot2::geom_line(data=data, ggplot2::aes(x=year, y=value, colour=type, linetype=type), linewidth = line_width) +
     ggplot2::geom_point(data=data |> dplyr::filter(era=="VIRG" & type=="SSB"), ggplot2::aes(x=year, y=value, shape="Equilibrium")) +
-    ggplot2::theme_bw() +
-    ggplot2::xlab(xlab) +
-    ggplot2::ylab(ylab) +
-    ggplot2::theme(text = ggplot2::element_text(size=text_size)) +
     ggplot2::scale_linetype_manual(values = linetype) +
-    ggplot2::scale_colour_manual(values = colours) +
-    ggplot2::theme(legend.position = legend_position, legend.title=ggplot2::element_blank()) +
-    ggplot2::scale_x_continuous(limits = xlim, breaks = xbreaks, labels = xlabels) +
-    ggplot2::scale_y_continuous(limits = ylim, breaks = ybreaks, labels = ylabels) +
-    ggplot2::theme(axis.text.x = ggplot2::element_text(angle = xangle, vjust = 0.5, hjust=ifelse(xangle==90,0,0.5)))
+    ggplot2::scale_colour_manual(values = colours)
 
-
-  if (length(unique(data$scenario))>1){
-    p <- p +
-      ggplot2::facet_wrap(~scenario_labels, scales = scales, ncol = ncol)
-  }
+  p <- add_scenario_facets(p, data, scales = scales, ncol = ncol)
 
   return(p)
 }

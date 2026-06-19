@@ -60,42 +60,24 @@ discardplot <- function(data,
                         text_size = 12,
                         point_size = 1.5,
                         show_dates_on_axis = FALSE,
-                        colours = NULL) {
+                        colours = c("black",fq_palette("alisecolours"))) {
+
+  # ___________________
+  # Data validation
+  # ___________________
+
   # Data input warnings
   check_data_columns(data, c("year","fleet","obs","upper","lower","exp"))
 
+  data$xvar <- data$year
+  data$upper <- data$prob_upper; data$lower <- data$prob_lower
+
+  # ___________________
+  # Custom to this plot
+  # ___________________
 
   if (!missing(fleets)) {
     data <- data |> dplyr::filter(fleet %in% fleets)
-  }
-
-
-
-
-  if (financial_year & xlab=="Year") {warning("Your x-axis implies calendar year, but you've indicated you're using financial year.")}
-
-  if (missing(xlim)) {xlim <- c(min(data$year)-0.5,max(data$year)+0.5)}
-  if (missing(ylim)) {ylim <- c(0,max(data$upper))}
-
-  if (missing(xbreaks) & xlim[1]!=xlim[2]) {xbreaks <- unique(floor(pretty(xlim)))} # unique(floor()) ensures integers only
-  if (missing(xbreaks) & xlim[1]==xlim[2]) {xbreaks <- xlim}
-
-  if (missing(xlabels)) {xlabels <- xbreaks}
-
-  if (financial_year & !show_dates_on_axis) {xlabels <- paste0(xbreaks-1,"\U2013",xbreaks)} else {xlabels <- xbreaks}
-  if (missing(xangle)) {xangle <- ifelse(financial_year,90,0)}
-
-  if (missing(colours)) {colours <- c("black",fq_palette("cols"))}
-
-  if (!missing(scenarios)){data <- data |> dplyr::filter(scenario %in% scenarios)}
-
-  if (missing(scenario_labels)) {
-    data <- data |> dplyr::mutate(scenario_labels = as.factor(paste0("Scenario ",scenario)))
-  } else {
-    scenario.lookup<- data.frame(scenario = unique(data$scenario), scenario_labels = scenario_labels)
-    data <- data |>
-      dplyr::left_join(scenario.lookup, by = "scenario") |>
-      dplyr::mutate(scenario_labels = as.factor(scenario_labels))
   }
 
   if (missing(fleet_names)) {
@@ -107,14 +89,40 @@ discardplot <- function(data,
       dplyr::mutate(fleet_names = as.factor(fleet_names))
   }
 
-  if (!missing(scenario_order)) {
-    # Add on any scenarios not included in the scenario_order list
-    scenario_order = c(scenario_order, setdiff(scenario_labels, scenario_order))
-    # Reorder scenarios
-    data$scenario_labels <- factor(data$scenario_labels, levels = scenario_order)
-  }
+  # ___________________
+  # Basic plot set up
+  # ___________________
 
-  p <- ggplot2::ggplot(data) +
+  data <- apply_scenarios(data, scenarios, scenario_labels, scenario_order)
+
+  x_axis <- build_x_axis(x = data$xvar,
+                         xlab = xlab,
+                         xlim = xlim,
+                         xbreaks = xbreaks,
+                         xlabels = xlabels,
+                         financial_year = financial_year,
+                         expand_upper = as.numeric(show_final_biomass),
+                         xangle = xangle,
+                         is_date = FALSE)
+
+  y_axis <- build_y_axis(y = data$value,
+                         ylab = ylab,
+                         ylim = ylim,
+                         ybreaks = ybreaks,
+                         ylabels = ylabels,
+                         lower = 0,
+                         upper = data$upper)
+
+
+  p <- ggplot2::ggplot(data) + get_theme_ssand()
+  p <- add_x_scale_continuous(p, x_axis)
+  p <- add_y_scale_continuous(p, y_axis)
+
+  # ___________________
+  # Build MLE plot
+  # ___________________
+
+  p <- p +
     ggplot2::geom_errorbar(ggplot2::aes(x=year, ymin=lower, ymax=upper), colour=colours[1], width=.2, position=ggplot2::position_dodge(.1)) +
     ggplot2::geom_point(ggplot2::aes(x=year, y=obs), colour=colours[1], shape=19, size=point_size, position=ggplot2::position_dodge(0))
 
@@ -137,14 +145,6 @@ discardplot <- function(data,
     p <- p +
       ggplot2::facet_wrap(~fleet_names)
   }
-
-  p <- p +
-    ggplot2::xlab(xlab) +
-    ggplot2::ylab(ylab) +
-    ggplot2::scale_y_continuous(limits=ylim) +
-    ggplot2::scale_x_continuous(limits = xlim, breaks = xbreaks, labels = xlabels) +
-    ggplot2::theme_bw() +
-    ggplot2::theme(text = ggplot2::element_text(size=text_size))
 
   return(p)
 }

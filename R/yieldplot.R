@@ -42,25 +42,7 @@ yieldplot <- function(data,
   # Data input warnings
   check_data_columns(data, c("Final_bio","yield","data","scenario"))
 
-
-  if (!missing(scenarios)){data <- data |> dplyr::filter(scenario %in% scenarios)}
-
-  if (missing(scenario_labels)) {
-    data <- data |> dplyr::mutate(scenario_labels = as.factor(paste0("Scenario ",scenario)))
-  } else {
-    scenario.lookup<- data.frame(scenario = unique(data$scenario), scenario_labels = scenario_labels)
-    data <- data |>
-      dplyr::left_join(scenario.lookup, by = "scenario") |>
-      dplyr::mutate(scenario_labels = as.factor(scenario_labels))
-  }
-
-  if (!missing(scenario_order)) {
-    # Add on any scenarios not included in the scenario_order list
-    scenario_order = c(scenario_order, setdiff(scenario_labels, scenario_order))
-    # Reorder scenarios
-    data$scenario_labels <- factor(data$scenario_labels, levels = scenario_order)
-  }
-
+  data <- apply_scenarios(data, scenarios, scenario_labels, scenario_order)
 
   if (show_current_line & show_msy_line){
 
@@ -111,7 +93,7 @@ yieldplot <- function(data,
       ggplot2::geom_line(ggplot2::aes(x=Final_bio, y=yield))
   }
   p <- p +
-    ggplot2::theme_bw() +
+    get_theme_ssand() +
     ggplot2::xlab(xlab) +
     ggplot2::ylab(ylab) +
     ggplot2::scale_x_continuous(breaks = c(0,0.2, 0.4, 0.6, 0.8, 1.0), limits=c(0,1.01)) +
@@ -122,10 +104,8 @@ yieldplot <- function(data,
                    legend.text = ggplot2::element_text(size=text_size)) +
     ggplot2::theme(text = ggplot2::element_text(size=text_size))
 
-  if(length(unique(data$scenario)) != 1){
-    p <- p +
-      ggplot2::facet_wrap(~scenario_labels, scales = scales, ncol=ncol)
-  }
+  p <- add_scenario_facets(p, data, scales = scales, ncol = ncol)
+
   return(p)
 
 }

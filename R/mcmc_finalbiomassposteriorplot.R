@@ -41,6 +41,7 @@ mcmc_finalbiomassposteriorplot <- function (data,
                                             axis_title_size = 13,
                                             axis_text_size = 12
 ) {
+
   density <- data$density
   quant_lower <- data$quant_lower
   quant_upper <- data$quant_upper
@@ -90,7 +91,7 @@ mcmc_finalbiomassposteriorplot <- function (data,
   }
 
   p <- ggplot2::ggplot() +
-    ggplot2::theme_bw() +
+    get_theme_ssand() +
     ggplot2::geom_area(data=density |> dplyr::filter(x<=20), ggplot2::aes(x=x,y=y,fill=fill)) +
     ggplot2::geom_area(data=density |> dplyr::filter(x>=20 & x<=40), ggplot2::aes(x=x,y=y,fill=fill)) +
     ggplot2::geom_area(data=density |> dplyr::filter(x>=40 & x<=60), ggplot2::aes(x=x,y=y,fill=fill)) +
@@ -107,12 +108,6 @@ mcmc_finalbiomassposteriorplot <- function (data,
       ggplot2::geom_vline(ggplot2::aes(linetype="F", xintercept = data$median)) +
       ggplot2::annotate('text', x=data$median+4, y=max(density$y), label = scales::percent(round(data$median)/100), size = annotation_text_size) # , family="Meta"
   }
-
-  #   if (show_median) {
-  #   p <- p +
-  #     ggplot2::geom_vline(xintercept = data$median) +
-  #     ggplot2::annotate('text', x=data$median+4, y=max(density$y), label = scales::percent(round(data$median)/100), size = annotation_text_size) # , family="Meta"
-  # }
 
   p <- p +
     ggplot2::scale_fill_manual(drop = FALSE,

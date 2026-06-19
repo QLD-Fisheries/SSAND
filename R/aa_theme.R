@@ -33,6 +33,21 @@ theme_ssand <- function(
   th
 }
 
+# CAAL plot:
+# ggplot2::theme(panel.grid.major = ggplot2::element_blank(),
+#                panel.grid.minor = ggplot2::element_blank(),
+#                legend.position = legend_position,
+#                legend.justification = c(0.5,1),
+#                legend.box = "horizontal",
+#                legend.box.just = "left",
+#                legend.key.size = ggplot2::unit(1,"lines"),
+#                legend.text.align = 0,
+#                legend.key = ggplot2::element_blank(),
+#                legend.title = ggplot2::element_blank(),
+#                legend.background = ggplot2::element_blank(),
+#                legend.text = ggplot2::element_text(size = text_size))
+
+
 # Use style functions ----
 # Retrieves active style within each plotting function
 get_theme_ssand <- function() {

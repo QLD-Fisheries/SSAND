@@ -74,7 +74,7 @@ mcmc_traceplot <- function(data,
     ggplot2::scale_colour_manual("Chain",values=colours) +
     ggplot2::labs(linetype = NULL) +
     ggplot2::facet_wrap(~parameter, scales = "free_y", labeller = ggplot2::label_parsed, ncol = ncol) +
-    ggplot2::theme_bw() +
+    get_theme_ssand() +
     ggplot2::theme(legend.position = "bottom")+
     ggplot2::guides(colour = ggplot2::guide_legend(override.aes = list(size=2))) +
     ggplot2::xlab(xlab) +

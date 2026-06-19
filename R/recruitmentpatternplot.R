@@ -36,28 +36,28 @@ recruitmentpatternplot <- function(data,
                                    ncol = 2,
                                    scales = 'free',
                                    colours= c("black","grey80","grey20","grey60","grey40")){
-  # Data input warnings
+
+  # ___________________
+  # Data validation
+  # ___________________
+
   check_data_columns(data, c("recruitment","months","monthnames","scenario"))
 
-  if (!missing(scenarios)){data <- data |> dplyr::filter(scenario %in% scenarios)}
 
-  if (missing(scenario_labels)) {
-    data <- data |> dplyr::mutate(scenario_labels = as.factor(paste0("Scenario ",scenario)))
-  } else {
-    scenario.lookup<- data.frame(scenario = unique(data$scenario), scenario_labels = scenario_labels)
-    data <- data |>
-      dplyr::left_join(scenario.lookup, by = "scenario") |>
-      dplyr::mutate(scenario_labels = as.factor(scenario_labels))
-  }
+  # ___________________
+  # Custom to this plot
+  # ___________________
 
-  if (!missing(scenario_order)) {
-    # Add on any scenarios not included in the scenario_order list
-    scenario_order = c(scenario_order, setdiff(scenario_labels, scenario_order))
-    # Reorder scenarios
-    data$scenario_labels <- factor(data$scenario_labels, levels = scenario_order)
-  }
+
+  # ___________________
+  # Basic plot set up
+  # ___________________
+
+  data <- apply_scenarios(data, scenarios, scenario_labels, scenario_order)
+
 
   p <- ggplot2::ggplot() +
+    get_theme_ssand() +
     ggplot2::geom_point(data = data, ggplot2::aes(x=months,y=recruitment,colour=area))
 
   if (length(unique(data$monthnames))>1) {
@@ -70,14 +70,10 @@ recruitmentpatternplot <- function(data,
     ggplot2::xlab(xlab) +
     ggplot2::ylab(ylab)+
     ggplot2::theme(legend.position = 'top')+
-    ggplot2::theme_bw()+
     ggplot2::theme(axis.text.x = ggplot2::element_text(angle=90,vjust=0.5, hjust = 1)) +
     ggplot2::scale_colour_manual(name="Area",values=colours)
 
-  if (length(unique(data$scenario))>1){
-    p <- p +
-      ggplot2::facet_wrap(~scenario_labels, scales = scales, ncol = ncol)
-  }
+  p <- add_scenario_facets(p, data, scales = scales, ncol = ncol)
 
   return(p)
 }

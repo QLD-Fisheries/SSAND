@@ -115,12 +115,18 @@ biomassplot <- function(data,
                         show_final_biomass = FALSE,
                         boxplot_outliers = TRUE) {
 
+  # ___________________
+  # Data validation
+  # ___________________
+
   # Identify MCMC or MLE
   MCMC <- "med" %in% names(data)
 
   # Data input warnings
   if (!MCMC) check_data_columns(data, c("year","value","upper","lower","scenario","biomass_type"))
   if (MCMC)  check_data_columns(data, c("rownum","scenario","year","value","interval","prob_lower","prob_upper","biomass_type"))
+  data$xvar <- data$year
+  if (is.null(alpha) & mcmc_style !="banded") {alpha=0.7}
 
   # MCMC warnings
   show_median <- simplify_show_median(show_median, c("annual_biomass","trajectory","none"))
@@ -129,11 +135,12 @@ biomassplot <- function(data,
   if (MCMC) {data$upper <- data$prob_upper; data$lower <- data$prob_lower}
   if (MCMC) data$med[startsWith(data$med, "annual_")] <- "annual"
   if (MCMC) data <- sample_mcmc_runs(data, sample)
-  data$xvar <- data$year
-  if (is.null(alpha) & mcmc_style !="banded") {alpha=0.7}
+
 
   # ___________________
   # Custom to this plot
+  # ___________________
+
   biomass_type <- data$biomass_type[1]
   biomass_definition_label <- ifelse(data$biomass_definition == 'spawning', 'Spawning', 'Vulnerable')
 
@@ -162,10 +169,10 @@ biomassplot <- function(data,
   }
 
   # ___________________
-  data <- apply_scenarios(data,
-                          scenarios = scenarios,
-                          scenario_labels = scenario_labels,
-                          scenario_order = scenario_order)
+  # Basic plot set up
+  # ___________________
+
+  data <- apply_scenarios(data, scenarios, scenario_labels, scenario_order)
 
   x_axis <- build_x_axis(x = data$xvar,
                          xlab = xlab,
@@ -185,13 +192,15 @@ biomassplot <- function(data,
                          lower = 0,
                          upper = data$upper)
 
-  # ___________________
-  # Initiate plot
+
   p <- ggplot2::ggplot(data) + get_theme_ssand()
   p <- add_x_scale_continuous(p, x_axis)
   p <- add_y_scale_continuous(p, y_axis)
 
+  # ___________________
   # Build MLE plot
+  # ___________________
+
   if (!MCMC) {
     p <- p +
       ggplot2::geom_line(ggplot2::aes(x=year,y=value, colour="A")) +
@@ -204,7 +213,10 @@ biomassplot <- function(data,
     }
   }
 
+  # ___________________
   # Build MCMC plot
+  # ___________________
+
   if (MCMC) {
     if (mcmc_style == "boxplot") p <- mcmc_boxplot(p, data, xlim, boxplot_outliers)
     if (mcmc_style == "banded")  p <- mcmc_banded(p, data, alpha, band_labels, band_colour)
@@ -217,7 +229,11 @@ biomassplot <- function(data,
     p <- show_median_lines("biomass",p,data,show_median,line_width,colours)
   }
 
-  # Customisable features
+
+  # ___________________
+  # Final layers
+  # ___________________
+
   if (show_final_biomass) p <- show_final_biomass(p, data, MCMC, colour_categories,scenario_labels)
   if (show_target_line)   p <- add_reference_line(p, data[1,], target_value, "#127B06", annotation_position, "Target reference point")
   if (show_limit_line)    p <- add_reference_line(p, data[1,], limit_value, "#AD3D25", annotation_position, "Limit reference point")

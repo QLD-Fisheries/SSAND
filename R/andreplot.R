@@ -32,11 +32,17 @@ andreplot <- function(data,
                       colours = c("black","grey80",fq_palette("DAF")),
                       legend_position = "top",
                       legend_ratio = c(1,10)) {
+  # ___________________
+  # Data validation
+  # ___________________
 
   # Data input warnings
   check_data_columns(data, c("year","length","obs","pred","low","upp","label","scenario","CI"))
+  data$xvar <- data$length
 
-
+  # ___________________
+  # Custom to this plot
+  # ___________________
 
   if (!missing(years)) {data <- data |> dplyr::filter(year %in% years)}
   scenario_var <- scenario
@@ -50,13 +56,18 @@ andreplot <- function(data,
   data_age <- data |> dplyr::filter(label=="Age")
   data_sd  <- data |> dplyr::filter(label=="Standard deviation (age)")
 
+
+  # ___________________
+  # Build MLE plots
+  # ___________________
+
   p_age <- ggplot2::ggplot(data_age, ggplot2::aes(x = length, y = obs)) +
+    get_theme_ssand() +
     ggplot2::geom_ribbon(data = data_age |>
                            dplyr::filter(!is.na(low) & !is.na(upp)),
                          ggplot2::aes(ymin = low, ymax = upp, fill = fill_var)) +
     ggplot2::geom_point(ggplot2::aes(shape = "Observed"), colour=colours[1]) +
     ggplot2::geom_line(ggplot2::aes(y = pred, color = "Expected")) +
-    ggplot2::theme_bw() +
     ggplot2::xlab(xlab) +
     ggplot2::ylab(ylab[1]) +
     ggplot2::facet_wrap(~year, ncol=1) +
@@ -66,12 +77,12 @@ andreplot <- function(data,
     ggplot2::theme(legend.position = "top")
 
   p_sd <- ggplot2::ggplot(data_sd, ggplot2::aes(x = length, y = obs)) +
+    get_theme_ssand() +
     ggplot2::geom_ribbon(data = data_sd |> dplyr::filter(!is.na(low) & !is.na(upp)),
                          ggplot2::aes(ymin = low, ymax = upp),
                          fill = colours[2]) +
     ggplot2::geom_point(colour = colours[1]) +
     ggplot2::geom_line(ggplot2::aes(y = pred), color = colours[3]) +
-    ggplot2::theme_bw() +
     ggplot2::xlab(xlab) +
     ggplot2::ylab(ylab[2]) +
     ggplot2::facet_wrap(~year, ncol=1)

@@ -38,56 +38,71 @@ maturityplot <- function(data,
                          scenarios = NULL,
                          scenario_labels = NULL,
                          scenario_order = NULL,
-                         colours = NULL,
+                         colours = c("grey70",fq_palette("alisecolours")),
                          scales = 'free',
                          ncol = 2) {
 
+  # ___________________
+  # Data validation
+  # ___________________
   # Data input warnings
   check_data_columns(data, c("value","maturity","sex","scenario","type"))
+  data$xvar <- data$value
 
+  # ___________________
+  # Custom to this plot
+  # ___________________
 
   data <- data |>
     dplyr::filter(type %in% maturity_type) |>
     dplyr::mutate(sex = dplyr::recode(sex, "1" = "Female" ,  "2" = "Male"))
 
-  if (missing(xlab)) {xlab <- ifelse(maturity_type%in%c("length1","length2"),"Length (cm)", "Age (years)")}
+  if (missing(xlab)) {xlab <- ifelse(maturity_type %in% c("length1","length2"),"Length (cm)", "Age (years)")}
 
-  if (!missing(scenarios)){data <- data |> dplyr::filter(scenario %in% scenarios)}
 
-  if (missing(scenario_labels)) {
-    data <- data |> dplyr::mutate(scenario_labels = as.factor(paste0("Scenario ",scenario)))
-  } else {
-    scenario.lookup<- data.frame(scenario = unique(data$scenario), scenario_labels = scenario_labels)
-    data <- data |>
-      dplyr::left_join(scenario.lookup, by = "scenario") |>
-      dplyr::mutate(scenario_labels = as.factor(scenario_labels))
-  }
+  # ___________________
+  # Basic plot set up
+  # ___________________
 
-  if (!missing(scenario_order)) {
-    # Add on any scenarios not included in the scenario_order list
-    scenario_order = c(scenario_order, setdiff(scenario_labels, scenario_order))
-    # Reorder scenarios
-    data$scenario_labels <- factor(data$scenario_labels, levels = scenario_order)
-  }
+  data <- apply_scenarios(data, scenarios, scenario_labels, scenario_order)
 
-  if (missing(colours)) {colours = c("grey70",fq_palette("alisecolours"))}
+  x_axis <- build_x_axis(x = data$xvar,
+                         xlab = xlab,
+                         xlim = xlim,
+                         xbreaks = xbreaks,
+                         xlabels = xlabels,
+                         financial_year = financial_year,
+                         expand_upper = as.numeric(show_final_biomass),
+                         xangle = xangle,
+                         is_date = FALSE)
 
-  p <- ggplot2::ggplot(data) +
+  y_axis <- build_y_axis(y = data$maturity,
+                         ylab = ylab,
+                         ylim = ylim,
+                         ybreaks = ybreaks,
+                         ylabels = ylabels,
+                         lower = 0,
+                         upper = 1)
+
+
+  p <- ggplot2::ggplot(data) + get_theme_ssand()
+  p <- add_x_scale_continuous(p, x_axis)
+  p <- add_y_scale_continuous(p, y_axis)
+
+  # ___________________
+  # Build MLE plot
+  # ___________________
+
+  p <- p +
     ggplot2::geom_line(ggplot2::aes(x=value, y=maturity, colour=sex)) +
     ggplot2::geom_point(ggplot2::aes(x=value, y=maturity, colour=sex)) +
-    ggplot2::theme_bw() +
-    ggplot2::xlab(xlab) +
-    ggplot2::ylab(ylab) +
-    ggplot2::ylim(c(0,1)) +
-    ggplot2::theme(text = ggplot2::element_text(size=text_size)) +
-    ggplot2::theme(legend.position = "top", legend.title = ggplot2::element_blank()) +
     ggplot2::scale_colour_manual(values = colours)
 
+  # ___________________
+  # Final layers
+  # ___________________
 
-  if (length(unique(data$scenario))>1){
-    p <- p +
-      ggplot2::facet_wrap(~scenario_labels, scales = scales, ncol = ncol)
-  }
+  p <- add_scenario_facets(p, data, scales = scales, ncol = ncol)
 
   return(p)
 }

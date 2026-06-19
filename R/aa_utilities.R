@@ -80,6 +80,8 @@ build_x_axis <- function(
     is_date = inherits(x, "Date")
 ) {
 
+  # if (missing(xbreaks) & xlim[1]!=xlim[2]) {xbreaks <- unique(floor(pretty(xlim)))} # unique(floor()) ensures integers only
+
   if(financial_year & xlab == "Year") {
     warning("Your x-axis implies calendar year, but you've indicated you're using financial year.")
   }
@@ -197,6 +199,10 @@ add_y_scale_continuous <- function(p,
       breaks = axis$breaks,
       labels = axis$labels
     )
+
+
+  # ggplot2::coord_cartesian(ylim = c(-0, NA), xlim = c(0,NA)) # alternative to ylim that doesn't cut off ribbons
+
 }
 
 
@@ -499,6 +505,16 @@ mcmc_joy <- function(p, data, CI_range, ridge_colour, rel_min_height, alpha, rid
 #     dplyr::summarise(value = sum(value), .groups = 'drop') |>
 #     dplyr::mutate(date = as.Date(paste0('01/01/', year), format = '%d/%m/%Y'))
 # }
+
+# # If xlim is entered as just years, convert to dates
+# if(!is.null(xlim)) {
+#   if(nchar(xlim[1]) == 4) {
+#     xlim <- c(
+#       as.Date(paste0(xlim[1], "-01-01"), format = "%Y-%m-%d"),
+#       as.Date(paste0(xlim[2], "-01-01"), format = "%Y-%m-%d"))
+#   }
+# }
+
 
 
 # Biomass plot:
