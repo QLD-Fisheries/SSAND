@@ -42,195 +42,115 @@
 #' @param band_colour Colour of bands (character). Only used when mcmc_style=="banded". Input one colour, bands will be distinguished using an alpha.
 #'
 recruitmentdistributiondeviationplot <- function(data,
-                       scales='free',
-                       ncol = 3,
-                       xlab = "Year",
-                       ylab = "Log recruitment deviation",
-                       xbreaks = NULL,
-                       ybreaks = NULL,
-                       xlabels = NULL,
-                       ylabels = NULL,
-                       xlim = NULL,
-                       ylim = NULL,
-                       xangle = NULL,
-                       point_size = 1.5,
-                       text_size = 12,
-                       # colours = c("#CF3B16"),
-                       colours = c("black","darkred"),
-                       line_type = c("solid","dashed"),
-                       scenarios = NULL,
-                       scenario_labels = NULL,
-                       scenario_order = NULL,
-                       financial_year = FALSE,
-                       mcmc_style = "boxplot",
-                       show_median = c("median_recdevs","trajectory"),
-                       aggregate_scenarios = FALSE,
-                       alpha = 0.7,
-                       line_width = 0.7,
-                       hair_width = 0.5,
-                       legend_box = "horizontal",
-                       legend_position= "top",
-                       band_colour = "black"){
+                                                 scales='free',
+                                                 ncol = 3,
+                                                 xlab = "Year",
+                                                 ylab = "Log recruitment deviation",
+                                                 xbreaks = NULL,
+                                                 ybreaks = NULL,
+                                                 xlabels = NULL,
+                                                 ylabels = NULL,
+                                                 xlim = NULL,
+                                                 ylim = NULL,
+                                                 xangle = NULL,
+                                                 point_size = 1.5,
+                                                 text_size = 12,
+                                                 colours = c("black","darkred"),
+                                                 line_type = c("solid","dashed"),
+                                                 scenarios = NULL,
+                                                 scenario_labels = NULL,
+                                                 scenario_order = NULL,
+                                                 financial_year = FALSE,
+                                                 mcmc_style = "boxplot",
+                                                 show_median = c("median_recdevs","trajectory"),
+                                                 aggregate_scenarios = FALSE,
+                                                 alpha = NULL,
+                                                 line_width = 0.7,
+                                                 hair_width = 0.5,
+                                                 legend_box = "horizontal",
+                                                 legend_position= "top",
+                                                 band_colour = "black",
+                                                 band_labels = NULL,
+                                                 sample = NULL,
+                                                 boxplot_outliers = TRUE,
+                                                 CI_range = 0.95){
 
   # Identify MCMC or MLE
   MCMC <- "med" %in% names(data)
 
   # Data input warnings
+  if (!MCMC) check_data_columns(data, c("year","value","ub","lb","scenario","method"))
+  if (MCMC)  check_data_columns(data, c("rownum","scenario","year","value","med","interval","prob_lower","prob_upper"))
+
+  # MCMC warnings
+  show_median <- simplify_show_median(show_median, c("median_recdevs","trajectory","none"))
+
+  check_mcmc_style(mcmc_style)
+  if (MCMC) {data$upper <- data$prob_upper; data$lower <- data$prob_lower}
+  if (MCMC) data$med[startsWith(data$med, "median_")] <- "annual"
+  if (MCMC) data <- sample_mcmc_runs(data, sample)
+  data$xvar <- data$year
+
+  # Determine axis settings if missing
+  facet_wrap <- length(unique(data$scenario))>1 & !aggregate_scenarios
+
+  if (is.null(alpha) & mcmc_style !="banded") {alpha=0.7}
+
+  # ___________________
+  data <- apply_scenarios(data,
+                          scenarios = scenarios,
+                          scenario_labels = scenario_labels,
+                          scenario_order = scenario_order)
+
+  x_axis <- build_x_axis(x = data$xvar,
+                         xlab = xlab,
+                         xlim = xlim,
+                         xbreaks = xbreaks,
+                         xlabels = xlabels,
+                         financial_year = financial_year,
+                         show_dates_on_axis = show_dates_on_axis,
+                         expand_upper = 0,
+                         xangle = xangle,
+                         is_date = FALSE)
+
+  y_axis <- build_y_axis(y = data$value,
+                         ylab = ylab,
+                         ylim = ylim,
+                         ybreaks = ybreaks,
+                         ylabels = ylabels,
+                         lower = data$lower,
+                         upper = data$upper)
+
+  # ___________________
+  # Initiate plot
+  p <- ggplot2::ggplot(data) + get_theme_ssand()
+  p <- add_x_scale_continuous(p, x_axis)
+  p <- add_y_scale_continuous(p, y_axis)
+
+  # Build MLE plot
   if (!MCMC) {
-    check_data_columns(data, c("year","value","ub","lb","scenario","method"))
-  } else {
-    check_data_columns(data, c("rownum","scenario","year","value","med","interval","prob_lower","prob_upper"))
-  }
-
-
-
-  if (!missing(scenarios)){data <- data |> dplyr::filter(scenario %in% scenarios)}
-
-  if (missing(scenario_labels)) {
-    data <- data |> dplyr::mutate(scenario_labels = as.factor(paste0("Scenario ",scenario)))
-  } else {
-    scenario.lookup<- data.frame(scenario = unique(data$scenario), scenario_labels = scenario_labels)
-    data <- data |>
-      dplyr::left_join(scenario.lookup, by = "scenario") |>
-      dplyr::mutate(scenario_labels = as.factor(scenario_labels))
-  }
-
-  if (!missing(scenario_order)) {
-    # Add on any scenarios not included in the scenario_order list
-    scenario_order = c(scenario_order, setdiff(scenario_labels, scenario_order))
-    # Reorder scenarios
-    data$scenario_labels <- factor(data$scenario_labels, levels = scenario_order)
-  }
-
-  if (financial_year & xlab=="Year") {warning("Your x-axis implies calendar year, but you've indicated you're using financial year.")}
-
-  if (missing(xlim)) {xlim <- c(min(data$year),max(data$year))}
-  if (missing(ylim) & !MCMC) {ylim <- c(min(data$lb,na.rm=T),max(data$ub,na.rm=T))}
-  if (missing(ylim) & MCMC) {ylim <- c(min(data$prob_lower,na.rm=T),max(data$prob_upper,na.rm=T))}
-
-  if (missing(xbreaks)) {xbreaks <- pretty(xlim)}
-  if (missing(ybreaks)) {ybreaks <- pretty(ylim)}
-
-  if (missing(xlabels)) {xlabels <- xbreaks}
-  if (missing(ylabels)) {ylabels <- ybreaks}
-
-  if (financial_year) {xlabels <- paste0(xbreaks-1,"\U2013",xbreaks)} else {xlabels <- xbreaks}
-  if (missing(xangle)) {xangle <- ifelse(financial_year,90,0)}
-
-  if (!MCMC) {
-    p <- ggplot2::ggplot(data) +
+    p <- p +
       ggplot2::geom_point(ggplot2::aes(x=year,y=value), size=point_size)+
       ggplot2::geom_errorbar(ggplot2::aes(x=year,ymin=ub, ymax=lb), width=.5,
                              position=ggplot2::position_dodge(0)) +
       ggplot2::geom_line(ggplot2::aes(x=year, y=value), linetype= "dotted", linewidth=0.7) +
-      ggplot2::geom_hline(yintercept=0, colour="grey") +
-      ggplot2::theme_bw() +
-      ggplot2::xlab(xlab) +
-      ggplot2::ylab(ylab) +
-      ggplot2::theme(text = ggplot2::element_text(size=text_size))+
-      ggplot2::theme(panel.grid.major = ggplot2::element_line(colour = "white"),
-                     panel.grid.minor = ggplot2::element_line(colour = "white")) +
-      ggplot2::scale_x_continuous(limits = xlim, breaks = xbreaks, labels = xlabels) +
-      ggplot2::theme(axis.text.x = ggplot2::element_text(angle = xangle, vjust = 0.5, hjust=ifelse(xangle==90,0,0.5)))
-
-
-    if (length(unique(data$scenario))>1){
-      p <- p +
-        ggplot2::facet_wrap(~scenario_labels, scales = scales, ncol = ncol)
-    }
-
-    return(p)
+      ggplot2::geom_hline(yintercept=0, colour="grey")
   }
 
+  # Build MCMC plot
   if (MCMC) {
-
-    # MCMC warnings
-    if (MCMC & !any(show_median %in% c('median_recdevs', 'trajectory', 'none'))){warning('Please check show_median options using ?recdevplot')}
-    if (MCMC & any(show_median %in% c('Parameters'))){warning('Median parameters feature not available yet.')}
-    if (MCMC & length(mcmc_style)>1) {warning("You can only select one mcmc_type at a time.")}
-
-    # Box plot
-    if (mcmc_style == "boxplot") {
-      databox <- data |>
-        dplyr::filter(rownum > 0)
-
-      # Expand limits of x-axis to include box
-      xlim[1] <- xlim[1]-0.5
-      xlim[2] <- xlim[2]+0.5
-
-      p <- ggplot2::ggplot(data) +
-        ggplot2::geom_boxplot(data = databox, ggplot2::aes(x=year, y=value, group=year))
-    }
-
-    # Banded plot
-    if (mcmc_style == "banded") {
-      tmp <- unique(data$interval)[!is.na(unique(data$interval))]
-      alpha_scale <- seq(round(1/length(tmp),2),1,round(1/length(tmp),2))^2 + 0.1
-      alpha_scale <- alpha_scale/max(alpha_scale)
-
-      p <- ggplot2::ggplot(data) +
-        ggplot2::geom_ribbon(data = data |> dplyr::filter(!is.na(interval)),
-                             ggplot2::aes(x=year, ymin=prob_lower, ymax=prob_upper, group=interval, alpha=as.factor(-interval)),
-                             fill=band_colour) +
-        ggplot2::scale_alpha_manual(values = alpha_scale,
-                                    labels = rev(unique(data$interval)[!is.na(unique(data$interval))]),
-                                    name = "Credible interval")
-    }
-
-    # Hairy plot
-    if (mcmc_style == "hairy") {
-      p <- ggplot2::ggplot(data) +
-        ggplot2::geom_line(data = data |> dplyr::filter(med == "MCMC"),
-                           ggplot2::aes(x=year,y=value, group=rownum), colour = 'grey20', linewidth=hair_width, alpha = 1)
-    }
-
-
-    # Credible interval
-    if (mcmc_style == "CI") {
-      dataCI <- data |>  dplyr::filter(med=="CI") |> dplyr::mutate(med=paste0(interval*100,"% credible interval"))
-      p <- ggplot2::ggplot(data) +
-        ggplot2::geom_ribbon(data = dataCI, ggplot2::aes(x=year, ymax=prob_upper, ymin = prob_lower, fill = med), alpha = alpha) +
-        ggplot2::scale_fill_manual(name="", values="grey60")
-    }
-
+    if (mcmc_style == "boxplot") p <- mcmc_boxplot(p, data, xlim, boxplot_outliers)
+    if (mcmc_style == "banded")  p <- mcmc_banded(p, data, alpha, band_labels, band_colour)
+    if (mcmc_style == "hairy")   p <- mcmc_hairy(p, data, hair_width)
+    if (mcmc_style == "CI")      p <- mcmc_CI(p, data, aggregate_scenarios, CI_range, alpha)
+    if (mcmc_style == "joy")     p <- mcmc_joy(p, data, CI_range, ridge_colour, rel_min_height, alpha, ridge_scale, show_CI,
+                                               ybreaks, ylin,ylab, xlab, legend_position, text_size,xbreaks,legend_box,facet_wrap,
+                                               show_median,xlabels,ylabels)
     # Add median lines
-    if (!"none" %in% show_median) {
-      data_med <- data |>
-        dplyr::filter(med %in% show_median) |>
-        dplyr::mutate(med = dplyr::recode(med,
-                                          "median_recdevs" = "Median recruitment deviations",
-                                          "trajectory" = "Median trajectory",
-                                          "parameters" = "Median parameters"))
-
-      p <- p +
-        ggplot2::geom_line(data=data_med, ggplot2::aes(x=year,y=value, colour=med, linetype=med), linewidth=line_width) +
-        ggplot2::scale_color_manual(values = colours, name = ggplot2::element_blank()) +
-        ggplot2::scale_linetype_manual(values= line_type, name=ggplot2::element_blank())
-    }
-
-    p <- p +
-      ggplot2::scale_x_continuous(limits = xlim, breaks = xbreaks, labels = xlabels) +
-      ggplot2::scale_y_continuous(limits = ylim, breaks = ybreaks, labels = ylabels) +
-      ggplot2::theme_bw() +
-      ggplot2::xlab(xlab) +
-      ggplot2::ylab(ylab) +
-      ggplot2::theme(legend.position=legend_position) +
-      ggplot2::theme(legend.text = ggplot2::element_text(size=text_size)) +
-      ggplot2::theme(text = ggplot2::element_text(size=text_size)) +
-      ggplot2::theme(legend.box=legend_box) +
-      ggplot2::theme(axis.text.x = ggplot2::element_text(angle = xangle, vjust = 0.5, hjust=ifelse(xangle==90,0,0.5)))
-
-    # Facet wrap
-    if (length(unique(data$scenario))>1) {
-      suppressMessages({
-        p <- p +
-          ggplot2::scale_x_continuous(limits = xlim, breaks = xbreaks, labels = xlabels) +
-          ggplot2::scale_y_continuous(limits = ylim, breaks = ybreaks, labels = ylabels) +
-          ggplot2::facet_wrap(~scenario_labels, ncol = ncol, scales = scales)
-
-      })
-    }
-
-    return(p)
+    p <- show_median_lines("recruitment deviations",p,data,show_median,line_width,colours)
   }
+
+  if (facet_wrap)  p <- add_scenario_facets(p, data, scales = scales, ncol = ncol)
+
+  return(p)
 }

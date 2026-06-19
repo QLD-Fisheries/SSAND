@@ -42,8 +42,7 @@
 #' @param sample Number of samples to plot from each MCMC chain to ease burden of rendering dense plots (numeric).
 #' @param alpha Transparency for range (numeric) used in ggplot2::geom_density_ridges(). Default is 0.7.
 #' @param show_median Type of median shown. Default "annual_biomass" shows the median of each year,
-#' "trajectory" shows median trajectory based on biomass in final year,
-#' "parameters" uses median of each parameter (not yet implemented)
+#' "trajectory" shows median trajectory based on biomass in final year
 #' @param mcmc_style The type of MCMC plot to be displayed (character). Options are "banded", "hairy", "boxplot", "CI" and "joy", the default is "banded". Only one option can be selected.
 #' @param aggregate_scenarios Set to TRUE to calculate credible intervals across all scenarios (logical). Only activated if mcmc_style==CI.
 #' @param CI_range Specify credible interval range (numeric). Only activated if mcmc_style==CI.
@@ -75,7 +74,7 @@
 #' biomassplot(data, mcmc_style = "joy", show_median = c("none"))
 biomassplot <- function(data,
                         xlab = "Year",
-                        ylab = NULL, #"Spawning biomass (relative)",
+                        ylab = NULL,
                         xbreaks = NULL,
                         ybreaks = NULL,
                         xlabels = NULL,
@@ -85,7 +84,7 @@ biomassplot <- function(data,
                         xangle = NULL,
                         colours = NULL,
                         legend_position= "top",
-                        annotation_position = NULL,
+                        annotation_position = min(data$year)+1,
                         financial_year = FALSE,
                         text_size = 12,
                         show_target_line = TRUE,
@@ -99,7 +98,7 @@ biomassplot <- function(data,
                         ncol = 2,
                         sample = NULL,
                         alpha = NULL,
-                        show_median = c("trajectory","annual_biomass"), # trajectory, annual_biomass, parameters, none
+                        show_median = c("trajectory","annual_biomass"),
                         mcmc_style = "banded", # hairy, boxplot, banded, CI, joy
                         aggregate_scenarios = FALSE,
                         CI_range = 0.95,
@@ -120,389 +119,109 @@ biomassplot <- function(data,
   MCMC <- "med" %in% names(data)
 
   # Data input warnings
-  if (!MCMC) {
-    check_data_columns(data, c("year","value","upper","lower","scenario","biomass_type"))
-  } else {
-    check_data_columns(data, c("rownum","scenario","year","value","interval","prob_lower","prob_upper","biomass_type"))
-  }
+  if (!MCMC) check_data_columns(data, c("year","value","upper","lower","scenario","biomass_type"))
+  if (MCMC)  check_data_columns(data, c("rownum","scenario","year","value","interval","prob_lower","prob_upper","biomass_type"))
 
-  # ______________________
+  # MCMC warnings
+  show_median <- simplify_show_median(show_median, c("annual_biomass","trajectory","none"))
 
+  check_mcmc_style(mcmc_style)
+  if (MCMC) {data$upper <- data$prob_upper; data$lower <- data$prob_lower}
+  if (MCMC) data$med[startsWith(data$med, "annual_")] <- "annual"
+  if (MCMC) data <- sample_mcmc_runs(data, sample)
+  data$xvar <- data$year
+  if (is.null(alpha) & mcmc_style !="banded") {alpha=0.7}
+
+  # ___________________
+  # Custom to this plot
   biomass_type <- data$biomass_type[1]
   biomass_definition_label <- ifelse(data$biomass_definition == 'spawning', 'Spawning', 'Vulnerable')
 
-  if (missing(ylab)) {ylab <- ifelse(biomass_type=="relative", paste0(biomass_definition_label," biomass (relative)"),
-                                     paste0(biomass_definition_label," biomass"))}
-
-  if (financial_year & xlab=="Year") {warning("Your x-axis implies calendar year, but you've indicated you're using financial year.")}
-
-  if (missing(xlim) & show_final_biomass==FALSE) {xlim <- c(min(data$year),max(data$year))}
-  if (missing(xlim) & show_final_biomass==TRUE) {xlim <- c(min(data$year),max(data$year)+1)}
-  if (MCMC & missing(ylim)) {ylim <- c(0,max(max(data$value,na.rm = T),max(data$prob_upper,na.rm = T)))}
-  if (!MCMC & missing(ylim)) {ylim <- c(0,max(max(data$value,na.rm = T),max(data$upper,na.rm = T)))}
-
-  if (missing(xbreaks)) {xbreaks <- pretty(xlim)}
-  if (missing(ybreaks)) {ybreaks <- pretty(ylim)}
-
-  if (missing(xlabels)) {xlabels <- xbreaks}
-  if (missing(ylabels)) {ylabels <- ybreaks}
-
-  if (financial_year) {xlabels <- paste0(xbreaks-1,"\U2013",xbreaks)} else {xlabels <- xbreaks}
-  if (missing(xangle)) {xangle <- ifelse(financial_year==TRUE,90,0)}
-
-  if (!missing(scenarios)){data <- data |> dplyr::filter(scenario %in% scenarios)}
-
-  if (missing(scenario_labels)) {
-    data <- data |> dplyr::mutate(scenario_labels = as.factor(paste0("Scenario ",scenario)))
-  } else {
-    scenario.lookup<- data.frame(scenario = unique(data$scenario), scenario_labels = scenario_labels)
-    data <- data |>
-      dplyr::left_join(scenario.lookup, by = "scenario") |>
-      dplyr::mutate(scenario_labels = as.factor(scenario_labels))
+  if (is.null(ylab)) {
+    ylab <- ifelse(biomass_type=="relative",
+                   paste0(biomass_definition_label," biomass (relative)"),
+                   paste0(biomass_definition_label," biomass"))
   }
-
-  if (!missing(scenario_order)) {
-    # Add on any scenarios not included in the scenario_order list
-    scenario_order = c(scenario_order, setdiff(scenario_labels, scenario_order))
-    # Reorder scenarios
-    data$scenario_labels <- factor(data$scenario_labels, levels = scenario_order)
-  }
-
-  # Take a subsample of MCMC runs if specified
-  if (MCMC & !missing(sample)) {
-    data2 <- data |> dplyr::filter(med == "trajectory")
-
-    data3 <- data |>
-      dplyr::filter(med == "MCMC") |>
-      dplyr::filter(rownum %in% sample(unique(data$rownum), size=sample))
-
-    data <- rbind(data2, data3)
-  }
-
-  # MCMC warnings
-  if (MCMC & !any(show_median %in% c('annual_biomass', 'trajectory', 'parameters', 'none'))){warning('Please check show_median options using ?biomassplot.')}
-  if (MCMC & any(show_median %in% c('Parameters'))){warning('Median parameters feature not available yet.')}
-  if (MCMC & length(mcmc_style)>1) {warning("You can only select one mcmc_type at a time.")}
 
   # Determine axis settings if missing
-  if (length(unique(data$scenario))>1 & !aggregate_scenarios) {facet_wrap=TRUE} else {facet_wrap=FALSE}
-  if (missing(annotation_position)) {annotation_position = min(data$year)+1}
+  facet_wrap <- length(unique(data$scenario))>1 & !aggregate_scenarios
 
   # Determine aesthetics if missing
-  if (!MCMC & missing(colours)) {colours <- "black"}
-  if (MCMC & missing(colours)) {colours <- c(c("#7CC8FC", "#FFC000", "#773158", "#01917C"))} # fq_palette("alisecolours"). Colour blind friendly, bright against the grey, not red or green
-  if (missing(alpha) & mcmc_style !="banded") {alpha=0.7}
-
-  if (!mcmc_style == "joy") {
-    # Build MLE plot
-    if (!MCMC) {
-      p <- ggplot2::ggplot(data) +
-        ggplot2::geom_line(ggplot2::aes(x=year,y=value, colour="A")) +
-        ggplot2::scale_colour_manual(c("","",""),values=colours,labels = c("Estimate")) +
-        ggplot2::scale_fill_manual("",values="grey12")
-
-      if (show_CI) {
-        p <- p +
-          ggplot2::geom_ribbon(ggplot2::aes(x=year,ymin=lower,ymax=upper,fill="95% confidence interval"), alpha = 0.2)
-      }
-
-      if (show_final_biomass) {
-        p <- p +
-          ggrepel::geom_text_repel(
-            data = subset(data, year == max(data$year)),
-            ggplot2::aes(
-              x = year,
-              y = value,
-              label = paste0(round(subset(data, year == max(data$year))$value,2)*100,"%"),
-              colour= subset(data, year == max(data$year))$colour_categories),
-            size = 4,
-            nudge_x = .5,
-            nudge_y = 0.1,
-            segment.color = '#cccccc',
-            segment.size = 0.5,
-            show.legend  = FALSE,
-            max.overlaps = Inf)
-
-      }
-
-    }
-
-    # Build MCMC plot (not joy plot)
-    if (MCMC) {
-      # Box plot
-      if (mcmc_style == "boxplot") {
-        databox <- data |>
-          dplyr::filter(rownum > 0)
-
-        # Expand limits of x-axis to include box
-        xlim[1] <- xlim[1]-0.5
-        xlim[2] <- xlim[2]+0.5
-
-        p <- ggplot2::ggplot(data) +
-          ggplot2::geom_boxplot(data = databox, ggplot2::aes(x=year, y=value, group=year), outliers = boxplot_outliers)
-      }
-
-      # Banded plot
-      if (mcmc_style == "banded") {
-        tmp <- unique(data$interval)[!is.na(unique(data$interval))]
-
-        if (missing(alpha)) {
-          alpha_scale <- seq(round(1/length(tmp),2),1,round(1/length(tmp),2))^2 + 0.1
-          alpha_scale <- alpha_scale/max(alpha_scale)
-        } else {
-          if (length(alpha) != length(unique(stats::na.omit(data$interval)))) {
-            stop("The number of alpha values provided does not match the number of credible intervals to plot.")
-          }
-          alpha_scale <- alpha
-        }
-
-        if (missing(band_labels)) {band_labels <- rev(unique(data$interval)[!is.na(unique(data$interval))])}
-
-        p <- ggplot2::ggplot(data) +
-          ggplot2::geom_ribbon(data = data |> dplyr::filter(!is.na(interval)),
-                               ggplot2::aes(x=year, ymin=prob_lower, ymax=prob_upper, group=interval, alpha=as.factor(-interval)),
-                               fill=band_colour) +
-          ggplot2::scale_alpha_manual(values = alpha_scale,
-                                      labels = band_labels,
-                                      name = "Credible interval")
-      }
-
-      # Hairy plot
-      if (mcmc_style == "hairy") {
-        p <- ggplot2::ggplot(data) +
-          ggplot2::geom_line(data = data |> dplyr::filter(med == "MCMC"),
-                             ggplot2::aes(x=year,y=value, group=rownum), colour = 'grey20', linewidth=hair_width, alpha = 1)
-      }
-
-
-      # Credible interval
-      if (mcmc_style == "CI") {
-        if (aggregate_scenarios) {
-          dataCI <- data |>
-            dplyr::filter(med=="MCMC") |>
-            dplyr::group_by(year) |>
-            dplyr::summarise(upper = quantile(value,probs=1-(1-CI_range)/2),
-                             lower = quantile(value,probs=(1-CI_range)/2),
-                             .groups = 'drop')
-        } else {
-          dataCI <- data |>
-            dplyr::filter(med=="MCMC") |>
-            dplyr::group_by(scenario_labels,year) |>
-            dplyr::summarise(upper = quantile(value,probs=1-(1-CI_range)/2),
-                             lower = quantile(value,probs=(1-CI_range)/2),
-                             .groups = 'drop')
-        }
-        p <- ggplot2::ggplot(data) +
-          ggplot2::geom_ribbon(data = dataCI, ggplot2::aes(x=year, ymax=upper, ymin = lower), fill = "grey60", alpha = alpha)
-      }
-
-
-      # Add median lines
-      if (!"none" %in% show_median) {
-        data_med <- data |>
-          dplyr::filter(med %in% show_median) |>
-          dplyr::mutate(med = dplyr::recode(med,
-                                            "annual_biomass" = "Median annual biomass",
-                                            "trajectory" = "Median trajectory",
-                                            "parameters" = "Median parameters"))
-
-        p <- p +
-          ggplot2::geom_line(data=data_med, ggplot2::aes(x=year,y=value, colour=med), linewidth=line_width) +
-          ggplot2::scale_color_manual(values = colours, name = ggplot2::element_blank())
-      }
-
-      if (show_final_biomass) {
-
-        final_biomass <- data |>
-          dplyr::group_by(scenario_labels) |>
-          dplyr::summarise(year = max(year,na.rm = TRUE)) |>
-          dplyr::left_join(
-            data |> dplyr::filter(med == "annual_biomass"), by = c("scenario_labels", "year")
-          )
-
-        p <- p +
-          ggrepel::geom_text_repel(
-            data = final_biomass,
-            ggplot2::aes(
-              x = year,
-              y = value,
-              label = paste0(round(value,2)*100,"%"),
-              colour= subset(data, year == max(data$year))$colour_categories#
-            ),
-            nudge_x = 0.5,
-            nudge_y = 0.1,
-            size = 4,
-            segment.color = '#cccccc',
-            segment.size = 0.5,
-            show.legend  = FALSE,
-            max.overlaps = Inf)
-      }
-    }
-
-
-
-    # Universal aesthetics
-    p <- p +
-      ggplot2::scale_x_continuous(limits = xlim, breaks = xbreaks, labels = xlabels) +
-      ggplot2::scale_y_continuous(limits = ylim, breaks = ybreaks, labels = ylabels) +
-      ggplot2::theme_bw() +
-      ggplot2::xlab(xlab) +
-      ggplot2::ylab(ylab) +
-      ggplot2::theme(legend.position=legend_position) +
-      ggplot2::theme(legend.text = ggplot2::element_text(size=text_size)) +
-      ggplot2::theme(text = ggplot2::element_text(size=text_size)) +
-      ggplot2::theme(legend.box=legend_box) +
-      ggplot2::theme(axis.text.x = ggplot2::element_text(angle = xangle, vjust = 0.5, hjust=ifelse(xangle==90,0,0.5)))
-
-
-
-    # Customisable features
-    if (biomass_type == "relative") {
-      if (show_target_line) {
-        p <- p +
-          ggplot2::geom_hline(yintercept = target_value, color="#127B06", linetype="solid",alpha=0.5) +
-          ggplot2::annotate("text", x = annotation_position, y = target_value+0.02, color="#127B06", label = "Target reference point", size=3,hjust = 0)
-      }
-
-      if (show_limit_line) {
-        p <- p +
-          ggplot2::geom_hline(yintercept = limit_value, color="#AD3D25",linetype="solid",alpha=0.5) +
-          ggplot2::annotate("text", x = annotation_position, y = limit_value+0.02, color="#AD3D25", label = "Limit reference point", size=3,hjust = 0)
-      }
-    }
-
-
-    if (biomass_type == "absolute") {
-
-      data <- data |>
-        dplyr::group_by(scenario_labels) |>
-        dplyr::mutate(target_value = ifelse(dplyr::row_number()==1, dplyr::first(value)*target_value, NA),
-                      limit_value  = ifelse(dplyr::row_number()==1, dplyr::first(value)*limit_value, NA)) |>
-        dplyr::ungroup() |>
-        dplyr::mutate(annotation_position = annotation_position)
-
-      if (show_target_line) {
-        p <- p +
-          ggplot2::geom_hline(data=data[1,], ggplot2::aes(yintercept = target_value), color="#127B06", linetype="solid",alpha=0.5) +
-          ggplot2::geom_text(data=data[1,], ggplot2::aes(x = annotation_position, y = target_value), color="#127B06", label = "Target reference point", size=3,hjust = 0,vjust = 0, nudge_y = 0.5)
-      }
-
-      if (show_limit_line) {
-        p <- p +
-          ggplot2::geom_hline(data=data[1,], ggplot2::aes(yintercept = limit_value), color="#AD3D25",linetype="solid",alpha=0.5) +
-          ggplot2::geom_text(data=data[1,], ggplot2::aes(x = annotation_position, y = limit_value), color="#AD3D25", label = "Limit reference point", size=3,hjust = 0,vjust = 0, nudge_y = 0.5)
-      }
-    }
-
-    # Facet wrap
-    if (facet_wrap) {
-      suppressMessages({
-        p <- p +
-          ggplot2::scale_x_continuous(limits = xlim, breaks = xbreaks, labels = xlabels) +
-          ggplot2::scale_y_continuous(limits = ylim, breaks = ybreaks, labels = ylabels) +
-          ggplot2::facet_wrap(~scenario_labels, ncol = ncol, scales = scales)
-
-      })
-    }
-
+  if (is.null(colours)) {
+    if (!MCMC) colours <- "black"
+    if (MCMC) colours <- c("#7CC8FC", "#FFC000", "#773158", "#01917C")
   }
 
-  # Joy plot
-  # Joy plot is different to the others as years need to be factors, and the x and y axes are swapped.
-  # There might be a more clever way to do this that we'll think of one day 🤷️
-  if (MCMC & mcmc_style == "joy") {
-    datajoy <- data |>
-      dplyr::mutate(yearf = as.factor(year))
+  if (biomass_type == "absolute") {
+    data <- data |>
+      dplyr::group_by(scenario_labels) |>
+      dplyr::mutate(target_value = ifelse(dplyr::row_number()==1, dplyr::first(value)*target_value, NA),
+                    limit_value  = ifelse(dplyr::row_number()==1, dplyr::first(value)*limit_value, NA)) |>
+      dplyr::ungroup() |>
+      dplyr::mutate(annotation_position = annotation_position)
+  }
 
-    datajoy95 <- datajoy |>
-      dplyr::group_by(yearf) |>
-      dplyr::summarise(min = quantile(value, probs = (1-CI_range)/2),
-                       max = quantile(value, probs = 1-(1-CI_range)/2)) |>
-      dplyr::mutate(linetype = paste0(CI_range*100,"% credible interval"))
+  # ___________________
+  data <- apply_scenarios(data,
+                          scenarios = scenarios,
+                          scenario_labels = scenario_labels,
+                          scenario_order = scenario_order)
 
-    p <- ggplot2::ggplot(data=datajoy) +
-      ggridges::geom_density_ridges(ggplot2::aes(x = value, y = yearf, group = yearf),
-                                    fill = ridge_colour[1],
-                                    colour = ridge_colour[2],
-                                    rel_min_height = rel_min_height,
-                                    alpha = alpha,
-                                    scale = ridge_scale)
+  x_axis <- build_x_axis(x = data$xvar,
+                         xlab = xlab,
+                         xlim = xlim,
+                         xbreaks = xbreaks,
+                         xlabels = xlabels,
+                         financial_year = financial_year,
+                         expand_upper = as.numeric(show_final_biomass),
+                         xangle = xangle,
+                         is_date = FALSE)
 
-    if (show_CI){
-      p <- p +
-        ggplot2::geom_segment(data = datajoy95, ggplot2::aes(x = min, xend = min, y = as.numeric(yearf), yend = as.numeric(yearf) + 0.75, linetype = linetype), color = "black") + # colours[3]
-        ggplot2::geom_segment(data = datajoy95, ggplot2::aes(x = max, xend = max, y = as.numeric(yearf), yend = as.numeric(yearf) + 0.75, linetype = linetype), color = "black") + # colours[3]
-        ggplot2::scale_linetype_manual(name = ggplot2::element_blank(), values = "solid")
-    }
+  y_axis <- build_y_axis(y = data$value,
+                         ylab = ylab,
+                         ylim = ylim,
+                         ybreaks = ybreaks,
+                         ylabels = ylabels,
+                         lower = 0,
+                         upper = data$upper)
 
+  # ___________________
+  # Initiate plot
+  p <- ggplot2::ggplot(data) + get_theme_ssand()
+  p <- add_x_scale_continuous(p, x_axis)
+  p <- add_y_scale_continuous(p, y_axis)
+
+  # Build MLE plot
+  if (!MCMC) {
     p <- p +
-      ggplot2::scale_x_continuous(breaks = ybreaks, limits = ylim) +
-      ggplot2::theme_bw() +
-      ggplot2::xlab(ylab) +
-      ggplot2::ylab(xlab) +
-      ggplot2::theme(legend.position=legend_position) +
-      ggplot2::theme(legend.text = ggplot2::element_text(size=text_size)) +
-      ggplot2::theme(text = ggplot2::element_text(size=text_size)) +
-      ggplot2::scale_y_discrete(breaks = xbreaks) +
-      ggplot2::theme(legend.box=legend_box)
+      ggplot2::geom_line(ggplot2::aes(x=year,y=value, colour="A")) +
+      ggplot2::scale_colour_manual(c("","",""),values=colours,labels = c("Estimate")) +
+      ggplot2::scale_fill_manual("",values="grey12")
 
-
-    if (facet_wrap) {
-
-      suppressMessages({
-        p <- p +
-          ggplot2::scale_x_continuous(limits = c(NA,NA), breaks = xbreaks, labels = xlabels) +
-          ggplot2::scale_y_discrete(limits = c(NA,NA), breaks = ybreaks, labels = ylabels) +
-          ggplot2::facet_wrap(~scenario_labels, ncol = ncol, scales = scales)
-
-      })
-
+    if (show_CI) {
+      p <- p +
+        ggplot2::geom_ribbon(ggplot2::aes(x=year,ymin=lower,ymax=upper,fill="95% confidence interval"), alpha = 0.2)
     }
+  }
 
+  # Build MCMC plot
+  if (MCMC) {
+    if (mcmc_style == "boxplot") p <- mcmc_boxplot(p, data, xlim, boxplot_outliers)
+    if (mcmc_style == "banded")  p <- mcmc_banded(p, data, alpha, band_labels, band_colour)
+    if (mcmc_style == "hairy")   p <- mcmc_hairy(p, data, hair_width)
+    if (mcmc_style == "CI")      p <- mcmc_CI(p, data, aggregate_scenarios, CI_range, alpha)
+    if (mcmc_style == "joy")     p <- mcmc_joy(p, data, CI_range, ridge_colour, rel_min_height, alpha, ridge_scale, show_CI,
+                                               ybreaks, ylin,ylab, xlab, legend_position, text_size,xbreaks,legend_box,facet_wrap,
+                                               show_median,xlabels,ylabels)
     # Add median lines
-    if (!"none" %in% show_median) {
-      data_med <- data |>
-        dplyr::filter(med %in% show_median) |>
-        dplyr::mutate(med = dplyr::recode(med,
-                                          "annual_biomass" = "Median annual biomass",
-                                          "trajectory" = "Median trajectory",
-                                          "parameters" = "Median parameters")) |>
-        dplyr::mutate(yearf = as.factor(year))
-
-      p <- p +
-        ggplot2::geom_point(data=data_med, ggplot2::aes(y=yearf, x=value, colour=med, shape=med)) +
-        ggplot2::scale_colour_manual(values = colours, name = ggplot2::element_blank()) +
-        ggplot2::scale_shape_manual(values = shapes, name = ggplot2::element_blank())
-
-      # It would be much nicer for the medians to be displayed using lines, however this is difficult
-      # as the x-axis is coded as a factor and the axes are later flipped.
-
-      # This is an example I found that achieves this, however I can't get it to work for this data:
-      # https://stackoverflow.com/questions/16350720/using-geom-line-with-x-axis-being-factors
-      # hist <- data.frame(date=Sys.Date() + 0:13, counts=1:14)
-      # hist <- transform(hist, weekday=factor(weekdays(date), levels=c('Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday')))
-      # ggplot2::ggplot(hist, ggplot2::aes(x=weekday, y=counts, group=1)) +
-      #   ggplot2::geom_point(stat='summary', fun=sum) +
-      #   ggplot2::stat_summary(fun=sum, geom="line")
-
-      # q <- q +
-      #   ggplot2::geom_point(data=data_med, ggplot2::aes(y=yearf, x=value, colour=med, shape=med, group=1), stat='summary', fun=sum) +
-      #   ggplot2::stat_summary(data=data_med, ggplot2::aes(x=year,y=value, group=1),fun=sum, geom="line")
-    }
-
-    if (show_target_line) {
-      p <- p +
-        ggplot2::geom_vline(xintercept = target_value, color="#127B06", linetype="solid",alpha=0.5) +
-        ggplot2::annotate("text", y = as.factor(annotation_position), x = target_value+0.02, color="#127B06", label = "Target reference point", size=3,hjust = 0)
-    }
-
-    if (show_limit_line) {
-      p <- p +
-        ggplot2::geom_vline(xintercept = limit_value, color="#AD3D25",linetype="solid",alpha=0.5) +
-        ggplot2::annotate("text", y = as.factor(annotation_position), x = limit_value+0.02, color="#AD3D25", label = "Limit reference point", size=3,hjust = 0)
-    }
-    p <- p +
-      ggplot2::coord_flip(expand = TRUE, clip = "on")
+    p <- show_median_lines("biomass",p,data,show_median,line_width,colours)
   }
+
+  # Customisable features
+  if (show_final_biomass) p <- show_final_biomass(p, data, MCMC, colour_categories,scenario_labels)
+  if (show_target_line)   p <- add_reference_line(p, data[1,], target_value, "#127B06", annotation_position, "Target reference point")
+  if (show_limit_line)    p <- add_reference_line(p, data[1,], limit_value, "#AD3D25", annotation_position, "Limit reference point")
+  if (facet_wrap)         p <- add_scenario_facets(p, data, scales = scales, ncol = ncol)
+
   return(p)
 }

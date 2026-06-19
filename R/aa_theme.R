@@ -16,6 +16,7 @@ theme_ssand <- function(
       legend.text = ggplot2::element_text(size = legend_text_size, colour=legend_text_colour),
       legend.position = legend_position,
       legend.box = legend_box,
+      legend.key = ggplot2::element_rect(colour = NA),
       axis.text.x = ggplot2::element_text(angle = xangle, vjust = 0.5, hjust = ifelse(xangle == 90, 0, 0.5))
     )
 
@@ -57,17 +58,17 @@ reset_theme_ssand <- function() {
 }
 
 
-catchplot(data, fleet_names = "Commercial")
-
-# This is user-facing. Declare at the start of the code/report:
-# Need to ensure all arguments are documents
-set_theme_ssand(theme_ssand(text_colour = "green", legend_text_colour = "blue"))
-reset_theme_ssand()
-
-
-data <- cpueplot_prep_SS(ss_mle, scenarios=1)
-cpueplot(data)
-cpueplot(data, xlim=c(1954,2023))
+# catchplot(data, fleet_names = "Commercial")
+#
+# # This is user-facing. Declare at the start of the code/report:
+# # Need to ensure all arguments are documents
+# set_theme_ssand(theme_ssand(text_colour = "green", legend_text_colour = "blue"))
+# reset_theme_ssand()
+#
+#
+# data <- cpueplot_prep_SS(ss_mle, scenarios=1)
+# cpueplot(data)
+# cpueplot(data, xlim=c(1954,2023))
 
 
 

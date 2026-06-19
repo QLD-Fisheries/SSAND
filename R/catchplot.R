@@ -39,7 +39,7 @@
 #' @examples
 #' data <- catchplot_prep_SS(ss_mle)
 #' catchplot(data, fleet_names = "Commercial")
-#' catchplot(data, fleet_names = "Commercial", financial_year = TRUE)
+#' catchplot(data, fleet_names = "Commercial", financial_year = TRUE, xlab = "Financial year")
 #'
 #' data <- catchplot_prep_DD(dd_mle)
 #' catchplot(data)
@@ -55,7 +55,7 @@ catchplot <- function(data,
                       xangle = NULL,
                       financial_year = FALSE,
                       fleet_names = NULL,
-                      colours = NULL,
+                      colours = c("grey70", fq_palette("alisecolours")[1:9]),
                       legend_position = "top",
                       reverse = FALSE,
                       strip_position = NA,
@@ -65,69 +65,21 @@ catchplot <- function(data,
                       scenario_labels = NULL,
                       scenario_order = NULL,
                       scales = 'free',
-                      ncol = 2
-) { # function name with default values
+                      ncol = 2) {
 
-  # Data input warnings
-  check_data_columns(c("date","value","fleet","scenario"))
+  check_data_columns(data,c("date","value","fleet","scenario"))
 
-  # ___________
-
-  data <- apply_scenarios(data, ...)
-    # if(!missing(scenarios)){
-  #   data <- dplyr::filter(data, scenario %in% scenarios)
-  # }
-  #
-  # if(missing(scenario_labels)) {
-  #   data <- dplyr::mutate(data, scenario_labels = as.factor(paste0("Scenario ", scenario)))
-  # } else {
-  #   scenario.lookup <- data.frame(scenario = unique(data$scenario), scenario_labels = scenario_labels)
-  #   data <- data |>
-  #     dplyr::left_join(scenario.lookup, by = "scenario") |>
-  #     dplyr::mutate(scenario_labels = as.factor(scenario_labels))
-  # }
-  #
-  # if(!missing(scenario_order)) {
-  #   # Add on any scenarios not included in the scenario_order list
-  #   scenario_order = c(scenario_order, setdiff(scenario_labels, scenario_order))
-  #   # Reorder scenarios
-  #   data$scenario_labels <- factor(data$scenario_labels, levels = scenario_order)
-  # }
-
-  # ____________
-
-  if(!missing(fleet_names)) {
-    fleet_names.lookup <- data.frame(fleet = unique(data$fleet), fleet_names = fleet_names)
-    data <- data |>
-      dplyr::left_join(fleet_names.lookup, by = "fleet") |>
-      dplyr::select(-fleet) |>
-      dplyr::rename(fleet = fleet_names)
-  }
-  # _________
-
-  if(missing(ylab)) {
-    if("partition" %in% names(data)) {
-      if(data$partition[1] == "sel") {
-        ylab = "Catch (retained and total discarded) (t)"
-      }
-      if(data$partition[1] == "retain") {
-        ylab = "Retained catch (t)"
-      }
-      if(data$partition[1] == "dead") {
-        ylab = "Dead catch (t)"
-      }
+  # ___________________
+  # Custom to this plot
+  if (is.null(ylab)) {
+    if ("partition" %in% names(data)) {
+      if (data$partition[1] == "sel")    ylab <- "Catch (retained and total discarded) (t)"
+      if (data$partition[1] == "retain") ylab <- "Retained catch (t)"
+      if (data$partition[1] == "dead")   ylab <- "Dead catch (t)"
     } else {
-      ylab = "Retained catch (t)"
+      ylab <- "Retained catch (t)"
     }
   }
-
-  # _________
-
-  if(missing(colours)) {
-    colours <- c("grey70", fq_palette("alisecolours")[1:9])
-  }
-
-  # _________
 
   if(show_annual_aggregate){
     data <- data |>
@@ -137,85 +89,47 @@ catchplot <- function(data,
       dplyr::mutate(date = as.Date(paste0('01/01/', year), format = '%d/%m/%Y'))
   }
 
-  # _________
-
   # If xlim is entered as just years, convert to dates
-  if(!missing(xlim)) {
+  if(!is.null(xlim)) {
     if(nchar(xlim[1]) == 4) {
-      xlim <- c(as.Date(paste0(xlim[1], "-01-01"), format = "%Y-%m-%d"), as.Date(paste0(xlim[2], "-01-01"), format = "%Y-%m-%d"))
+      xlim <- c(
+        as.Date(paste0(xlim[1], "-01-01"), format = "%Y-%m-%d"),
+        as.Date(paste0(xlim[2], "-01-01"), format = "%Y-%m-%d"))
     }
   }
 
-  x_axis <- build_x_axis(
-    x = data$date,
-    xlab = xlab,
-    xlim = xlim,
-    xbreaks = xbreaks,
-    xlabels = xlabels,
-    financial_year = financial_year,
-    show_dates_on_axis = show_dates_on_axis,
-    expand_upper = 1,
-    xangle = xangle,
-    is_date = TRUE
+  # ___________________
+  check_data_columns(data,c("date","value","fleet","scenario"))
+
+  data <- apply_scenarios(data,
+                          scenarios = scenarios,
+                          scenario_labels = scenario_labels,
+                          scenario_order = scenario_order)
+
+  data <- apply_fleet_names(data, fleet_names)
+
+
+  x_axis <- build_x_axis(x = data$date,
+                         xlab = xlab,
+                         xlim = xlim,
+                         xbreaks = xbreaks,
+                         xlabels = xlabels,
+                         financial_year = financial_year,
+                         show_dates_on_axis = show_dates_on_axis,
+                         expand_upper = 1,
+                         xangle = xangle,
+                         is_date = TRUE
   )
 
-  # if(financial_year & xlab == "Year") {
-  #   warning("Your x-axis implies calendar year, but you've indicated you're using financial year.")
-  # }
+  y_axis <- build_y_axis(y = data$value,
+                         ylab = ylab,
+                         ylim = ylim,
+                         ybreaks = ybreaks,
+                         ylabels = ylabels,
+                         lower = 0
+  )
 
-  # if(!show_dates_on_axis) {
-  #   data <- dplyr::mutate(data, date = lubridate::year(date))
-  # }
-
-  # if(missing(xlim)) {
-  #   xlim <- c(min(data$date), max(data$date) + 1)
-  # }
-
-
-  if(missing(xbreaks)) {
-    xbreaks <- pretty(xlim)
-  }
-  # if(missing(xlabels)) {
-  #   xlabels <- xbreaks
-  # }
-
-  if(missing(xlabels) & !financial_year & show_dates_on_axis) {
-    xlabels <- xbreaks
-  }
-  if(missing(xlabels) & !financial_year & !show_dates_on_axis) {
-    xlabels <- lubridate::year(xbreaks)
-  }
-
-  if(missing(xlabels) & financial_year & !show_dates_on_axis) {
-    xlabels <- paste0(lubridate::year(xbreaks) - 1, "\U2013", lubridate::year(xbreaks))
-  }
-  if(missing(xlabels) & financial_year & show_dates_on_axis) {
-    xlabels <- xbreaks
-  }
-
-
-  if(missing(xangle)) {
-    xangle <- ifelse(financial_year, 90, 0)
-  }
-
-
-
-
-  if(missing(ylim)) {
-    ylim <- c(0, max(data$value) + 1)
-  }
-  if(missing(ybreaks)) {
-    ybreaks <- pretty(ylim)
-  }
-
-
-  if(missing(ylabels)) {
-    ylabels <- ybreaks
-  }
-
-
-  # _________
-
+  # ___________________
   p <- ggplot2::ggplot(data) +
     get_theme_ssand() +
     ggplot2::geom_bar(data,
@@ -223,24 +137,13 @@ catchplot <- function(data,
                       position = ggplot2::position_stack(reverse = reverse),
                       stat     = 'identity'
     ) +
-    ggplot2::xlab(xlab) +
-    ggplot2::ylab(ylab) +
     ggplot2::scale_fill_manual(values = colours) +
-    ggplot2::scale_colour_manual(values = "#3d4040") +
-    ggplot2::scale_x_continuous(limits = as.numeric(xlim), breaks = xbreaks, labels = xlabels) +
-    ggplot2::scale_y_continuous(limits = as.numeric(ylim), breaks = ybreaks, labels = ylabels)
-    # ggplot2::theme(
-    #   panel.background = ggplot2::element_rect(fill = NA, colour = "black"),
-    #   legend.title     = ggplot2::element_blank(),
-    #   legend.position  = legend_position
-    # ) +
-    # ggplot2::theme(text = ggplot2::element_text(size = 12), legend.text = ggplot2::element_text(size = 12)) +
-    # ggplot2::theme(axis.text.x = ggplot2::element_text(angle = xangle, vjust = 0.5, hjust = ifelse(xangle == 90, 0, 0.5)))
+    ggplot2::scale_colour_manual(values = "#3d4040")
 
-  if(length(unique(data$scenario)) > 1){
-    p <- p +
-      ggplot2::facet_wrap(~scenario_labels, scales = scales, ncol = ncol)
-  }
+
+  p <- add_x_scale_continuous(p, x_axis)  # or date version depending on representation
+  p <- add_y_scale_continuous(p, y_axis)
+  p <- add_scenario_facets(p, data, scales = scales, ncol = ncol)
 
   return(p)
 }
