@@ -14,12 +14,11 @@ biomassplot(
   ylabels = NULL,
   xlim = NULL,
   ylim = NULL,
-  xangle = NULL,
   colours = NULL,
-  legend_position = "top",
-  annotation_position = NULL,
-  financial_year = FALSE,
-  text_size = 12,
+  alpha = NULL,
+  line_width = 1,
+  hair_width = 0.5,
+  annotation_position = min(data$year) + 1,
   show_target_line = TRUE,
   target_value = 0.6,
   show_limit_line = TRUE,
@@ -30,23 +29,30 @@ biomassplot(
   scales = "fixed",
   ncol = 2,
   sample = NULL,
-  alpha = NULL,
   show_median = c("trajectory", "annual_biomass"),
   mcmc_style = "banded",
   aggregate_scenarios = FALSE,
   CI_range = 0.95,
   show_CI = TRUE,
-  line_width = 1,
-  hair_width = 0.5,
-  legend_box = "horizontal",
+  band_colour = "black",
+  band_labels = NULL,
   rel_min_height = 0.01,
   ridge_scale = 4.5,
   ridge_colour = c("grey30", "black"),
   shapes = c(16, 18, 17),
-  band_colour = "black",
-  band_labels = NULL,
   show_final_biomass = FALSE,
-  boxplot_outliers = TRUE
+  boxplot_outliers = TRUE,
+  xangle = NULL,
+  legend_position = NULL,
+  financial_year = FALSE,
+  text_size = NULL,
+  legend_text_size = NULL,
+  text_colour = NULL,
+  legend_text_colour = NULL,
+  legend_box = NULL,
+  legend_title_blank = NULL,
+  panel_border = NULL,
+  panel_border_colour = NULL
 )
 }
 \arguments{
@@ -68,17 +74,15 @@ biomassplot(
 
 \item{ylim}{A vector of lower and upper y-axis limits (e.g. c(0,1)) (numeric).}
 
-\item{xangle}{Set to 90 to rotate x-axis labels 90 degrees.}
-
 \item{colours}{A vector of colours used for median types (character).}
 
-\item{legend_position}{Position of the legend ("none", "left", "right", "bottom", "top", or two-element numeric vector for x and y position). Default is "top".}
+\item{alpha}{Transparency for range (numeric) used in ggplot2::geom_density_ridges(). Default is 0.7.}
+
+\item{line_width}{Width of median lines (numeric). Default is 1.}
+
+\item{hair_width}{Width of fine MCMC hairs (numeric). Default is 0.5.}
 
 \item{annotation_position}{Horizontal position of annotation}
-
-\item{financial_year}{Set to TRUE if the assessment was based on financial year (logical). Adjusts the x-axis to show full financial year notation.}
-
-\item{text_size}{text_size, default 12}
 
 \item{show_target_line}{Set to TRUE to show target reference point line (logical).}
 
@@ -102,11 +106,8 @@ Any scenarios not included in "scenario_order" will be tacked on in the order th
 
 \item{sample}{Number of samples to plot from each MCMC chain to ease burden of rendering dense plots (numeric).}
 
-\item{alpha}{Transparency for range (numeric) used in ggplot2::geom_density_ridges(). Default is 0.7.}
-
 \item{show_median}{Type of median shown. Default "annual_biomass" shows the median of each year,
-"trajectory" shows median trajectory based on biomass in final year,
-"parameters" uses median of each parameter (not yet implemented)}
+"trajectory" shows median trajectory based on biomass in final year}
 
 \item{mcmc_style}{The type of MCMC plot to be displayed (character). Options are "banded", "hairy", "boxplot", "CI" and "joy", the default is "banded". Only one option can be selected.}
 
@@ -116,11 +117,9 @@ Any scenarios not included in "scenario_order" will be tacked on in the order th
 
 \item{show_CI}{Set to TRUE to show CI range on joy plot (logical).}
 
-\item{line_width}{Width of median lines (numeric). Default is 1.}
+\item{band_colour}{Colour of bands (character). Only used when mcmc_style=="banded". Input one colour, bands will be distinguished using an alpha.}
 
-\item{hair_width}{Width of fine MCMC hairs (numeric). Default is 0.5.}
-
-\item{legend_box}{Display option for legend (character). Choose "vertical" to stack legend types vertically, or "horizontal" to keep legends in one row.}
+\item{band_labels}{Labels for bands. Default is NULL and interval is used.}
 
 \item{rel_min_height}{Only used when mcmc_style=="joy". Lines with heights below this cutoff will be removed (passed to geom_density_ridges). Default is 0.01.}
 
@@ -130,13 +129,22 @@ Any scenarios not included in "scenario_order" will be tacked on in the order th
 
 \item{shapes}{Vector of shapes to denote different median types. Only used when mcmc_style=="joy".}
 
-\item{band_colour}{Colour of bands (character). Only used when mcmc_style=="banded". Input one colour, bands will be distinguished using an alpha.}
-
-\item{band_labels}{Labels for bands. Default is NULL and interval is used.}
-
 \item{show_final_biomass}{Set to TRUE to show final biomass value at the end of the time series.}
 
 \item{boxplot_outliers}{Set to FALSE to remove outlier points from boxplot. Default is TRUE.}
+
+\item{xangle}{Set to 90 to rotate x-axis labels 90 degrees.}
+
+\item{legend_position}{Position of the legend ("none", "left", "right", "bottom", "top", or two-element numeric vector for x and y position). Default is "top".}
+
+\item{financial_year}{Set to TRUE if the assessment was based on financial year (logical). Adjusts the x-axis to show full financial year notation.}
+
+\item{text_size}{text_size, default 12}
+
+\item{legend_box}{Display option for legend (character). Choose "vertical" to stack legend types vertically, or "horizontal" to keep legends in one row.}
+
+\item{text_size, legend_text_size, text_colour, legend_text_colour, legend_position, legend_box, legend_title_blank, panel_border, panel_border_colour, xangle}{Optional plotting theme overrides. Defaults are controlled by \code{theme_ssand()}
+and can be set globally via \code{set_ssand_style()}.}
 }
 \value{
 Biomass plot
@@ -158,4 +166,10 @@ biomassplot(data, mcmc_style = "boxplot", show_median = c("annual_biomass","traj
 biomassplot(data, mcmc_style = "hairy", show_median = c("annual_biomass","trajectory"))
 biomassplot(data, mcmc_style = "CI", show_median = c("annual_biomass","trajectory"), CI_range = 0.9)
 biomassplot(data, mcmc_style = "joy", show_median = c("none"))
+
+# Theme setting:
+biomassplot(data)
+biomassplot(data, text_size = 16)
+set_ssand_style(text_colour = "red")
+biomassplot(data)
 }

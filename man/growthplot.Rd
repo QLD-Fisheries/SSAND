@@ -8,7 +8,6 @@ growthplot(
   data,
   xlab = "Age",
   ylab = "Carapace length (cm, beginning of year)",
-  text_size = 12,
   show_two_sex = NULL,
   scenarios = NULL,
   scenario_labels = NULL,
@@ -16,7 +15,18 @@ growthplot(
   colours = NULL,
   scales = "free",
   ncol = 2,
-  variation_on_variation = FALSE
+  variation_on_variation = FALSE,
+  xangle = NULL,
+  legend_position = NULL,
+  financial_year = FALSE,
+  text_size = NULL,
+  legend_text_size = NULL,
+  text_colour = NULL,
+  legend_text_colour = NULL,
+  legend_box = NULL,
+  legend_title_blank = NULL,
+  panel_border = NULL,
+  panel_border_colour = NULL
 )
 }
 \arguments{
@@ -25,8 +35,6 @@ growthplot(
 \item{xlab}{Label for x-axis (character). Default is "Age".}
 
 \item{ylab}{Label for y-axis (character). Default is "Carapace length (cm, beginning of year)".}
-
-\item{text_size}{Text size (num). Default is 12.}
 
 \item{show_two_sex}{Set to TRUE to activate a feature that is relevant for two-sex models (logical).}
 
@@ -45,6 +53,11 @@ Any scenarios not included in "scenario_order" will be tacked on in the order th
 \item{ncol}{Number of columns for facet_wrap(). Default is 2.}
 
 \item{variation_on_variation}{Set to TRUE to illustrate MCMC variation on the CV or SD values. Default (FALSE) sets the variation in growth to the median MCMC value.}
+
+\item{text_size}{Text size (num). Default is 12.}
+
+\item{text_size, legend_text_size, text_colour, legend_text_colour, legend_position, legend_box, legend_title_blank, panel_border, panel_border_colour, xangle}{Optional plotting theme overrides. Defaults are controlled by \code{theme_ssand()}
+and can be set globally via \code{set_ssand_style()}.}
 }
 \value{
 Growth plot

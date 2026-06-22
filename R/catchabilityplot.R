@@ -12,13 +12,14 @@
 #' @param ylab Label for y-axis (character). Default is "Catchability coefficient (q)".
 #' @param ncol Number of columns for facet_wrap(). Default is 2.
 #' @param scales Scales for ggplot2::facet_wrap(). Default is 'free', see ?ggplot2::facet_wrap for options.
-#' @param text_size Text size (num). Default is 12.
 #' @param colours A vector of colours used for lines (character).
 #' @param scenario_labels A vector of customised scenario names (character). Default is "Scenario 1", "Scenario 2", etc.
 #' @param scenarios A vector of scenario numbers to be shown on plot (numeric). This was already specified in prep file, but this is a manual override to save running the prep function again.
 #' @param scenario_order A vector to reorder how scenarios are displayed (character). Use the label names defined in "scenario_labels".
 #' If "scenario_labels" is left blank, the labels will be "Scenario 1", "Scenario 2" etc.
 #' Any scenarios not included in "scenario_order" will be tacked on in the order they appear in the input data.
+#' @param text_size,legend_text_size,text_colour,legend_text_colour,legend_position,legend_box,legend_title_blank,panel_border,panel_border_colour,xangle Optional plotting theme overrides. Defaults are controlled by `theme_ssand()`
+#'   and can be set globally via `set_ssand_style()`.
 #'
 #' @return A plot of catchability pattern
 #' @export
@@ -32,32 +33,53 @@
 catchabilityplot <- function(data,
                              xlab = 'Month',
                              ylab = 'Catchability coefficient (q)',
-                             text_size = 12,
                              ncol = 2,
                              scales = 'free',
                              colours = fq_palette("alisecolours"),
                              scenarios = NULL,
                              scenario_labels = NULL,
-                             scenario_order = NULL) {
+                             scenario_order = NULL,
+                             xangle = NULL,
+                             legend_position = NULL,
+                             financial_year = FALSE,
+                             text_size = NULL,
+                             legend_text_size = NULL,
+                             text_colour = NULL,
+                             legend_text_colour = NULL,
+                             legend_box = NULL,
+                             legend_title_blank = NULL,
+                             panel_border = NULL,
+                             panel_border_colour = NULL) {
   # ___________________
   # Data validation
   # ___________________
-
-  # Data input warnings
   check_data_columns(data, c("q","month","fleet","scenario","month_point","monthnames"))
   data$xvar <- data$month
 
   # ___________________
-  # Custom to this plot
-  # ___________________
-
-
-  # ___________________
   # Basic plot set up
   # ___________________
-
   data <- apply_scenarios(data, scenarios, scenario_labels, scenario_order)
+  p <- ggplot2::ggplot(data)
 
+  # ___________________
+  # Build MLE plot
+  # ___________________
+  p <- p +
+    ggplot2::geom_line(ggplot2::aes(x=month,y=q,col=fleet)) +
+    ggplot2::geom_point(ggplot2::aes(x=month_point,y=q,col=fleet)) +
+    ggplot2::scale_x_discrete(limits=month.name) + ##########################
+    ggplot2::scale_y_continuous(limits=ylim, breaks = ybreaks) +
+    ggplot2::scale_colour_manual(name = "Fleet", values = colours)
+
+  if (length(unique(data$scenario))>1){
+    p <- p +
+      ggplot2::facet_wrap(~scenario_labels, scales = scales, ncol = ncol)
+  }
+
+  # ___________________
+  # Axes and theme
+  # ___________________
   x_axis <- build_x_axis(x = data$xvar,
                          xlab = xlab,
                          xlim = xlim,
@@ -77,25 +99,20 @@ catchabilityplot <- function(data,
                          upper = data$q) #
 
 
-  p <- ggplot2::ggplot(data) + get_theme_ssand()
   p <- add_x_scale_continuous(p, x_axis)
   p <- add_y_scale_continuous(p, y_axis)
 
-  # ___________________
-  # Build MLE plot
-  # ___________________
-
-  p <- p +
-    ggplot2::geom_line(ggplot2::aes(x=month,y=q,col=fleet)) +
-    ggplot2::geom_point(ggplot2::aes(x=month_point,y=q,col=fleet)) +
-    ggplot2::scale_x_discrete(limits=month.name) + ##########################
-    ggplot2::scale_y_continuous(limits=ylim, breaks = ybreaks) +
-    ggplot2::scale_colour_manual(name = "Fleet", values = colours)
-
-  if (length(unique(data$scenario))>1){
-    p <- p +
-      ggplot2::facet_wrap(~scenario_labels, scales = scales, ncol = ncol)
-  }
+  p <- add_ssand_theme(p,
+                       text_size = text_size,
+                       legend_text_size = legend_text_size,
+                       text_colour = text_colour,
+                       legend_text_colour = legend_text_colour,
+                       legend_position = legend_position,
+                       legend_box = legend_box,
+                       legend_title_blank = legend_title_blank,
+                       panel_border = panel_border,
+                       panel_border_colour = panel_border_colour,
+                       xangle = x_axis$angle)
 
   return(p)
 }

@@ -48,7 +48,12 @@ apply_scenarios <- function(
 # Set up fleets ----
 apply_fleet_names <- function(
     data,
+    fleets = NULL,
     fleet_names = NULL) {
+
+  if(!is.null(fleets)) {
+    data <- data |> dplyr::filter(fleet %in% fleets)
+  }
 
   if(!is.null(fleet_names)) {
 
@@ -68,6 +73,54 @@ apply_fleet_names <- function(
 
 
 # Set up x axis ----
+
+coerce_year_axis_to_date <- function(x, arg = "x") {
+
+  if (is.null(x)) return(NULL)
+
+  if (inherits(x, "Date")) {
+    return(x)
+  }
+
+  if (inherits(x, c("POSIXct", "POSIXlt"))) {
+    return(as.Date(x))
+  }
+
+  if (is.numeric(x)) {
+
+    # Treat values like 1950, 2023 as years
+    if (all(x == floor(x), na.rm = TRUE) &&
+        all(x >= 1000 & x <= 9999, na.rm = TRUE)) {
+      return(as.Date(paste0(x, "-01-01")))
+    }
+
+    stop(
+      arg,
+      " is numeric but does not look like a year. ",
+      "Use years, e.g. c(1950, 2023), or Date values, e.g. as.Date(c('1950-01-01', '2023-01-01'))."
+    )
+  }
+
+  if (is.character(x)) {
+
+    # Treat character years like "1950" as years
+    if (all(grepl("^\\d{4}$", x))) {
+      return(as.Date(paste0(x, "-01-01")))
+    }
+
+    out <- as.Date(x)
+
+    if (any(is.na(out))) {
+      stop(arg, " could not be converted to Date.")
+    }
+
+    return(out)
+  }
+
+  stop(arg, " must be numeric years, character dates, or Date values.")
+}
+
+
 build_x_axis <- function(
     x,
     xlab = NULL,
@@ -76,34 +129,65 @@ build_x_axis <- function(
     xlabels = NULL,
     financial_year = FALSE,
     show_dates_on_axis = FALSE,
+    expand_lower = 0,
     expand_upper = 0,
     xangle = NULL,
     is_date = inherits(x, "Date")
 ) {
-  # if (missing(xbreaks) & xlim[1]!=xlim[2]) {xbreaks <- unique(floor(pretty(xlim)))} # unique(floor()) ensures integers only
 
-  if(financial_year & xlab == "Year") {
+  if (financial_year && xlab == "Year") {
     warning("Your x-axis implies calendar year, but you've indicated you're using financial year.")
   }
 
-  if (is.null(xlim)) {
-    xlim <- c(min(x, na.rm = TRUE), max(x, na.rm = TRUE) + expand_upper)
-  }
+  if (is_date) {
 
-  if (is.null(xbreaks)) {
-    xbreaks <- pretty(xlim)
+    if (is.null(xlim)) {
+      xlim <- c(
+        min(x, na.rm = TRUE) - expand_lower,
+        max(x, na.rm = TRUE) + expand_upper
+      )
+    } else {
+      xlim <- coerce_year_axis_to_date(xlim, arg = "xlim")
+    }
+
+    if (is.null(xbreaks)) {
+      xbreaks <- pretty(xlim)
+    } else {
+      xbreaks <- coerce_year_axis_to_date(xbreaks, arg = "xbreaks")
+    }
+
+  } else {
+
+    if (is.null(xlim)) {
+      xlim <- c(
+        min(x, na.rm = TRUE) - expand_lower,
+        max(x, na.rm = TRUE) + expand_upper
+      )
+    }
+
+    if (is.null(xbreaks)) {
+      xbreaks <- pretty(xlim)
+    }
   }
 
   if (is.null(xlabels)) {
+
     if (is_date) {
+
       if (financial_year && !show_dates_on_axis) {
-        xlabels <- paste0(lubridate::year(xbreaks) - 1, "\u2013", lubridate::year(xbreaks))
+        xlabels <- paste0(
+          lubridate::year(xbreaks) - 1,
+          "\u2013",
+          lubridate::year(xbreaks)
+        )
       } else if (!financial_year && !show_dates_on_axis) {
         xlabels <- lubridate::year(xbreaks)
       } else {
         xlabels <- xbreaks
       }
+
     } else {
+
       if (financial_year) {
         xlabels <- paste0(xbreaks - 1, "\u2013", xbreaks)
       } else {
@@ -121,7 +205,8 @@ build_x_axis <- function(
     limits = xlim,
     breaks = xbreaks,
     labels = xlabels,
-    angle = xangle
+    angle = xangle,
+    is_date = is_date
   )
 }
 
@@ -157,6 +242,11 @@ build_y_axis <- function(
 
 # Add axes ----
 add_x_scale_date <- function(p, axis) {
+
+  # if (!is.null(xbreaks) && !lubridate::is.Date(xbreaks)) {
+  #   xbreaks <- as.Date(paste0(xbreaks, "-01-01"))
+  # }
+
   p +
     ggplot2::scale_x_date(
       name   = axis$xlab,
@@ -194,10 +284,11 @@ add_y_scale_continuous <- function(p,
 add_scenario_facets <- function(p,
                                 data,
                                 scales = "fixed",
-                                ncol = 2) {
+                                ncol = 2,
+                                dir = "v") {
 
   if (length(unique(data$scenario)) > 1) {
-    p + ggplot2::facet_wrap(~scenario_labels, scales = scales, ncol = ncol)
+    p + ggplot2::facet_wrap(~scenario_labels, scales = scales, ncol = ncol, dir = dir)
   } else {
     p
   }

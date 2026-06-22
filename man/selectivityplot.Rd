@@ -11,11 +11,10 @@ selectivityplot(
   selectivity_type = "Selectivity (length)",
   xlab = "Length (cm)",
   ylab = "Selectivity",
-  text_size = 12,
   scenarios = NULL,
   scenario_labels = NULL,
   scenario_order = NULL,
-  colours = NULL,
+  colours = c("grey70", fq_palette("alisecolours")),
   scales = "free",
   ncol = 2,
   MLS = NULL,
@@ -26,7 +25,18 @@ selectivityplot(
   MLS_label_size = 3,
   show_ribbon = TRUE,
   time_blocks = FALSE,
-  years = NULL
+  years = NULL,
+  xangle = NULL,
+  legend_position = NULL,
+  financial_year = FALSE,
+  text_size = NULL,
+  legend_text_size = NULL,
+  text_colour = NULL,
+  legend_text_colour = NULL,
+  legend_box = NULL,
+  legend_title_blank = NULL,
+  panel_border = NULL,
+  panel_border_colour = NULL
 )
 }
 \arguments{
@@ -41,8 +51,6 @@ selectivityplot(
 \item{xlab}{Label for x-axis (character). Default is "Age".}
 
 \item{ylab}{Label for y-axis (character). Default is "Carapace length (cm, beginning of year)".}
-
-\item{text_size}{Text size (num). Default is 12.}
 
 \item{scenarios}{A vector of scenario numbers to be shown on plot (numeric). This was already specified in prep file, but this is a manual override to save running the prep function again.}
 
@@ -75,6 +83,11 @@ Any scenarios not included in "scenario_order" will be tacked on in the order th
 \item{time_blocks}{Set to TRUE to show time blocks. You might want to also set selectivity_type to something relevant such as "Discard"}
 
 \item{years}{A vector of years to show. Relevant if time_blocks==TRUE.}
+
+\item{text_size}{Text size (num). Default is 12.}
+
+\item{text_size, legend_text_size, text_colour, legend_text_colour, legend_position, legend_box, legend_title_blank, panel_border, panel_border_colour, xangle}{Optional plotting theme overrides. Defaults are controlled by \code{theme_ssand()}
+and can be set globally via \code{set_ssand_style()}.}
 }
 \value{
 Selectivity plot

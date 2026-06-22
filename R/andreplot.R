@@ -14,8 +14,10 @@
 #' @param colours A vector of colours to plot. First is the colour of points, then the colour of the ribbon, then the colour of the expected line.
 #' @param xlab Label for x-axis (character). Default is "Length (cm)".
 #' @param ylab A vector of labels for y-axis (character). Two entries, for each column of the plot. Default is c("Age","Standard deviation (age)").
-#' @param legend_position Position of the legend ("top" or "bottom"). Default is "top".
 #' @param legend_ratio A vector specifying the relative heights of the legend and the rest of the plot. Default is c(1,10)
+#' @param financial_year Set to TRUE if the assessment was based on financial year (logical). Adjusts the x-axis to show full financial year notation.
+#' @param text_size,legend_text_size,text_colour,legend_text_colour,legend_position,legend_box,legend_title_blank,panel_border,panel_border_colour,xangle Optional plotting theme overrides. Defaults are controlled by `theme_ssand()`
+#'   and can be set globally via `set_ssand_style()`.
 #'
 #' @return Andre plot with an option to filter by fleet
 #' @export
@@ -30,20 +32,27 @@ andreplot <- function(data,
                       xlab = "Length (cm)",
                       ylab = c("Age","Standard deviation (age)"),
                       colours = c("black","grey80",fq_palette("DAF")),
-                      legend_position = "top",
-                      legend_ratio = c(1,10)) {
+                      legend_ratio = c(1,10),
+                      xangle = NULL,
+                      legend_position = NULL,
+                      financial_year = FALSE,
+                      text_size = NULL,
+                      legend_text_size = NULL,
+                      text_colour = NULL,
+                      legend_text_colour = NULL,
+                      legend_box = NULL,
+                      legend_title_blank = NULL,
+                      panel_border = NULL,
+                      panel_border_colour = NULL) {
   # ___________________
   # Data validation
   # ___________________
-
-  # Data input warnings
   check_data_columns(data, c("year","length","obs","pred","low","upp","label","scenario","CI"))
   data$xvar <- data$length
 
   # ___________________
   # Custom to this plot
   # ___________________
-
   if (!missing(years)) {data <- data |> dplyr::filter(year %in% years)}
   scenario_var <- scenario
   fleet_var <- fleet
@@ -56,11 +65,9 @@ andreplot <- function(data,
   data_age <- data |> dplyr::filter(label=="Age")
   data_sd  <- data |> dplyr::filter(label=="Standard deviation (age)")
 
-
   # ___________________
   # Build MLE plots
   # ___________________
-
   p_age <- ggplot2::ggplot(data_age, ggplot2::aes(x = length, y = obs)) +
     get_theme_ssand() +
     ggplot2::geom_ribbon(data = data_age |>
@@ -86,6 +93,32 @@ andreplot <- function(data,
     ggplot2::xlab(xlab) +
     ggplot2::ylab(ylab[2]) +
     ggplot2::facet_wrap(~year, ncol=1)
+
+
+  p_age <- add_ssand_theme(p_age,
+                           text_size = text_size,
+                           legend_text_size = legend_text_size,
+                           text_colour = text_colour,
+                           legend_text_colour = legend_text_colour,
+                           legend_position = legend_position,
+                           legend_box = legend_box,
+                           legend_title_blank = legend_title_blank,
+                           panel_border = panel_border,
+                           panel_border_colour = panel_border_colour,
+                           xangle = x_axis$angle)
+
+
+  p_sd <- add_ssand_theme(p_sd,
+                          text_size = text_size,
+                          legend_text_size = legend_text_size,
+                          text_colour = text_colour,
+                          legend_text_colour = legend_text_colour,
+                          legend_position = legend_position,
+                          legend_box = legend_box,
+                          legend_title_blank = legend_title_blank,
+                          panel_border = panel_border,
+                          panel_border_colour = panel_border_colour,
+                          xangle = x_axis$angle)
 
   # Combine two plots into one
   plots <- gridExtra::arrangeGrob(p_age + ggplot2::theme(legend.position="none"), p_sd, nrow=1)

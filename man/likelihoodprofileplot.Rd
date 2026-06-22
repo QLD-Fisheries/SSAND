@@ -14,7 +14,17 @@ likelihoodprofileplot(
   colours = c(SSAND::fq_palette("alisecolours"), SSAND::fq_palette("cols")),
   shapes = c(16, 17, 18, 15, 1, 2, 5, 0, 19, 20, 3, 4, 7, 8, 9, 10, 11, 12, 13, 14),
   component_names = NULL,
-  legend_position = "top"
+  xangle = NULL,
+  legend_position = NULL,
+  financial_year = FALSE,
+  text_size = NULL,
+  legend_text_size = NULL,
+  text_colour = NULL,
+  legend_text_colour = NULL,
+  legend_box = NULL,
+  legend_title_blank = NULL,
+  panel_border = NULL,
+  panel_border_colour = NULL
 )
 }
 \arguments{
@@ -35,6 +45,9 @@ likelihoodprofileplot(
 \item{component_names}{A vector of customised component names for legend (character).}
 
 \item{legend_position}{Position of the legend ("none", "left", "right", "bottom", "top", or two-element numeric vector for x and y position). Default is "top".}
+
+\item{text_size, legend_text_size, text_colour, legend_text_colour, legend_position, legend_box, legend_title_blank, panel_border, panel_border_colour, xangle}{Optional plotting theme overrides. Defaults are controlled by \code{theme_ssand()}
+and can be set globally via \code{set_ssand_style()}.}
 }
 \value{
 Likelihood profile plot

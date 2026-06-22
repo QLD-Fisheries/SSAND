@@ -11,7 +11,6 @@ lengthplot(
   partition = 0,
   point_size = 1,
   colours = c("#AD3D25", "#0085B8", "#FCC17E"),
-  legend_position = "top",
   financial_year = FALSE,
   xlab = "Length (cm)",
   ylab = "Proportion",
@@ -27,7 +26,17 @@ lengthplot(
   MLS = NULL,
   MLS_colour = "black",
   MLS_label = "MLS",
-  show_fits = TRUE
+  show_fits = TRUE,
+  text_size = NULL,
+  legend_text_size = NULL,
+  text_colour = NULL,
+  legend_text_colour = NULL,
+  legend_position = NULL,
+  legend_box = NULL,
+  legend_title_blank = NULL,
+  panel_border = NULL,
+  panel_border_colour = NULL,
+  xangle = NULL
 )
 }
 \arguments{
@@ -35,15 +44,13 @@ lengthplot(
 
 \item{fleet}{Specify which fleet to plot (numeric). By default, fleet 1 will be shown.}
 
-\item{scenario}{A scenario numbers to be shown on plot (numeric). This was already specified in prep file, but this is a manual override to save running the prep function again.}
+\item{scenario}{A scenario number to be shown on plot (numeric). This was already specified in prep file, but this is a manual override to save running the prep function again.}
 
 \item{partition}{Specify which partition to plot (numeric). By default, partition 0 will be shown.}
 
 \item{point_size}{Size of points used in ggplot2::geom_line(). Default is 1.}
 
 \item{colours}{A vector of colours used for sex types (character).}
-
-\item{legend_position}{Position of the legend ("none", "left", "right", "bottom", "top", or two-element numeric vector for x and y position). Default is "top".}
 
 \item{financial_year}{Set to TRUE if the assessment was based on financial year (logical). Adjusts the x-axis to show full financial year notation.}
 
@@ -76,6 +83,8 @@ lengthplot(
 \item{MLS_label}{Label of MLS line (character). Default is "MLS".}
 
 \item{show_fits}{Set to TRUE to show model fits.}
+
+\item{text_size, legend_text_size, text_colour, legend_text_colour, legend_position, legend_box, legend_title_blank, panel_border, panel_border_colour, xangle}{Optional plotting theme overrides. Defaults are controlled by \code{theme_ssand()}}
 }
 \value{
 A length plot, with an option to add model fits

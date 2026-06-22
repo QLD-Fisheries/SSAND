@@ -9,7 +9,6 @@ spaghettiplot(
   template = "coloured",
   show_base_case = TRUE,
   legend_labels = NULL,
-  legend_position = "top",
   xlab = "Year",
   ylab = "Biomass (relative unfished)",
   xlim = c(NA, NA),
@@ -18,7 +17,6 @@ spaghettiplot(
   ybreaks = NULL,
   xlabels = NULL,
   ylabels = NULL,
-  xangle = NULL,
   show_scenario_labels = TRUE,
   linetype_categories = NA,
   linetype_labels = NA,
@@ -30,10 +28,19 @@ spaghettiplot(
   scenario_labels = NULL,
   scenario_order = NULL,
   line_width = 1,
-  financial_year = FALSE,
   force = 1,
-  text_size = 12,
-  scenario_text_size = 4
+  scenario_text_size = 4,
+  xangle = NULL,
+  legend_position = NULL,
+  financial_year = FALSE,
+  text_size = NULL,
+  legend_text_size = NULL,
+  text_colour = NULL,
+  legend_text_colour = NULL,
+  legend_box = NULL,
+  legend_title_blank = NULL,
+  panel_border = NULL,
+  panel_border_colour = NULL
 )
 }
 \arguments{
@@ -44,8 +51,6 @@ spaghettiplot(
 \item{show_base_case}{Set to TRUE to highlight the base case (logical)}
 
 \item{legend_labels}{A vector to specify legend labels}
-
-\item{legend_position}{Legend position (default is "top")}
 
 \item{xlab}{Label for x-axis (character). Default is "Year".}
 
@@ -62,8 +67,6 @@ spaghettiplot(
 \item{xlabels}{A vector of labels for the x-axis breaks.}
 
 \item{ylabels}{A vector of labels for the y-axis breaks.}
-
-\item{xangle}{Set to 90 to rotate x-axis labels 90 degrees.}
 
 \item{show_scenario_labels}{Set to TRUE to include scenario labels on the plots (logical).}
 
@@ -89,13 +92,20 @@ Any scenarios not included in "scenario_order" will be tacked on in the order th
 
 \item{line_width}{Width of lines}
 
-\item{financial_year}{Set to TRUE if the assessment was based on financial year (logical). Adjusts the x-axis to show full financial year notation.}
-
 \item{force}{Force of repulsion between overlapping text labels. Default is 1.}
+
+\item{scenario_text_size}{scenario_text_size, default 4}
+
+\item{xangle}{Set to 90 to rotate x-axis labels 90 degrees.}
+
+\item{legend_position}{Legend position (default is "top")}
+
+\item{financial_year}{Set to TRUE if the assessment was based on financial year (logical). Adjusts the x-axis to show full financial year notation.}
 
 \item{text_size}{text_size, default 12}
 
-\item{scenario_text_size}{scenario_text_size, default 4}
+\item{text_size, legend_text_size, text_colour, legend_text_colour, legend_position, legend_box, legend_title_blank, panel_border, panel_border_colour, xangle}{Optional plotting theme overrides. Defaults are controlled by \code{theme_ssand()}
+and can be set globally via \code{set_ssand_style()}.}
 }
 \value{
 A spaghetti plot

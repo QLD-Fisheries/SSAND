@@ -31,7 +31,6 @@
 #' If "scenario_labels" is left blank, the labels will be "Scenario 1", "Scenario 2" etc.
 #' Any scenarios not included in "scenario_order" will be tacked on in the order they appear in the input data.
 #' @param legend_labels A vector to specify legend labels
-#' @param legend_position Legend position (default is "top")
 #' @param xlab Label for x-axis (character). Default is "Year".
 #' @param ylab Label for y-axis (character). Default is "Biomass (relative unfished)".
 #' @param xbreaks A vector of breaks between x-axis labels, used in ggplot2::scale_x_continous() (numeric).
@@ -49,10 +48,10 @@
 #' @param colours A vector of the colours desired for the groups specified in colour_labels
 #' @param line_width Width of lines
 #' @param financial_year Set to TRUE if the assessment was based on financial year (logical). Adjusts the x-axis to show full financial year notation.
-#' @param xangle Set to 90 to rotate x-axis labels 90 degrees.
 #' @param force Force of repulsion between overlapping text labels. Default is 1.
-#' @param text_size text_size, default 12
 #' @param scenario_text_size scenario_text_size, default 4
+#' @param text_size,legend_text_size,text_colour,legend_text_colour,legend_position,legend_box,legend_title_blank,panel_border,panel_border_colour,xangle Optional plotting theme overrides. Defaults are controlled by `theme_ssand()`
+#'   and can be set globally via `set_ssand_style()`.
 #'
 #' @return A spaghetti plot
 #' @export
@@ -76,7 +75,6 @@ spaghettiplot <- function(data,
                           template = "coloured",
                           show_base_case = TRUE,
                           legend_labels = NULL,
-                          legend_position = "top",
                           xlab = "Year",
                           ylab = "Biomass (relative unfished)",
                           xlim = c(NA,NA),
@@ -85,7 +83,6 @@ spaghettiplot <- function(data,
                           ybreaks = NULL,
                           xlabels = NULL,
                           ylabels = NULL,
-                          xangle = NULL,
                           show_scenario_labels = TRUE,
                           linetype_categories = NA,
                           linetype_labels = NA,
@@ -97,34 +94,30 @@ spaghettiplot <- function(data,
                           scenario_labels = NULL,
                           scenario_order = NULL,
                           line_width = 1,
-                          financial_year = FALSE,
                           force = 1,
-                          text_size = 12,
-                          scenario_text_size = 4
-) {
+                          scenario_text_size = 4,
+                          xangle = NULL,
+                          legend_position = NULL,
+                          financial_year = FALSE,
+                          text_size = NULL,
+                          legend_text_size = NULL,
+                          text_colour = NULL,
+                          legend_text_colour = NULL,
+                          legend_box = NULL,
+                          legend_title_blank = NULL,
+                          panel_border = NULL,
+                          panel_border_colour = NULL) {
 
+  # ___________________
+  # Data validation
+  # ___________________
   # Data input warnings
   check_data_columns(data, c("year","scenario","value","base"))
-
-
-
-  if (financial_year & xlab=="Year") {warning("Your x-axis implies calendar year, but you've indicated you're using financial year.")}
-
-  if (missing(xlim)) {xlim <- c(min(data$year),max(data$year)+5)}
-  if (missing(ylim)) {ylim <- c(0,max(data$value))}
-
-  if (missing(xbreaks)) {xbreaks <- pretty(xlim)}
-  if (missing(ybreaks)) {ybreaks <- pretty(ylim)}
-
-  if (missing(xlabels)) {xlabels <- xbreaks}
-  if (missing(ylabels)) {ylabels <- ybreaks}
-
-  if (financial_year) {xlabels <- paste0(xbreaks-1,"\U2013",xbreaks)} else {xlabels <- xbreaks}
-  if (missing(xangle)) {xangle <- ifelse(financial_year,90,0)}
-
+  data$xvar <- data$year
   data <- apply_scenarios(data, scenarios, scenario_labels, scenario_order)
 
-  if (!missing(linetype_categories) & length(linetype_categories) != length(unique(data$scenario))) {
+
+  if (!is.null(linetype_categories) & length(linetype_categories) != length(unique(data$scenario))) {
     warning("You have not specified a line type category for each scenario")
   }
 
@@ -132,12 +125,11 @@ spaghettiplot <- function(data,
     warning("The number of linetype categories defined in linetype_categories is not the same as the number of line type labels provided in linetype_labels.")
   }
 
-  if (!missing(linetypes) & length(linetype_labels) != length(linetypes)) {
+  if (!is.null(linetypes) & length(linetype_labels) != length(linetypes)) {
     warning("The length of linetypes should either be blank or match the length of linetype_labels.")
   }
 
-
-  if (!missing(colour_categories) & length(colour_categories) != length(unique(data$scenario))) {
+  if (!is.null(colour_categories) & length(colour_categories) != length(unique(data$scenario))) {
     warning("You have not specified a colour category for each scenario")
   }
 
@@ -145,15 +137,15 @@ spaghettiplot <- function(data,
     warning("The number of colour categories defined in colour_categories is not the same as the number of colour_labels provided in colour_labels")
   }
 
-  if (!missing(colour_labels) & length(colour_labels) != length(colours)) {
+  if (!is.null(colour_labels) & length(colour_labels) != length(colours)) {
     warning("The length of colours should either be blank or match the length of colour_labels")
   }
 
-  if (!missing(colour_categories) && missing(linetype_categories)) {
+  if (!is.null(colour_categories) && is.null(linetype_categories)) {
     warning("If customising colour, please also customise linetype (even if there is only one category for linetype).")
   }
 
-  if (missing(colour_categories) && !missing(linetype_categories)) {
+  if (is.null(colour_categories) && !is.null(linetype_categories)) {
     warning("If customising linetype, please also customise colour (even if there is only one category for colour).")
   }
 
@@ -163,10 +155,10 @@ spaghettiplot <- function(data,
   if (!show_base_case) {data$base <- "Alt"}
 
   # Set up data based on manual line type categories
-  if (!missing(colour_categories)) {
+  if (!is.null(colour_categories)) {
     template = "none"
   }
-  if (!missing(linetype_categories)) {
+  if (!is.null(linetype_categories)) {
     template = "none"
   }
 
@@ -211,8 +203,6 @@ spaghettiplot <- function(data,
                     alphacat = base)
   }
 
-
-
   # Use pre-build "grey scale" template
   if (template == "greyscale") {
     data <- data |>
@@ -229,7 +219,7 @@ spaghettiplot <- function(data,
   }
 
   # Set up legend labels
-  if (missing(legend_labels)) {
+  if (is.null(legend_labels)) {
     legend_labels = c(paste0("Base case estimate (",as.numeric(unique(data$scenario[data$base=="Base"])),")"),
                       paste0("Alternative scenarios (",min(as.numeric(as.character(data$scenario[data$base!="Base"]))),"-",
                              max(as.numeric(as.character(data$scenario[data$base!="Base"]))),")"))
@@ -242,7 +232,7 @@ spaghettiplot <- function(data,
 
 
   # Set up colour palettes
-  if (missing(colours) & template=="coloured") {
+  if (is.null(colours) & template=="coloured") {
     colours <- c("black",fq_palette("cols")[1:length(unique(data$scenario))])
   }
 
@@ -251,7 +241,7 @@ spaghettiplot <- function(data,
   }
 
   # Set up linetypes
-  if (missing(linetypes) & template=="coloured") {
+  if (is.null(linetypes) & template=="coloured") {
     linetypes <- "solid"
   }
 
@@ -259,22 +249,18 @@ spaghettiplot <- function(data,
     linetypes <- c("solid","dashed")
   }
 
-
-
-  ### PLOT
-
-  # Set up canvas
+  # ___________________
+  # Basic plot set up
+  # ___________________
   p <- ggplot2::ggplot(data, ggplot2::aes(year, value, group=scenario)) +
-    get_theme_ssand() +
     ggplot2::coord_cartesian(xlim = c(min(data$year), max(data$year) + 5)) +
     ggplot2::xlab(xlab) +
     ggplot2::ylab(ylab) +
-    ggplot2::theme(legend.title = ggplot2::element_blank()) +
-    ggplot2::theme(text = ggplot2::element_text(size=text_size),legend.key.size = ggplot2::unit(3,"line")) +
+    # ggplot2::theme(legend.title = ggplot2::element_blank()) +
+    # ggplot2::theme(text = ggplot2::element_text(size=text_size),legend.key.size = ggplot2::unit(3,"line")) +
     ggplot2::scale_x_continuous(limits = xlim, breaks = xbreaks, labels = xlabels) +
     ggplot2::scale_y_continuous(limits = ylim, breaks = ybreaks, labels = ylabels) +
-    ggplot2::theme(axis.text.x = ggplot2::element_text(angle = xangle, vjust = 0.5, hjust=ifelse(xangle==90,0,0.5)))
-
+    # ggplot2::theme(axis.text.x = ggplot2::element_text(angle = xangle, vjust = 0.5, hjust=ifelse(xangle==90,0,0.5)))
 
   # Add data
   if (template == "coloured") {
@@ -288,9 +274,9 @@ spaghettiplot <- function(data,
   }
 
   if (template == "none") {
-    if (missing(colour_categories) & !missing(linetype_categories)) {
+    if (is.null(colour_categories) & !is.null(linetype_categories)) {
 
-      if (missing(colours)) {
+      if (is.null(colours)) {
         p <- p +
           ggplot2::geom_line(data = data, ggplot2::aes(linetype=linetype_categories), colour = "grey50", linewidth = line_width)
       } else {
@@ -305,7 +291,7 @@ spaghettiplot <- function(data,
 
   # Manual scales
   if (template=="none") {
-    if (missing(linetypes)) {
+    if (is.null(linetypes)) {
       p <- p +
         ggplot2::scale_linetype_manual(name = "Legend", values = rep(c("solid", "dashed", "dotted", "dotdash", "longdash", "twodash"),10), labels=linetype_labels)
     } else {
@@ -313,15 +299,15 @@ spaghettiplot <- function(data,
         ggplot2::scale_linetype_manual(name = "Legend", values = linetypes, labels=linetype_labels)
     }
 
-    if (missing(colours) & missing(colour_labels)) {
+    if (is.null(colours) & is.null(colour_labels)) {
       p <- p +
         ggplot2::scale_colour_manual(name = "Legend", values = fq_palette("alisecolours"), labels=linetype_labels)
     }
-    if (!missing(colours) & missing(colour_labels)) {
+    if (!is.null(colours) & is.null(colour_labels)) {
       p <- p +
         ggplot2::scale_colour_manual(name = "Legend", values = colours, labels=linetype_labels)
     }
-    if (!missing(colours) & !missing(colour_labels)) {
+    if (!is.null(colours) & !is.null(colour_labels)) {
       p <- p +
         ggplot2::scale_colour_manual(name = "Legend", values = colours, labels=colour_labels)
     }
@@ -342,7 +328,6 @@ spaghettiplot <- function(data,
     }
   }
 
-
   if (template=="greyscale") {
     p <- p +
       ggplot2::scale_colour_manual(name = "Legend", values = colours, labels=colour_labels) +
@@ -353,16 +338,6 @@ spaghettiplot <- function(data,
       p <- p +
         ggplot2::geom_line(data = data |> dplyr::filter(base=="Base"), ggplot2::aes(), colour="black", alpha=1, linetype="solid", linewidth = line_width)
     }
-  }
-
-
-  # Add legend
-  p <- p +
-    ggplot2::theme(legend.position=legend_position, legend.text = ggplot2::element_text(size=text_size))
-
-  if (!show_base_case & template=="none") {
-    p <- p +
-      ggplot2::theme(legend.position = "none")
   }
 
   # Add scenario labels
@@ -381,6 +356,42 @@ spaghettiplot <- function(data,
         force=force
       )
   }
+
+  # ___________________
+  # Theme
+  # ___________________
+  x_axis <- build_x_axis(x = data$xvar,
+                         xlab = xlab,
+                         xlim = xlim,
+                         xbreaks = xbreaks,
+                         xlabels = xlabels,
+                         financial_year = financial_year,
+                         expand_upper = as.numeric(show_final_biomass),
+                         xangle = xangle,
+                         is_date = FALSE)
+
+  y_axis <- build_y_axis(y = data$value,
+                         ylab = ylab,
+                         ylim = ylim,
+                         ybreaks = ybreaks,
+                         ylabels = ylabels,
+                         lower = 0,
+                         upper = data$upper)
+
+  p <- add_x_scale_continuous(p, x_axis)
+  p <- add_y_scale_continuous(p, y_axis)
+
+  p <- add_ssand_theme(p,
+                       text_size = text_size,
+                       legend_text_size = legend_text_size,
+                       text_colour = text_colour,
+                       legend_text_colour = legend_text_colour,
+                       legend_position = legend_position,
+                       legend_box = legend_box,
+                       legend_title_blank = legend_title_blank,
+                       panel_border = panel_border,
+                       panel_border_colour = panel_border_colour,
+                       xangle = x_axis$angle)
 
   return(p)
 }

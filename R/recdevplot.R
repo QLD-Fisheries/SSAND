@@ -13,7 +13,6 @@
 #' @param xlab Label for x-axis (character). Default is "Year".
 #' @param ylab Label for y-axis (character). Default is "Log recruitment deviation".
 #' @param point_size Size of points used in ggplot2::geom_line(). Default is 1.5.
-#' @param text_size Text size (num). Default is 12.
 #' @param show_median Logical, TRUE to show median line
 #' @param colours A vector of colours used (character).
 #' @param scales Scales for ggplot2::facet_wrap(). Default is 'free', see ?ggplot2::facet_wrap for options.
@@ -30,17 +29,19 @@
 #' @param xlim A vector of lower and upper x-axis limits (e.g. c(1950, 2020)) (numeric).
 #' @param ylim A vector of lower and upper y-axis limits (e.g. c(0,1)) (numeric).
 #' @param ylabels A vector of labels for the y-axis breaks.
-#' @param xangle Set to 90 to rotate x-axis labels 90 degrees.
 #' @param line_type A vector of linetypes (e.g. "solid", "dashed") for median lines.
 #' @param mcmc_style The type of MCMC plot to be displayed (character). Options are "banded", "hairy", "boxplot" and "CI", the default is "banded". Only one option can be selected.
 #' @param aggregate_scenarios Set to TRUE to calculate credible intervals across all scenarios (logical). Only activated if mcmc_style==CI.
+#' @param CI_range Specify credible interval range (numeric). Only activated if mcmc_style==CI.
 #' @param alpha Transparency for range (numeric) used in ggplot2::geom_density_ridges(). Default is 0.7.
 #' @param line_width Width of median lines (numeric). Default is 1.
 #' @param hair_width Width of fine MCMC hairs (numeric). Default is 0.5.
-#' @param legend_box Display option for legend (character). Choose "vertical" to stack legend types vertically, or "horizontal" to keep legends in one row.
-#' @param legend_position Position of the legend ("none", "left", "right", "bottom", "top", or two-element numeric vector for x and y position). Default is "top".
+#' @param sample Number of samples to plot from each MCMC chain to ease burden of rendering dense plots (numeric).
 #' @param band_colour Colour of bands (character). Only used when mcmc_style=="banded". Input one colour, bands will be distinguished using an alpha.
+#' @param band_labels Labels for bands. Default is NULL and interval is used.
 #' @param boxplot_outliers Set to FALSE to remove outlier points from boxplot. Default is TRUE.
+#' @param text_size,legend_text_size,text_colour,legend_text_colour,legend_position,legend_box,legend_title_blank,panel_border,panel_border_colour,xangle Optional plotting theme overrides. Defaults are controlled by `theme_ssand()`
+#'   and can be set globally via `set_ssand_style()`.
 #'
 #' @return Plot grid of recruitment deviations
 #' @export
@@ -63,33 +64,38 @@ recdevplot <- function(data,
                        ylabels = NULL,
                        xlim = NULL,
                        ylim = NULL,
-                       xangle = NULL,
                        point_size = 1.5,
-                       text_size = 12,
                        colours = c("black","darkred"),
                        line_type = c("solid","dashed"),
                        sample = NULL,
                        scenarios = NULL,
                        scenario_labels = NULL,
                        scenario_order = NULL,
-                       financial_year = FALSE,
                        mcmc_style = "boxplot",
                        show_median = c("median_recdevs","trajectory"),
                        aggregate_scenarios = FALSE,
                        alpha = NULL,
                        line_width = 0.7,
                        hair_width = 0.5,
-                       legend_box = "horizontal",
-                       legend_position= "top",
                        band_colour = "black",
                        band_labels = NULL,
                        boxplot_outliers = TRUE,
-                       CI_range = 0.95) {
+                       CI_range = 0.95,
+                       xangle = NULL,
+                       legend_position = NULL,
+                       financial_year = FALSE,
+                       text_size = NULL,
+                       legend_text_size = NULL,
+                       text_colour = NULL,
+                       legend_text_colour = NULL,
+                       legend_box = NULL,
+                       legend_title_blank = NULL,
+                       panel_border = NULL,
+                       panel_border_colour = NULL) {
 
   # ___________________
   # Data validation
   # ___________________
-
   # Identify MCMC or MLE
   MCMC <- "med" %in% names(data)
 
@@ -113,37 +119,11 @@ recdevplot <- function(data,
   if (is.null(alpha) & mcmc_style !="banded") {alpha=0.7}
 
   # ___________________
-  # Custom to this plot
-  # ___________________
-
-  # ___________________
   # Basic plot set up
   # ___________________
-
   data <- apply_scenarios(data, scenarios, scenario_labels, scenario_order)
 
-  x_axis <- build_x_axis(x = data$xvar,
-                         xlab = xlab,
-                         xlim = xlim,
-                         xbreaks = xbreaks,
-                         xlabels = xlabels,
-                         financial_year = financial_year,
-                         show_dates_on_axis = FALSE,
-                         expand_upper = 0,
-                         xangle = xangle,
-                         is_date = FALSE)
-
-  y_axis <- build_y_axis(y = data$value,
-                         ylab = ylab,
-                         ylim = ylim,
-                         ybreaks = ybreaks,
-                         ylabels = ylabels,
-                         lower = data$lower,
-                         upper = data$upper)
-
-  p <- ggplot2::ggplot(data) + get_theme_ssand()
-  p <- add_x_scale_continuous(p, x_axis)
-  p <- add_y_scale_continuous(p, y_axis)
+  p <- ggplot2::ggplot(data)
 
   # ___________________
   # Build MLE plot
@@ -165,9 +145,10 @@ recdevplot <- function(data,
     if (mcmc_style == "banded")  p <- mcmc_banded(p, data, alpha, band_labels, band_colour)
     if (mcmc_style == "hairy")   p <- mcmc_hairy(p, data, hair_width)
     if (mcmc_style == "CI")      p <- mcmc_CI(p, data, aggregate_scenarios, CI_range, alpha)
-    if (mcmc_style == "joy")     p <- mcmc_joy(p, data, CI_range, ridge_colour, rel_min_height, alpha, ridge_scale, show_CI,
-                                               ybreaks, ylin,ylab, xlab, legend_position, text_size,xbreaks,legend_box,facet_wrap,
-                                               show_median,xlabels,ylabels)
+    # if (mcmc_style == "joy")     p <- mcmc_joy(p, data, CI_range, ridge_colour, rel_min_height, alpha, ridge_scale, show_CI,
+    #                                            ybreaks, ylin,ylab, xlab, legend_position, text_size,xbreaks,legend_box,facet_wrap,
+    #                                            show_median,xlabels,ylabels)
+
     # Add median lines
     p <- show_median_lines("recruitment deviations",p,data,show_median,line_width,colours)
   }
@@ -176,6 +157,43 @@ recdevplot <- function(data,
   # Final layers
   # ___________________
   if (facet_wrap)  p <- add_scenario_facets(p, data, scales = scales, ncol = ncol)
+
+  # ___________________
+  # Axes and theme
+  # ___________________
+  x_axis <- build_x_axis(x = data$xvar,
+                         xlab = xlab,
+                         xlim = xlim,
+                         xbreaks = xbreaks,
+                         xlabels = xlabels,
+                         financial_year = financial_year,
+                         show_dates_on_axis = FALSE,
+                         expand_upper = 0,
+                         xangle = xangle,
+                         is_date = FALSE)
+
+  y_axis <- build_y_axis(y = data$value,
+                         ylab = ylab,
+                         ylim = ylim,
+                         ybreaks = ybreaks,
+                         ylabels = ylabels,
+                         lower = data$lower,
+                         upper = data$upper)
+
+  p <- add_x_scale_continuous(p, x_axis)
+  p <- add_y_scale_continuous(p, y_axis)
+
+  p <- add_ssand_theme(p,
+                       text_size = text_size,
+                       legend_text_size = legend_text_size,
+                       text_colour = text_colour,
+                       legend_text_colour = legend_text_colour,
+                       legend_position = legend_position,
+                       legend_box = legend_box,
+                       legend_title_blank = legend_title_blank,
+                       panel_border = panel_border,
+                       panel_border_colour = panel_border_colour,
+                       xangle = x_axis$angle)
 
   return(p)
 }

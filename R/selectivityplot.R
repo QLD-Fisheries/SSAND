@@ -11,7 +11,6 @@
 #' @param selectivity_type A vector of types of selectivity information to show on the plot. Options are "Selectivity (length)", "Selectivity (age)", "Retention", "Discard mortality", "Dead", "Discard".
 #' @param xlab Label for x-axis (character). Default is "Age".
 #' @param ylab Label for y-axis (character). Default is "Carapace length (cm, beginning of year)".
-#' @param text_size Text size (num). Default is 12.
 #' @param scenarios A vector of scenario numbers to be shown on plot (numeric). This was already specified in prep file, but this is a manual override to save running the prep function again.
 #' @param scenario_labels A vector of customised scenario names (character). Default is "Scenario 1", "Scenario 2", etc.
 #' @param scenario_order A vector to reorder how scenarios are displayed (character). Use the label names defined in "scenario_labels".
@@ -31,6 +30,8 @@
 #' @param show_ribbon Set to TRUE to display 95% credible interval ribbon for MCMC results
 #' @param time_blocks Set to TRUE to show time blocks. You might want to also set selectivity_type to something relevant such as "Discard"
 #' @param years A vector of years to show. Relevant if time_blocks==TRUE.
+#' @param text_size,legend_text_size,text_colour,legend_text_colour,legend_position,legend_box,legend_title_blank,panel_border,panel_border_colour,xangle Optional plotting theme overrides. Defaults are controlled by `theme_ssand()`
+#'   and can be set globally via `set_ssand_style()`.
 #'
 #' @return Selectivity plot
 #' @export
@@ -59,11 +60,10 @@ selectivityplot <- function(data,
                             selectivity_type = "Selectivity (length)",
                             xlab = "Length (cm)",
                             ylab = "Selectivity",
-                            text_size = 12,
                             scenarios = NULL,
                             scenario_labels = NULL,
                             scenario_order = NULL,
-                            colours = NULL,
+                            colours = c("grey70",fq_palette("alisecolours")),
                             scales = 'free',
                             ncol = 2,
                             MLS = NULL,
@@ -74,7 +74,17 @@ selectivityplot <- function(data,
                             MLS_label_size = 3,
                             show_ribbon = TRUE,
                             time_blocks = FALSE,
-                            years = NULL) {
+                            years = NULL,
+                            xangle = NULL,
+                            legend_position = NULL,
+                            text_size = NULL,
+                            legend_text_size = NULL,
+                            text_colour = NULL,
+                            legend_text_colour = NULL,
+                            legend_box = NULL,
+                            legend_title_blank = NULL,
+                            panel_border = NULL,
+                            panel_border_colour = NULL) {
 
   # Identify MCMC or MLE
   MCMC <- data$scenario[1]=="Ensemble"
@@ -82,58 +92,25 @@ selectivityplot <- function(data,
   # Data input warnings
   check_data_columns(data, c("fleet","year","sex","value","type","selectivity","scenario"))
 
-
   if (missing(fleets)) {fleets <- unique(data$fleet)}
 
   if (!MCMC) {
-
     data <- data |>
       dplyr::filter(type %in% selectivity_type) |>
       dplyr::filter(fleet %in% fleets) |>
       dplyr::mutate(sex = dplyr::recode(sex, "1" = "Female" ,  "2" = "Male"))
 
-    if (!missing(scenarios)){data <- data |> dplyr::filter(scenario %in% scenarios)}
-
-    if (missing(scenario_labels)) {
-      data <- data |> dplyr::mutate(scenario_labels = as.factor(paste0("Scenario ",scenario)))
-    } else {
-      scenario.lookup<- data.frame(scenario = unique(data$scenario), scenario_labels = scenario_labels)
-      data <- data |>
-        dplyr::left_join(scenario.lookup, by = "scenario") |>
-        dplyr::mutate(scenario_labels = as.factor(scenario_labels))
-    }
-
-    if (!missing(scenario_order)) {
-      # Add on any scenarios not included in the scenario_order list
-      scenario_order = c(scenario_order, setdiff(scenario_labels, scenario_order))
-      # Reorder scenarios
-      data$scenario_labels <- factor(data$scenario_labels, levels = scenario_order)
-    }
-
-    if (missing(fleet_names)) {
-      data <- data |> dplyr::mutate(fleet_names = as.factor(paste0("Fleet ",fleet)))
-    } else {
-      fleet.lookup <- data.frame(fleet = unique(data$fleet), fleet_names = fleet_names)
-      data <- data |>
-        dplyr::left_join(fleet.lookup, by = "fleet")
-      # Reorder fleet names
-      data$fleet_names <- factor(data$fleet_names, levels = fleet_names)
-    }
-
-    if (missing(colours)) {colours = c("grey70",fq_palette("alisecolours"))}
-
+    data <- apply_scenarios(data, scenarios, scenario_labels, scenario_order)
+    data <- apply_scenarios(data, fleets=NULL, fleet_names)
 
     if(!time_blocks) {
       data <- data |> dplyr::filter(year==endyear)
 
       p <- ggplot2::ggplot(data) +
         ggplot2::geom_line(ggplot2::aes(x=value, y=selectivity, colour=type, linetype=sex)) +
-        ggplot2::theme_bw() +
         ggplot2::xlab(xlab) +
         ggplot2::ylab(ylab) +
         ggplot2::ylim(c(0,1)) +
-        ggplot2::theme(text = ggplot2::element_text(size=text_size)) +
-        ggplot2::theme(legend.position = "top", legend.title = ggplot2::element_blank()) +
         ggplot2::scale_colour_manual(values = colours)
     }
 
@@ -143,12 +120,9 @@ selectivityplot <- function(data,
 
       p <- ggplot2::ggplot(data) +
         ggplot2::geom_line(ggplot2::aes(x=value, y=selectivity, colour=year, linetype=sex)) +
-        ggplot2::theme_bw() +
         ggplot2::xlab(xlab) +
         ggplot2::ylab(ylab) +
         ggplot2::ylim(c(0,1)) +
-        ggplot2::theme(text = ggplot2::element_text(size=text_size)) +
-        ggplot2::theme(legend.position = "top", legend.title = ggplot2::element_blank()) +
         ggplot2::scale_colour_manual(values = colours)
     }
   }
@@ -157,10 +131,8 @@ selectivityplot <- function(data,
     p <- ggplot2::ggplot(data) +
       ggplot2::geom_line(ggplot2::aes(x = value, y = selectivity), colour = "grey30") +
       ggplot2::scale_fill_manual("", values="grey30") +
-      ggplot2::theme_bw() +
       ggplot2::xlab(xlab) +
-      ggplot2::ylab(ylab) +
-      ggplot2::theme(legend.position="top")
+      ggplot2::ylab(ylab)
 
     if (show_ribbon) {
       p <- p +
@@ -190,6 +162,21 @@ selectivityplot <- function(data,
     p <- p +
       ggplot2::facet_wrap(~fleet_names)
   }
+
+  # ___________________
+  # Axes and theme
+  # ___________________
+  p <- add_ssand_theme(p,
+                       text_size = text_size,
+                       legend_text_size = legend_text_size,
+                       text_colour = text_colour,
+                       legend_text_colour = legend_text_colour,
+                       legend_position = legend_position,
+                       legend_box = legend_box,
+                       legend_title_blank = legend_title_blank,
+                       panel_border = panel_border,
+                       panel_border_colour = panel_border_colour,
+                       xangle = x_axis$angle)
 
   return(p)
 }

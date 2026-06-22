@@ -11,7 +11,6 @@
 #' @param maturity_type To define the x-axis. Use "length1" or "age1", depending on what you'd like on the x-axis, if you modelled length-based maturity. Use "length2" or "age2", depending on what you'd like on the x-axis, if you modelled age-based maturity.
 #' @param xlab Label for x-axis (character). Default is "Age".
 #' @param ylab Label for y-axis (character). Default is "Carapace length (cm, beginning of year)".
-#' @param text_size Text size (num). Default is 12.
 #' @param scenarios A vector of scenario numbers to be shown on plot (numeric). This was already specified in prep file, but this is a manual override to save running the prep function again.
 #' @param scenario_labels A vector of customised scenario names (character). Default is "Scenario 1", "Scenario 2", etc.
 #' @param scenario_order A vector to reorder how scenarios are displayed (character). Use the label names defined in "scenario_labels".
@@ -20,6 +19,9 @@
 #' @param colours A vector of colours used (character).
 #' @param scales Scales for ggplot2::facet_wrap(). Default is 'free', see ?ggplot2::facet_wrap for options.
 #' @param ncol Number of columns for facet_wrap(). Default is 2.
+#' @param financial_year Set to TRUE if the assessment was based on financial year (logical). Adjusts the x-axis to show full financial year notation.
+#' @param text_size,legend_text_size,text_colour,legend_text_colour,legend_position,legend_box,legend_title_blank,panel_border,panel_border_colour,xangle Optional plotting theme overrides. Defaults are controlled by `theme_ssand()`
+#'   and can be set globally via `set_ssand_style()`.
 #'
 #' @return Maturity plot
 #' @export
@@ -34,38 +36,62 @@ maturityplot <- function(data,
                          maturity_type = "length1",
                          xlab = NULL,
                          ylab = "Maturity",
-                         text_size = 12,
                          scenarios = NULL,
                          scenario_labels = NULL,
                          scenario_order = NULL,
                          colours = c("grey70",fq_palette("alisecolours")),
                          scales = 'free',
-                         ncol = 2) {
+                         ncol = 2,
+                         xangle = NULL,
+                         legend_position = NULL,
+                         financial_year = FALSE,
+                         text_size = NULL,
+                         legend_text_size = NULL,
+                         text_colour = NULL,
+                         legend_text_colour = NULL,
+                         legend_box = NULL,
+                         legend_title_blank = NULL,
+                         panel_border = NULL,
+                         panel_border_colour = NULL) {
 
   # ___________________
   # Data validation
   # ___________________
-  # Data input warnings
   check_data_columns(data, c("value","maturity","sex","scenario","type"))
   data$xvar <- data$value
 
   # ___________________
   # Custom to this plot
   # ___________________
-
   data <- data |>
     dplyr::filter(type %in% maturity_type) |>
     dplyr::mutate(sex = dplyr::recode(sex, "1" = "Female" ,  "2" = "Male"))
 
   if (missing(xlab)) {xlab <- ifelse(maturity_type %in% c("length1","length2"),"Length (cm)", "Age (years)")}
 
-
   # ___________________
   # Basic plot set up
   # ___________________
-
   data <- apply_scenarios(data, scenarios, scenario_labels, scenario_order)
 
+  p <- ggplot2::ggplot(data)
+
+  # ___________________
+  # Build MLE plot
+  # ___________________
+  p <- p +
+    ggplot2::geom_line(ggplot2::aes(x=value, y=maturity, colour=sex)) +
+    ggplot2::geom_point(ggplot2::aes(x=value, y=maturity, colour=sex)) +
+    ggplot2::scale_colour_manual(values = colours)
+
+  # ___________________
+  # Final layers
+  # ___________________
+  p <- add_scenario_facets(p, data, scales = scales, ncol = ncol)
+
+  # ___________________
+  # Axes and theme
+  # ___________________
   x_axis <- build_x_axis(x = data$xvar,
                          xlab = xlab,
                          xlim = xlim,
@@ -84,25 +110,20 @@ maturityplot <- function(data,
                          lower = 0,
                          upper = 1)
 
-
-  p <- ggplot2::ggplot(data) + get_theme_ssand()
   p <- add_x_scale_continuous(p, x_axis)
   p <- add_y_scale_continuous(p, y_axis)
 
-  # ___________________
-  # Build MLE plot
-  # ___________________
-
-  p <- p +
-    ggplot2::geom_line(ggplot2::aes(x=value, y=maturity, colour=sex)) +
-    ggplot2::geom_point(ggplot2::aes(x=value, y=maturity, colour=sex)) +
-    ggplot2::scale_colour_manual(values = colours)
-
-  # ___________________
-  # Final layers
-  # ___________________
-
-  p <- add_scenario_facets(p, data, scales = scales, ncol = ncol)
+  p <- add_ssand_theme(p,
+                       text_size = text_size,
+                       legend_text_size = legend_text_size,
+                       text_colour = text_colour,
+                       legend_text_colour = legend_text_colour,
+                       legend_position = legend_position,
+                       legend_box = legend_box,
+                       legend_title_blank = legend_title_blank,
+                       panel_border = panel_border,
+                       panel_border_colour = panel_border_colour,
+                       xangle = x_axis$angle)
 
   return(p)
 }

@@ -10,7 +10,6 @@
 #' @param data Output from yieldplot_prep() with columns Final_bio (num), yield (num), data (chr), scenario (fac)
 #' @param xlab Label for x-axis (character). Default is "Biomass (relative)".
 #' @param ylab Label for y-axis (character). Default is "Equilibrium dead catch (t)".
-#' @param text_size Text size (num). Default is 12.
 #' @param show_current_line Set to TRUE to include a line on the plot showing where the current fishing pressure sits (logical).
 #' @param show_msy_line Set to TRUE to include a line that shows MSY (logical).
 #' @param scenarios A vector of scenario numbers to be shown on plot (numeric). This was already specified in prep file, but this is a manual override to save running the prep function again.
@@ -20,6 +19,8 @@
 #' Any scenarios not included in "scenario_order" will be tacked on in the order they appear in the input data.
 #' @param scales Scales for ggplot2::facet_wrap(). Default is 'free', see ?ggplot2::facet_wrap for options.
 #' @param ncol Number of columns for facet_wrap(). Default is 2.
+#' @param text_size,legend_text_size,text_colour,legend_text_colour,legend_position,legend_box,legend_title_blank,panel_border,panel_border_colour,xangle Optional plotting theme overrides. Defaults are controlled by `theme_ssand()`
+#'   and can be set globally via `set_ssand_style()`.
 #'
 #' @return Plot of spawning biomass vs equilibrium catch
 #' @export
@@ -30,14 +31,23 @@
 yieldplot <- function(data,
                       xlab = "Biomass (relative)",
                       ylab = "Equilibrium dead catch (t)",
-                      text_size = 12,
                       show_current_line = TRUE,
                       show_msy_line = FALSE,
                       scenarios = NULL,
                       scenario_labels = NULL,
                       scenario_order = NULL,
                       scales = 'free',
-                      ncol = 2) {
+                      ncol = 2,
+                      xangle = NULL,
+                      legend_position = NULL,
+                      text_size = NULL,
+                      legend_text_size = NULL,
+                      text_colour = NULL,
+                      legend_text_colour = NULL,
+                      legend_box = NULL,
+                      legend_title_blank = NULL,
+                      panel_border = NULL,
+                      panel_border_colour = NULL) {
 
   # Data input warnings
   check_data_columns(data, c("Final_bio","yield","data","scenario"))
@@ -93,18 +103,27 @@ yieldplot <- function(data,
       ggplot2::geom_line(ggplot2::aes(x=Final_bio, y=yield))
   }
   p <- p +
-    get_theme_ssand() +
     ggplot2::xlab(xlab) +
     ggplot2::ylab(ylab) +
     ggplot2::scale_x_continuous(breaks = c(0,0.2, 0.4, 0.6, 0.8, 1.0), limits=c(0,1.01)) +
-    ggplot2::scale_y_continuous(limits=c(0,NA)) +
-    ggplot2::theme(legend.title = ggplot2::element_blank(),
-                   legend.position = "top",
-                   legend.background = ggplot2::element_blank(),
-                   legend.text = ggplot2::element_text(size=text_size)) +
-    ggplot2::theme(text = ggplot2::element_text(size=text_size))
+    ggplot2::scale_y_continuous(limits=c(0,NA))
 
   p <- add_scenario_facets(p, data, scales = scales, ncol = ncol)
+
+  # ___________________
+  # Axes and theme
+  # ___________________
+  p <- add_ssand_theme(p,
+                       text_size = text_size,
+                       legend_text_size = legend_text_size,
+                       text_colour = text_colour,
+                       legend_text_colour = legend_text_colour,
+                       legend_position = legend_position,
+                       legend_box = legend_box,
+                       legend_title_blank = legend_title_blank,
+                       panel_border = panel_border,
+                       panel_border_colour = panel_border_colour,
+                       xangle = x_axis$angle)
 
   return(p)
 

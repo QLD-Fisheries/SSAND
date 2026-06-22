@@ -17,6 +17,9 @@
 #' @param scenario_order A vector to reorder how scenarios are displayed (character). Use the label names defined in "scenario_labels".
 #' If "scenario_labels" is left blank, the labels will be "Scenario 1", "Scenario 2" etc.
 #' Any scenarios not included in "scenario_order" will be tacked on in the order they appear in the input data.
+#' @param financial_year Set to TRUE if the assessment was based on financial year (logical). Adjusts the x-axis to show full financial year notation.
+#' @param text_size,legend_text_size,text_colour,legend_text_colour,legend_position,legend_box,legend_title_blank,panel_border,panel_border_colour,xangle Optional plotting theme overrides. Defaults are controlled by `theme_ssand()`
+#'   and can be set globally via `set_ssand_style()`.
 #'
 #' @return A plot of R-hat values for parameter estimates
 #' @export
@@ -32,15 +35,24 @@ mcmc_rhatplot <- function(data,
                           show_point = FALSE,
                           scenarios = NULL,
                           scenario_labels = NULL,
-                          scenario_order = NULL
+                          scenario_order = NULL,
+                          xangle = NULL,
+                          legend_position = NULL,
+                          financial_year = FALSE,
+                          text_size = NULL,
+                          legend_text_size = NULL,
+                          text_colour = NULL,
+                          legend_text_colour = NULL,
+                          legend_box = NULL,
+                          legend_title_blank = NULL,
+                          panel_border = NULL,
+                          panel_border_colour = NULL
                           ) {
 
   # Data input warnings
   check_data_columns(data, c("parameter","Rhat","scenario","group","xmax"))
 
-
   data <- apply_scenarios(data, scenarios, scenario_labels, scenario_order)
-
 
   if(!show_point) {
     p <- ggplot2::ggplot(data) +
@@ -64,13 +76,25 @@ mcmc_rhatplot <- function(data,
                                           expression(hat(R) > 1.1)),
                                values = c("#b4d9eb", "#4facda", "#136993")) +
     ggplot2::xlab(expression(hat(R))) +
-    ggplot2::ylab(ylab) +
-    get_theme_ssand() +
-    ggplot2::theme(legend.position = 'top') +
-    ggplot2::theme(legend.title = ggplot2::element_blank())
+    ggplot2::ylab(ylab)
 
   if (!missing(parameter_labels)){
     p = p + ggplot2::scale_y_discrete(labels= parameter_labels)
   }
+
+  # ___________________
+  # Axes and theme
+  # ___________________
+  p <- add_ssand_theme(p,
+                       text_size = text_size,
+                       legend_text_size = legend_text_size,
+                       text_colour = text_colour,
+                       legend_text_colour = legend_text_colour,
+                       legend_position = legend_position,
+                       legend_box = legend_box,
+                       legend_title_blank = legend_title_blank,
+                       panel_border = panel_border,
+                       panel_border_colour = panel_border_colour,
+                       xangle = x_axis$angle)
   return(p)
 }

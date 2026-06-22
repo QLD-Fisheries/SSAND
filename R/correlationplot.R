@@ -13,6 +13,8 @@
 #' @param colours A vector of colours used (character).
 #' @param sample Number of samples to plot from each MCMC chain to ease burden of rendering dense plots (numeric).
 #' @param columns A vector of columns to display on plot (character).
+#' @param text_size,legend_text_size,text_colour,legend_text_colour,legend_position,legend_box,legend_title_blank,panel_border,panel_border_colour,xangle Optional plotting theme overrides. Defaults are controlled by `theme_ssand()`
+#'   and can be set globally via `set_ssand_style()`.
 #'
 #' @return Correlation plot
 #' @export
@@ -26,7 +28,17 @@ correlationplot <- function(data,
                             show_diagonal = FALSE,
                             columns = NULL,
                             colours = NULL,
-                            sample = NULL){
+                            sample = NULL,
+                            xangle = NULL,
+                            legend_position = NULL,
+                            text_size = NULL,
+                            legend_text_size = NULL,
+                            text_colour = NULL,
+                            legend_text_colour = NULL,
+                            legend_box = NULL,
+                            legend_title_blank = NULL,
+                            panel_border = NULL,
+                            panel_border_colour = NULL){
 
 
   MCMC <- data$MCMC[1]
@@ -42,9 +54,7 @@ correlationplot <- function(data,
       ggplot2::ylab('')+
       ggplot2::xlab('')+
       ggplot2::labs(fill="Correlation")+
-      get_theme_ssand() +
       ggplot2::geom_text(ggplot2::aes(label=round(value,2)), colour = 'grey30')
-
 
     if (!missing(labels)) {
       p <- p +
@@ -73,7 +83,6 @@ correlationplot <- function(data,
                            columns = columns,
                            ggplot2::aes(col=chain),
                            labeller = "label_parsed") +
-        get_theme_ssand() +
         ggplot2::scale_colour_manual(values=colours) +
         ggplot2::scale_fill_manual(values=colours)
     } else {
@@ -84,9 +93,23 @@ correlationplot <- function(data,
                            diag = NULL,
                            ggplot2::aes(col=chain),
                            labeller = "label_parsed") +
-        get_theme_ssand() +
         ggplot2::scale_colour_manual(values=colours)
     }
   }
+
+  # ___________________
+  # Axes and theme
+  # ___________________
+  p <- add_ssand_theme(p,
+                       text_size = text_size,
+                       legend_text_size = legend_text_size,
+                       text_colour = text_colour,
+                       legend_text_colour = legend_text_colour,
+                       legend_position = legend_position,
+                       legend_box = legend_box,
+                       legend_title_blank = legend_title_blank,
+                       panel_border = panel_border,
+                       panel_border_colour = panel_border_colour,
+                       xangle = x_axis$angle)
   return(p)
 }

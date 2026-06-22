@@ -16,25 +16,34 @@ recdevplot(
   ylabels = NULL,
   xlim = NULL,
   ylim = NULL,
-  xangle = NULL,
   point_size = 1.5,
-  text_size = 12,
   colours = c("black", "darkred"),
   line_type = c("solid", "dashed"),
+  sample = NULL,
   scenarios = NULL,
   scenario_labels = NULL,
   scenario_order = NULL,
-  financial_year = FALSE,
   mcmc_style = "boxplot",
   show_median = c("median_recdevs", "trajectory"),
   aggregate_scenarios = FALSE,
-  alpha = 0.7,
+  alpha = NULL,
   line_width = 0.7,
   hair_width = 0.5,
-  legend_box = "horizontal",
-  legend_position = "top",
   band_colour = "black",
-  boxplot_outliers = TRUE
+  band_labels = NULL,
+  boxplot_outliers = TRUE,
+  CI_range = 0.95,
+  xangle = NULL,
+  legend_position = NULL,
+  financial_year = FALSE,
+  text_size = NULL,
+  legend_text_size = NULL,
+  text_colour = NULL,
+  legend_text_colour = NULL,
+  legend_box = NULL,
+  legend_title_blank = NULL,
+  panel_border = NULL,
+  panel_border_colour = NULL
 )
 }
 \arguments{
@@ -62,11 +71,7 @@ For MCMC, a dataframe with variables called rownum (num), scenario (int), year (
 
 \item{ylim}{A vector of lower and upper y-axis limits (e.g. c(0,1)) (numeric).}
 
-\item{xangle}{Set to 90 to rotate x-axis labels 90 degrees.}
-
 \item{point_size}{Size of points used in ggplot2::geom_line(). Default is 1.5.}
-
-\item{text_size}{Text size (num). Default is 12.}
 
 \item{colours}{A vector of colours used (character).}
 
@@ -80,8 +85,6 @@ For MCMC, a dataframe with variables called rownum (num), scenario (int), year (
 If "scenario_labels" is left blank, the labels will be "Scenario 1", "Scenario 2" etc.
 Any scenarios not included in "scenario_order" will be tacked on in the order they appear in the input data.}
 
-\item{financial_year}{Set to TRUE if the assessment was based on financial year (logical). Adjusts the x-axis to show full financial year notation.}
-
 \item{mcmc_style}{The type of MCMC plot to be displayed (character). Options are "banded", "hairy", "boxplot" and "CI", the default is "banded". Only one option can be selected.}
 
 \item{show_median}{Logical, TRUE to show median line}
@@ -94,13 +97,22 @@ Any scenarios not included in "scenario_order" will be tacked on in the order th
 
 \item{hair_width}{Width of fine MCMC hairs (numeric). Default is 0.5.}
 
-\item{legend_box}{Display option for legend (character). Choose "vertical" to stack legend types vertically, or "horizontal" to keep legends in one row.}
-
-\item{legend_position}{Position of the legend ("none", "left", "right", "bottom", "top", or two-element numeric vector for x and y position). Default is "top".}
-
 \item{band_colour}{Colour of bands (character). Only used when mcmc_style=="banded". Input one colour, bands will be distinguished using an alpha.}
 
 \item{boxplot_outliers}{Set to FALSE to remove outlier points from boxplot. Default is TRUE.}
+
+\item{xangle}{Set to 90 to rotate x-axis labels 90 degrees.}
+
+\item{legend_position}{Position of the legend ("none", "left", "right", "bottom", "top", or two-element numeric vector for x and y position). Default is "top".}
+
+\item{financial_year}{Set to TRUE if the assessment was based on financial year (logical). Adjusts the x-axis to show full financial year notation.}
+
+\item{text_size}{Text size (num). Default is 12.}
+
+\item{legend_box}{Display option for legend (character). Choose "vertical" to stack legend types vertically, or "horizontal" to keep legends in one row.}
+
+\item{text_size, legend_text_size, text_colour, legend_text_colour, legend_position, legend_box, legend_title_blank, panel_border, panel_border_colour, xangle}{Optional plotting theme overrides. Defaults are controlled by \code{theme_ssand()}
+and can be set globally via \code{set_ssand_style()}.}
 }
 \value{
 Plot grid of recruitment deviations

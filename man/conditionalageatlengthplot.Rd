@@ -9,15 +9,24 @@ conditionalageatlengthplot(
   show_fits = TRUE,
   xlab = "Age (years)",
   ylab = "Length (cm)",
-  legend_position = "top",
   size_breaks = c(0.01, 0.25, 0.5),
   size_range = c(0.01, 6),
   fleet = 1,
   ylim = c(NA, NA),
   xlim = c(NA, NA),
-  text_size = 12,
   ncol = 3,
-  colours = fq_palette("alisecolours")[c(2, 10)]
+  colours = fq_palette("alisecolours")[c(2, 10)],
+  xangle = NULL,
+  legend_position = NULL,
+  financial_year = FALSE,
+  text_size = NULL,
+  legend_text_size = NULL,
+  text_colour = NULL,
+  legend_text_colour = NULL,
+  legend_box = NULL,
+  legend_title_blank = NULL,
+  panel_border = NULL,
+  panel_border_colour = NULL
 )
 }
 \arguments{
@@ -29,8 +38,6 @@ conditionalageatlengthplot(
 
 \item{ylab}{Label for y-axis (character). Default is "Spawning biomass (relative)".}
 
-\item{legend_position}{Position of the legend ("none", "left", "right", "bottom", "top", or two-element numeric vector for x and y position). Default is "top".}
-
 \item{size_breaks}{Breaks of size scale for bubbles}
 
 \item{size_range}{Range of size scale for bubbles}
@@ -41,11 +48,16 @@ conditionalageatlengthplot(
 
 \item{xlim}{A vector of lower and upper x-axis limits (e.g. c(1950, 2020)) (numeric).}
 
-\item{text_size}{Text size (num). Default is 12.}
-
 \item{ncol}{Number of columns for facet_wrap(). Default is 3.}
 
 \item{colours}{A vector of colours used (character).}
+
+\item{legend_position}{Position of the legend ("none", "left", "right", "bottom", "top", or two-element numeric vector for x and y position). Default is "top".}
+
+\item{text_size}{Text size (num). Default is 12.}
+
+\item{text_size, legend_text_size, text_colour, legend_text_colour, legend_position, legend_box, legend_title_blank, panel_border, panel_border_colour, xangle}{Optional plotting theme overrides. Defaults are controlled by \code{theme_ssand()}
+and can be set globally via \code{set_ssand_style()}.}
 }
 \value{
 Conditional age-at-length plot

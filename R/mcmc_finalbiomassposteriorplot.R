@@ -11,15 +11,17 @@
 #' @param colours A vector of colours used (character).
 #' @param xlab Label for x-axis (character). Default is "".
 #' @param ylab Label for y-axis (character). Default is "".
-#' @param legend_position Position of the legend ("none", "left", "right", "bottom", "top", or two-element numeric vector for x and y position). Default is "top".
 #' @param line_type Linetype for vertical lines. Default is "dashed".
 #' @param line_type_label Label for linetype legend. Default is "X% falls within this range" where X is the credible_interval specified in the input data.
 #' @param CI_label_position Specify position for labels for 95% confidence interval percentages. Default "bottom", alternatives are "top" or "none".
 #' @param show_median Default is TRUE. Set to FALSE to remove median line.
 #' @param annotation_text_size Size of annotation text (e.g. median and CI). Default is 5.
-#' @param legend_text_size Size of legend text. Default is 11.5.
 #' @param axis_title_size Sie of axis title. Default is 13.
 #' @param axis_text_size Size of axis text. Default is 12.
+#' @param financial_year Set to TRUE if the assessment was based on financial year (logical). Adjusts the x-axis to show full financial year notation.
+#' @param text_size,legend_text_size,text_colour,legend_text_colour,legend_position,legend_box,legend_title_blank,panel_border,panel_border_colour,xangle Optional plotting theme overrides. Defaults are controlled by `theme_ssand()`
+#'   and can be set globally via `set_ssand_style()`.
+#'
 #' @return A posterior plot for final biomass ratio with risk area (below B20) highlighted
 #' @export
 #'
@@ -31,15 +33,25 @@ mcmc_finalbiomassposteriorplot <- function (data,
                                             colours = c("#AD3D25","#FCC17E","#0085B8","#00925B"),
                                             xlab = NULL,
                                             ylab = NULL,
-                                            legend_position = "top",
                                             CI_label_position = "bottom",
                                             line_type = NULL,
                                             line_type_label = NULL,
                                             show_median = TRUE,
                                             annotation_text_size = 5,
-                                            legend_text_size = 11.5,
+                                            legend_text_size = 11.5, #
                                             axis_title_size = 13,
-                                            axis_text_size = 12
+                                            axis_text_size = 12,
+                                            xangle = NULL,
+                                            legend_position = NULL,
+                                            financial_year = FALSE,
+                                            text_size = NULL,
+                                            # legend_text_size = NULL,
+                                            text_colour = NULL,
+                                            legend_text_colour = NULL,
+                                            legend_box = NULL,
+                                            legend_title_blank = NULL,
+                                            panel_border = NULL,
+                                            panel_border_colour = NULL
 ) {
 
   density <- data$density
@@ -91,7 +103,6 @@ mcmc_finalbiomassposteriorplot <- function (data,
   }
 
   p <- ggplot2::ggplot() +
-    get_theme_ssand() +
     ggplot2::geom_area(data=density |> dplyr::filter(x<=20), ggplot2::aes(x=x,y=y,fill=fill)) +
     ggplot2::geom_area(data=density |> dplyr::filter(x>=20 & x<=40), ggplot2::aes(x=x,y=y,fill=fill)) +
     ggplot2::geom_area(data=density |> dplyr::filter(x>=40 & x<=60), ggplot2::aes(x=x,y=y,fill=fill)) +
@@ -120,18 +131,12 @@ mcmc_finalbiomassposteriorplot <- function (data,
                                ),
                                values=colours)+
     ggplot2::scale_linetype_manual(name="",values=line_type, labels = line_type_label) +
-    ggplot2::theme(legend.position = legend_position,
-                   panel.grid.minor.x = ggplot2::element_blank(),
-                   legend.text = ggplot2::element_text(size = legend_text_size),
-                   axis.title.x = ggplot2::element_text(size = axis_title_size),
-                   axis.text.x = ggplot2::element_text(size = axis_text_size)) +
+
     ggplot2::xlab(xlab) +
     ggplot2::ylab(ylab) +
     ggplot2::scale_x_continuous(limits = limits,
                                 breaks = breaks,
-                                labels = labels) +
-    ggplot2::theme(axis.ticks.y=ggplot2::element_blank(),axis.text.y=ggplot2::element_blank()) +
-    ggplot2::theme(legend.box="vertical", legend.margin=ggplot2::margin())
+                                labels = labels)
 
   if (CI_label_position=="top"){
     labs <- data.frame(x = c(quant_lower, quant_upper),
@@ -145,6 +150,33 @@ mcmc_finalbiomassposteriorplot <- function (data,
   # Reorder legends so fill is on top
   p <- p +
     ggplot2::guides(fill = ggplot2::guide_legend(order = 1), linetype = ggplot2::guide_legend(order = 2))
+
+  # ___________________
+  # Axes and theme
+  # ___________________
+  p <- add_ssand_theme(p,
+                       text_size = text_size,
+                       legend_text_size = legend_text_size,
+                       text_colour = text_colour,
+                       legend_text_colour = legend_text_colour,
+                       legend_position = legend_position,
+                       legend_box = legend_box,
+                       legend_title_blank = legend_title_blank,
+                       panel_border = panel_border,
+                       panel_border_colour = panel_border_colour,
+                       xangle = x_axis$angle)
+
+  p <- p +
+    ggplot2::theme(
+      panel.grid.minor.x = ggplot2::element_blank(),
+      # legend.position = legend_position,
+      # legend.text = ggplot2::element_text(size = legend_text_size),
+      # axis.title.x = ggplot2::element_text(size = axis_title_size),
+      # axis.text.x = ggplot2::element_text(size = axis_text_size),
+      axis.ticks.y=ggplot2::element_blank(),
+      axis.text.y=ggplot2::element_blank(),
+      legend.box="vertical",
+      legend.margin=ggplot2::margin())
 
   return(p)
 }

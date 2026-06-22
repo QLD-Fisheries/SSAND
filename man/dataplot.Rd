@@ -12,9 +12,7 @@ dataplot(
   xlabels = NULL,
   xlim = NULL,
   ylim = NULL,
-  xangle = NULL,
-  financial_year = FALSE,
-  colours = NULL,
+  colours = fq_palette("alisecolours"),
   size_range = c(0.5, 5),
   scenarios = 1,
   scenario_labels = NULL,
@@ -22,7 +20,18 @@ dataplot(
   scales = "free",
   ncol = 2,
   fleet_names = NULL,
-  hollow = TRUE
+  hollow = TRUE,
+  xangle = NULL,
+  legend_position = NULL,
+  financial_year = FALSE,
+  text_size = NULL,
+  legend_text_size = NULL,
+  text_colour = NULL,
+  legend_text_colour = NULL,
+  legend_box = NULL,
+  legend_title_blank = NULL,
+  panel_border = NULL,
+  panel_border_colour = NULL
 )
 }
 \arguments{
@@ -39,10 +48,6 @@ dataplot(
 \item{xlim}{A vector of lower and upper x-axis limits (e.g. c(1950, 2020)) (numeric).}
 
 \item{ylim}{A vector of lower and upper y-axis limits (e.g. c(0,1)) (numeric).}
-
-\item{xangle}{Set to 90 to rotate x-axis labels 90 degrees.}
-
-\item{financial_year}{Set to TRUE if the assessment was based on financial year (logical). Adjusts the x-axis to show full financial year notation.}
 
 \item{colours}{A vector of colours used (character).}
 
@@ -63,6 +68,13 @@ Any scenarios not included in "scenario_order" will be tacked on in the order th
 \item{fleet_names}{A vector of customised fleet names for legend}
 
 \item{hollow}{A logitcal to switch between two colouring styles. Default is TRUE.}
+
+\item{xangle}{Set to 90 to rotate x-axis labels 90 degrees.}
+
+\item{financial_year}{Set to TRUE if the assessment was based on financial year (logical). Adjusts the x-axis to show full financial year notation.}
+
+\item{text_size, legend_text_size, text_colour, legend_text_colour, legend_position, legend_box, legend_title_blank, panel_border, panel_border_colour, xangle}{Optional plotting theme overrides. Defaults are controlled by \code{theme_ssand()}
+and can be set globally via \code{set_ssand_style()}.}
 }
 \value{
 A plot of data used in model

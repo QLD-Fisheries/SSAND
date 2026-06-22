@@ -15,7 +15,18 @@ caal_agefitplot(
   point_size = 1.5,
   xlab = "Age (years)",
   ylab = "Proportion",
-  show_fits = TRUE
+  show_fits = TRUE,
+  xangle = NULL,
+  legend_position = NULL,
+  financial_year = FALSE,
+  text_size = NULL,
+  legend_text_size = NULL,
+  text_colour = NULL,
+  legend_text_colour = NULL,
+  legend_box = NULL,
+  legend_title_blank = NULL,
+  panel_border = NULL,
+  panel_border_colour = NULL
 )
 }
 \arguments{
@@ -41,6 +52,9 @@ caal_agefitplot(
 
 \item{show_fits}{Set to TRUE to show model fits. Set to FALSE to show model 'inputs'.
 When TRUE, the input data are transformed into proportions rather than absolute values.}
+
+\item{text_size, legend_text_size, text_colour, legend_text_colour, legend_position, legend_box, legend_title_blank, panel_border, panel_border_colour, xangle}{Optional plotting theme overrides. Defaults are controlled by \code{theme_ssand()}
+and can be set globally via \code{set_ssand_style()}.}
 }
 \value{
 A plot of age fits from conditional-age-at-length data

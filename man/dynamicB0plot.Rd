@@ -15,9 +15,6 @@ dynamicB0plot(
   ylabels = NULL,
   xlim = NULL,
   ylim = NULL,
-  xangle = NULL,
-  financial_year = FALSE,
-  text_size = 12,
   colours = c("black", "grey40"),
   linetype = c("solid", "dashed"),
   scales = "free",
@@ -25,8 +22,18 @@ dynamicB0plot(
   scenarios = NULL,
   scenario_labels = NULL,
   scenario_order = NULL,
-  legend_position = "top",
-  line_width = 0.7
+  line_width = 0.7,
+  xangle = NULL,
+  legend_position = NULL,
+  financial_year = FALSE,
+  text_size = NULL,
+  legend_text_size = NULL,
+  text_colour = NULL,
+  legend_text_colour = NULL,
+  legend_box = NULL,
+  legend_title_blank = NULL,
+  panel_border = NULL,
+  panel_border_colour = NULL
 )
 }
 \arguments{
@@ -50,12 +57,6 @@ dynamicB0plot(
 
 \item{ylim}{A vector of lower and upper y-axis limits (e.g. c(0,1)) (numeric).}
 
-\item{xangle}{Set to 90 to rotate x-axis labels 90 degrees.}
-
-\item{financial_year}{Set to TRUE if the assessment was based on financial year (logical). Adjusts the x-axis to show full financial year notation.}
-
-\item{text_size}{Text size (num). Default is 12.}
-
 \item{colours}{A vector of colours used (character).}
 
 \item{linetype}{A vector of linetypes used (character)}
@@ -72,9 +73,18 @@ dynamicB0plot(
 If "scenario_labels" is left blank, the labels will be "Scenario 1", "Scenario 2" etc.
 Any scenarios not included in "scenario_order" will be tacked on in the order they appear in the input data.}
 
+\item{line_width}{Width of lines. Default is 0.7.}
+
+\item{xangle}{Set to 90 to rotate x-axis labels 90 degrees.}
+
 \item{legend_position}{Position of the legend ("none", "left", "right", "bottom", "top", or two-element numeric vector for x and y position). Default is "top".}
 
-\item{line_width}{Width of lines. Default is 0.7.}
+\item{financial_year}{Set to TRUE if the assessment was based on financial year (logical). Adjusts the x-axis to show full financial year notation.}
+
+\item{text_size}{Text size (num). Default is 12.}
+
+\item{text_size, legend_text_size, text_colour, legend_text_colour, legend_position, legend_box, legend_title_blank, panel_border, panel_border_colour, xangle}{Optional plotting theme overrides. Defaults are controlled by \code{theme_ssand()}
+and can be set globally via \code{set_ssand_style()}.}
 }
 \value{
 A dynamic B0 plot to show the effect of fishing

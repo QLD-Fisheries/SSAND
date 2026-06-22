@@ -20,12 +20,20 @@ discardplot(
   ylim = NULL,
   xlabels = NULL,
   ylabels = NULL,
-  xangle = NULL,
-  financial_year = FALSE,
-  text_size = 12,
   point_size = 1.5,
   show_dates_on_axis = FALSE,
-  colours = NULL
+  colours = c("black", fq_palette("alisecolours")),
+  xangle = NULL,
+  legend_position = NULL,
+  financial_year = FALSE,
+  text_size = NULL,
+  legend_text_size = NULL,
+  text_colour = NULL,
+  legend_text_colour = NULL,
+  legend_box = NULL,
+  legend_title_blank = NULL,
+  panel_border = NULL,
+  panel_border_colour = NULL
 )
 }
 \arguments{
@@ -61,17 +69,20 @@ Any scenarios not included in "scenario_order" will be tacked on in the order th
 
 \item{ylabels}{A vector of labels for the y-axis breaks.}
 
+\item{point_size}{Size of points used in ggplot2::geom_point(). Default is 1.5.}
+
+\item{show_dates_on_axis}{Set to TRUE to show full dates on x-axis as opposed to years.}
+
+\item{colours}{A vector of colours used (character).}
+
 \item{xangle}{Set to 90 to rotate x-axis labels 90 degrees.}
 
 \item{financial_year}{Set to TRUE if the assessment was based on financial year (logical). Adjusts the x-axis to show full financial year notation.}
 
 \item{text_size}{Text size (num). Default is 12.}
 
-\item{point_size}{Size of points used in ggplot2::geom_point(). Default is 1.5.}
-
-\item{show_dates_on_axis}{Set to TRUE to show full dates on x-axis as opposed to years.}
-
-\item{colours}{A vector of colours used (character).}
+\item{text_size, legend_text_size, text_colour, legend_text_colour, legend_position, legend_box, legend_title_blank, panel_border, panel_border_colour, xangle}{Optional plotting theme overrides. Defaults are controlled by \code{theme_ssand()}
+and can be set globally via \code{set_ssand_style()}.}
 }
 \value{
 Discard plot

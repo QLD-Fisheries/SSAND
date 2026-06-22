@@ -16,7 +16,8 @@
 #' @param colours A vector of colours used (character).
 #' @param shapes A vector of shapes used (character).
 #' @param fleet_names A vector of customised fleet names for legend (character).
-#' @param legend_position Position of the legend ("none", "left", "right", "bottom", "top", or two-element numeric vector for x and y position). Default is "top".
+#' @param text_size,legend_text_size,text_colour,legend_text_colour,legend_position,legend_box,legend_title_blank,panel_border,panel_border_colour,xangle Optional plotting theme overrides. Defaults are controlled by `theme_ssand()`
+#'   and can be set globally via `set_ssand_style()`.
 #'
 #' @return Piner plot, a fleet based likelihood plot
 #' @export
@@ -48,16 +49,21 @@ pinerplot <- function(data,
                       colours = SSAND::fq_palette("alisecolours"),
                       shapes = c(16,17,18,15,1,2,5,0,19,20,3,4,7,8,9,10,11,12,13,14),
                       fleet_names = NULL,
-                      legend_position = "top"
-) {
+                      xangle = NULL,
+                      legend_position = NULL,
+                      text_size = NULL,
+                      legend_text_size = NULL,
+                      text_colour = NULL,
+                      legend_text_colour = NULL,
+                      legend_box = NULL,
+                      legend_title_blank = NULL,
+                      panel_border = NULL,
+                      panel_border_colour = NULL) {
 
   # Data input warnings
   check_data_columns(data, c("x_vector","fleet","likelihood"))
 
-
-  if (missing(xlab)) {
-    xlab = expression(log(italic(R)[0]))
-  }
+  if (missing(xlab)) xlab = expression(log(italic(R)[0]))
 
   if (missing(xlim)) {
     xlim <- c(
@@ -66,12 +72,9 @@ pinerplot <- function(data,
     )
   }
 
-  if (missing(ylim)) {
-    ylim <- c(0,max(data$likelihood))
-  }
+  if (missing(ylim)) ylim <- c(0,max(data$likelihood))
 
   p <- ggplot2::ggplot(data) +
-    get_theme_ssand() +
     ggplot2::geom_line(ggplot2::aes(x=x_vector,
                                     y=likelihood,
                                     colour=fleet)) +
@@ -87,8 +90,21 @@ pinerplot <- function(data,
     ggplot2::scale_colour_manual(name="Fleet",
                                  values=colours) +
     ggplot2::scale_shape_manual(name="Fleet",
-                                values=shapes) +
-    ggplot2::theme(legend.position = legend_position)
+                                values=shapes)
 
+  # ___________________
+  # Axes and theme
+  # ___________________
+  p <- add_ssand_theme(p,
+                       text_size = text_size,
+                       legend_text_size = legend_text_size,
+                       text_colour = text_colour,
+                       legend_text_colour = legend_text_colour,
+                       legend_position = legend_position,
+                       legend_box = legend_box,
+                       legend_title_blank = legend_title_blank,
+                       panel_border = panel_border,
+                       panel_border_colour = panel_border_colour,
+                       xangle = x_axis$angle)
   return(p)
 }

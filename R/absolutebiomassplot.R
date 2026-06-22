@@ -25,15 +25,12 @@
 #' @param ylim A vector of lower and upper y-axis limits (e.g. c(0,1)) (numeric).
 #' @param xlabels A vector of labels for the x-axis breaks.
 #' @param ylabels A vector of labels for the y-axis breaks.
-#' @param xangle Set to 90 to rotate x-axis labels 90 degrees.
 #' @param show_colour Set to TRUE to activate coloured mode, or FALSE for greyscale (logical).
 #' @param show_CI_ribbon Set to TRUE to show a confidence interval ribbon (logical).
 #' @param show_error_bar Set to TRUE to include error bar (logical). If wanting to use confidence interval lines with error bars use make error_bar = FALSE
 #' @param show_negative Set to TRUE to allow confidence interval to be less than zero (logical).
 #' @param point_size Size of points used in ggplot2::geom_line(). Default is 1.5.
-#' @param text_size Text size (num). Default is 12.
 #' @param colours A vector of colours used (character).
-#' @param legend_position Position of the legend ("none", "left", "right", "bottom", "top", or two-element numeric vector for x and y position). Default is "top".
 #' @param ncol Number of columns for facet_wrap(). Default is 2.
 #' @param scales Scales for ggplot2::facet_wrap(). Default is 'free', see ?ggplot2::facet_wrap for options.
 #' @param financial_year Set to TRUE if the assessment was based on financial year (logical). Adds 1 to each year in the dataset.
@@ -46,7 +43,6 @@
 #' @param show_median Type of median shown. Default "annual_biomass" shows the median of each year,
 #' "trajectory" shows median trajectory based on biomass in final year,
 #' @param mcmc_style The type of MCMC plot to be displayed (character). Options are "banded", "hairy", "boxplot", "CI" and "joy", the default is "banded". Only one option can be selected.
-#' @param legend_box Display option for legend (character). Choose "vertical" to stack legend types vertically, or "horizontal" to keep legends in one row.
 #' @param show_observed_error Set to TRUE to display error bars around input data (MCMC only)
 #' @param line_width Width of median lines (numeric). Default is 1.
 #' @param hair_width Width of fine MCMC hairs (numeric). Default is 0.5.
@@ -56,6 +52,8 @@
 #' @param CI_range Specify credible interval range (numeric). Only activated if mcmc_style==CI.
 #' @param alpha Transparency for range (numeric) used in ggplot2::geom_density_ridges(). Default is 0.7.
 #' @param boxplot_outliers Set to FALSE to remove outlier points from boxplot. Default is TRUE.
+#' @param text_size,legend_text_size,text_colour,legend_text_colour,legend_position,legend_box,legend_title_blank,panel_border,panel_border_colour,xangle Optional plotting theme overrides. Defaults are controlled by `theme_ssand()`
+#'   and can be set globally via `set_ssand_style()`.
 #'
 #' @return A plot that shows input data and model fits to CPUE data
 #' @export
@@ -84,17 +82,13 @@ absolutebiomassplot <- function(data,
                                 xlabels = NULL,
                                 ylabels = NULL,
                                 show_colour = TRUE,
-                                xangle = NULL,
                                 show_CI_ribbon = TRUE,
                                 show_error_bar = FALSE,
                                 show_negative = TRUE,
                                 point_size = 2,
-                                text_size = 12,
                                 colours = c("black",fq_palette("cols")),
-                                legend_position = "top",
                                 ncol = 2,
                                 scales = "free",
-                                financial_year = FALSE,
                                 seasonal = NULL,
                                 show_point = TRUE,
                                 show_line = NULL,
@@ -105,18 +99,27 @@ absolutebiomassplot <- function(data,
                                 mcmc_style = "banded", # hairy, boxplot, banded, CI, joy
                                 line_width = 1,
                                 hair_width = 0.5,
-                                legend_box = "horizontal",
                                 input_colour = "black",
                                 input_range_colour = "black",
                                 aggregate_scenarios = FALSE,
                                 CI_range = 0.95,
                                 alpha = NULL,
-                                boxplot_outliers = TRUE) {
+                                boxplot_outliers = TRUE,
+                                xangle = NULL,
+                                legend_position = NULL,
+                                financial_year = FALSE,
+                                text_size = NULL,
+                                legend_text_size = NULL,
+                                text_colour = NULL,
+                                legend_text_colour = NULL,
+                                legend_box = NULL,
+                                legend_title_blank = NULL,
+                                panel_border = NULL,
+                                panel_border_colour = NULL) {
 
   # ___________________
   # Data validation
   # ___________________
-
   # Identify MCMC or MLE
   MCMC <- "med" %in% names(data)
 
@@ -168,39 +171,14 @@ absolutebiomassplot <- function(data,
   # ___________________
   # Basic plot set up
   # ___________________
-
   data <- apply_scenarios(data, scenarios, scenario_labels, scenario_order)
 
-  x_axis <- build_x_axis(x = data$xvar,
-                         xlab = xlab,
-                         xlim = xlim,
-                         xbreaks = xbreaks,
-                         xlabels = xlabels,
-                         financial_year = financial_year,
-                         expand_upper = 0,
-                         xangle = xangle,
-                         is_date = TRUE)
-
-  y_axis <- build_y_axis(y = data$value,
-                         ylab = ylab,
-                         ylim = ylim,
-                         ybreaks = ybreaks,
-                         ylabels = ylabels,
-                         lower = 0,
-                         upper = data$upper)
-
-
-  p <- ggplot2::ggplot(data) + get_theme_ssand()
-  p <- add_x_scale_continuous(p, x_axis)
-  p <- add_y_scale_continuous(p, y_axis)
-
-  p <- p +
-    ggplot2::scale_colour_manual(values = colours, labels = fleet_names)
+  p <- ggplot2::ggplot(data)
+  p <- p + ggplot2::scale_colour_manual(values = colours, labels = fleet_names)
 
   # ___________________
   # Build MLE plot
   # ___________________
-
   if (!MCMC) {
     # Model fits
     if (show_CI_ribbon){
@@ -250,9 +228,10 @@ absolutebiomassplot <- function(data,
     if (mcmc_style == "banded")  p <- mcmc_banded(p, data, alpha, band_labels, band_colour)
     if (mcmc_style == "hairy")   p <- mcmc_hairy(p, data, hair_width)
     if (mcmc_style == "CI")      p <- mcmc_CI(p, data, aggregate_scenarios, CI_range, alpha)
-    if (mcmc_style == "joy")     p <- mcmc_joy(p, data, CI_range, ridge_colour, rel_min_height, alpha, ridge_scale, show_CI,
-                                               ybreaks, ylin,ylab, xlab, legend_position, text_size,xbreaks,legend_box,facet_wrap,
-                                               show_median,xlabels,ylabels)
+    # if (mcmc_style == "joy")     p <- mcmc_joy(p, data, CI_range, ridge_colour, rel_min_height, alpha, ridge_scale, show_CI,
+    #                                            ybreaks, ylin,ylab, xlab, legend_position, text_size,xbreaks,legend_box,facet_wrap,
+    #                                            show_median,xlabels,ylabels)
+
     # Add median lines
     p <- show_median_lines("annual biomass",p,data,show_median,line_width,colours)
 
@@ -276,6 +255,42 @@ absolutebiomassplot <- function(data,
   # Final layers
   # ___________________
   if (facet_wrap) p <- add_scenario_facets(p, data, scales = scales, ncol = ncol)
+
+  # ___________________
+  # Axes and theme
+  # ___________________
+  x_axis <- build_x_axis(x = data$xvar,
+                         xlab = xlab,
+                         xlim = xlim,
+                         xbreaks = xbreaks,
+                         xlabels = xlabels,
+                         financial_year = financial_year,
+                         expand_upper = 0,
+                         xangle = xangle,
+                         is_date = TRUE)
+
+  y_axis <- build_y_axis(y = data$value,
+                         ylab = ylab,
+                         ylim = ylim,
+                         ybreaks = ybreaks,
+                         ylabels = ylabels,
+                         lower = 0,
+                         upper = data$upper)
+
+  p <- add_x_scale_continuous(p, x_axis)
+  p <- add_y_scale_continuous(p, y_axis)
+
+  p <- add_ssand_theme(p,
+                       text_size = text_size,
+                       legend_text_size = legend_text_size,
+                       text_colour = text_colour,
+                       legend_text_colour = legend_text_colour,
+                       legend_position = legend_position,
+                       legend_box = legend_box,
+                       legend_title_blank = legend_title_blank,
+                       panel_border = panel_border,
+                       panel_border_colour = panel_border_colour,
+                       xangle = x_axis$angle)
 
   return(p)
 }

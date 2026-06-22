@@ -20,6 +20,8 @@
 #' @param ylim A vector of lower and upper y-axis limits (e.g. c(0,1)) (numeric).
 #' @param ylabels A vector of labels for the y-axis breaks.
 #' @param ybreaks A vector of breaks between y-axis labels, used in ggplot2::scale_y_continous() (numeric).
+#' @param text_size,legend_text_size,text_colour,legend_text_colour,legend_position,legend_box,legend_title_blank,panel_border,panel_border_colour,xangle Optional plotting theme overrides. Defaults are controlled by `theme_ssand()`
+#'   and can be set globally via `set_ssand_style()`.
 #'
 #' @return Proportion spawning plot
 #' @export
@@ -37,36 +39,57 @@ proportionspawningplot <- function(data,
                                    scales = 'free',
                                    ncol = 2,
                                    xlab = "Month",
-                                   ylab = "Proportion spawning"){
+                                   ylab = "Proportion spawning",
+                                   xangle = NULL,
+                                   legend_position = NULL,
+                                   financial_year = FALSE,
+                                   text_size = NULL,
+                                   legend_text_size = NULL,
+                                   text_colour = NULL,
+                                   legend_text_colour = NULL,
+                                   legend_box = NULL,
+                                   legend_title_blank = NULL,
+                                   panel_border = NULL,
+                                   panel_border_colour = NULL){
 
   # ___________________
   # Data validation
   # ___________________
-
   check_data_columns(data, c("month","value","scenario"))
 
   # ___________________
   # Basic plot set up
   # ___________________
-
   if (is.null(ylim)) {ylim <- c(0,max(data$value))}
   if (is.null(ybreaks)) {ybreaks <- pretty(ylim)}
   if (is.null(ylabels)) {ylabels <- ybreaks}
 
   data <- apply_scenarios(data, scenarios, scenario_labels, scenario_order)
 
-
   p <- ggplot2::ggplot(data) +
     ggplot2::geom_point(ggplot2::aes(x=month,y=value),size=2) +
-    get_theme_ssand() +
     ggplot2::xlab(xlab) +
     ggplot2::ylab(ylab)
 
   # ___________________
   # Final layers
   # ___________________
-
   p <- add_scenario_facets(p, data, scales = scales, ncol = ncol)
+
+  # ___________________
+  # Axes and theme
+  # ___________________
+  p <- add_ssand_theme(p,
+                       text_size = text_size,
+                       legend_text_size = legend_text_size,
+                       text_colour = text_colour,
+                       legend_text_colour = legend_text_colour,
+                       legend_position = legend_position,
+                       legend_box = legend_box,
+                       legend_title_blank = legend_title_blank,
+                       panel_border = panel_border,
+                       panel_border_colour = panel_border_colour,
+                       xangle = x_axis$angle)
 
   return(p)
 }

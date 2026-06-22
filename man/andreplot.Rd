@@ -12,8 +12,18 @@ andreplot(
   xlab = "Length (cm)",
   ylab = c("Age", "Standard deviation (age)"),
   colours = c("black", "grey80", fq_palette("DAF")),
-  legend_position = "top",
-  legend_ratio = c(1, 10)
+  legend_ratio = c(1, 10),
+  xangle = NULL,
+  legend_position = NULL,
+  financial_year = FALSE,
+  text_size = NULL,
+  legend_text_size = NULL,
+  text_colour = NULL,
+  legend_text_colour = NULL,
+  legend_box = NULL,
+  legend_title_blank = NULL,
+  panel_border = NULL,
+  panel_border_colour = NULL
 )
 }
 \arguments{
@@ -31,9 +41,12 @@ andreplot(
 
 \item{colours}{A vector of colours to plot. First is the colour of points, then the colour of the ribbon, then the colour of the expected line.}
 
+\item{legend_ratio}{A vector specifying the relative heights of the legend and the rest of the plot. Default is c(1,10)}
+
 \item{legend_position}{Position of the legend ("top" or "bottom"). Default is "top".}
 
-\item{legend_ratio}{A vector specifying the relative heights of the legend and the rest of the plot. Default is c(1,10)}
+\item{text_size, legend_text_size, text_colour, legend_text_colour, legend_position, legend_box, legend_title_blank, panel_border, panel_border_colour, xangle}{Optional plotting theme overrides. Defaults are controlled by \code{theme_ssand()}
+and can be set globally via \code{set_ssand_style()}.}
 }
 \value{
 Andre plot with an option to filter by fleet

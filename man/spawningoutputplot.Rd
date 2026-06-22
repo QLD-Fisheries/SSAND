@@ -9,12 +9,23 @@ spawningoutputplot(
   xaxis = "age",
   xlab = "Age (years)",
   ylab = "Spawning output",
-  colours = NULL,
+  colours = "black",
   scenarios = NULL,
   scenario_labels = NULL,
   scenario_order = NULL,
   scales = "free",
-  ncol = 2
+  ncol = 2,
+  xangle = NULL,
+  legend_position = NULL,
+  financial_year = FALSE,
+  text_size = NULL,
+  legend_text_size = NULL,
+  text_colour = NULL,
+  legend_text_colour = NULL,
+  legend_box = NULL,
+  legend_title_blank = NULL,
+  panel_border = NULL,
+  panel_border_colour = NULL
 )
 }
 \arguments{
@@ -39,6 +50,9 @@ Any scenarios not included in "scenario_order" will be tacked on in the order th
 \item{scales}{Scales for ggplot2::facet_wrap(). Default is 'free', see ?ggplot2::facet_wrap for options.}
 
 \item{ncol}{Number of columns for facet_wrap(). Default is 2.}
+
+\item{text_size, legend_text_size, text_colour, legend_text_colour, legend_position, legend_box, legend_title_blank, panel_border, panel_border_colour, xangle}{Optional plotting theme overrides. Defaults are controlled by \code{theme_ssand()}
+and can be set globally via \code{set_ssand_style()}.}
 }
 \value{
 Spawning output plot

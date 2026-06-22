@@ -10,8 +10,10 @@
 #' @param data Output from cpueqplot_prep()
 #' @param xlab Label for x-axis (character). Default is "Year".
 #' @param ylab Label for y-axis (character). Default is "Catch rate (kg/fisher day)".
-#' @param text_size Text size (num). Default is 12.
 #' @param colours A vector of colours used for scenarios (character).
+#' @param financial_year Set to TRUE if the assessment was based on financial year (logical). Adjusts the x-axis to show full financial year notation.
+#' @param text_size,legend_text_size,text_colour,legend_text_colour,legend_position,legend_box,legend_title_blank,panel_border,panel_border_colour,xangle Optional plotting theme overrides. Defaults are controlled by `theme_ssand()`
+#'   and can be set globally via `set_ssand_style()`.
 #'
 #' @return A plot that illustrates the impact of catchability rescaling how the model perceives catch rates
 #' @export
@@ -19,18 +21,39 @@
 cpueqplot <- function(data,
                       xlab = "Year",
                       ylab = "Catch rate (kg/fisher day)",
-                      text_size = 12,
-                      colours = c("#FFC000","#9E480E", "#70AD47")) {
+                      colours = c("#FFC000","#9E480E", "#70AD47"),
+                      xangle = NULL,
+                      legend_position = NULL,
+                      financial_year = FALSE,
+                      text_size = NULL,
+                      legend_text_size = NULL,
+                      text_colour = NULL,
+                      legend_text_colour = NULL,
+                      legend_box = NULL,
+                      legend_title_blank = NULL,
+                      panel_border = NULL,
+                      panel_border_colour = NULL) {
 
   p <- ggplot2::ggplot(data) +
     ggplot2::geom_line(ggplot2::aes(x=year,y=cpueadjust, colour=scenario)) +
     ggplot2::scale_colour_manual(values = colours) +
-    ggplot2::theme_bw() +
     ggplot2::xlab(xlab) +
-    ggplot2::ylab(ylab) +
-    ggplot2::theme(text = ggplot2::element_text(size=text_size)) +
-    ggplot2::theme(legend.title = ggplot2::element_blank(), legend.position = "top", legend.box="vertical")
+    ggplot2::ylab(ylab)
 
+  # ___________________
+  # Axes and theme
+  # ___________________
+  p <- add_ssand_theme(p,
+                       text_size = text_size,
+                       legend_text_size = legend_text_size,
+                       text_colour = text_colour,
+                       legend_text_colour = legend_text_colour,
+                       legend_position = legend_position,
+                       legend_box = legend_box,
+                       legend_title_blank = legend_title_blank,
+                       panel_border = panel_border,
+                       panel_border_colour = panel_border_colour,
+                       xangle = x_axis$angle)
   return(p)
 }
 

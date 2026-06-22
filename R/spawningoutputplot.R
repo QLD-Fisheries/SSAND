@@ -19,6 +19,8 @@
 #' Any scenarios not included in "scenario_order" will be tacked on in the order they appear in the input data.
 #' @param scales Scales for ggplot2::facet_wrap(). Default is 'free', see ?ggplot2::facet_wrap for options.
 #' @param ncol Number of columns for facet_wrap(). Default is 2.
+#' @param text_size,legend_text_size,text_colour,legend_text_colour,legend_position,legend_box,legend_title_blank,panel_border,panel_border_colour,xangle Optional plotting theme overrides. Defaults are controlled by `theme_ssand()`
+#'   and can be set globally via `set_ssand_style()`.
 #'
 #' @return Spawning output plot
 #' @export
@@ -35,7 +37,17 @@ spawningoutputplot <- function(data,
                                scenario_labels = NULL,
                                scenario_order = NULL,
                                scales = 'free',
-                               ncol = 2) {
+                               ncol = 2,
+                               xangle = NULL,
+                               legend_position = NULL,
+                               text_size = NULL,
+                               legend_text_size = NULL,
+                               text_colour = NULL,
+                               legend_text_colour = NULL,
+                               legend_box = NULL,
+                               legend_title_blank = NULL,
+                               panel_border = NULL,
+                               panel_border_colour = NULL) {
 
   check_data_columns(data, c("xvar","maturityxfecundity","x","scenario"))
 
@@ -45,15 +57,28 @@ spawningoutputplot <- function(data,
 
   data <- apply_scenarios(data, scenarios, scenario_labels, scenario_order)
 
-
   p <- ggplot2::ggplot(data, ggplot2::aes(x=xvar, y=maturityxfecundity)) +
-    get_theme_ssand() +
     ggplot2::geom_line(colour=colours) +
     ggplot2::geom_point(colour=colours) +
     ggplot2::xlab(xlab) +
     ggplot2::ylab(ylab)
 
   p <- add_scenario_facets(p, data, scales = scales, ncol = ncol)
+
+  # ___________________
+  # Axes and theme
+  # ___________________
+  p <- add_ssand_theme(p,
+                       text_size = text_size,
+                       legend_text_size = legend_text_size,
+                       text_colour = text_colour,
+                       legend_text_colour = legend_text_colour,
+                       legend_position = legend_position,
+                       legend_box = legend_box,
+                       legend_title_blank = legend_title_blank,
+                       panel_border = panel_border,
+                       panel_border_colour = panel_border_colour,
+                       xangle = x_axis$angle)
 
   return(p)
 }

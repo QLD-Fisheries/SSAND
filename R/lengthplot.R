@@ -14,7 +14,6 @@
 #' @param scenario A scenario number to be shown on plot (numeric). This was already specified in prep file, but this is a manual override to save running the prep function again.
 #' @param point_size Size of points used in ggplot2::geom_line(). Default is 1.
 #' @param colours A vector of colours used for sex types (character).
-#' @param legend_position Position of the legend ("none", "left", "right", "bottom", "top", or two-element numeric vector for x and y position). Default is "top".
 #' @param xlab Label for x-axis (character). Default is "Year".
 #' @param ylab Label for y-axis (character). Default is "Spawning biomass (relative)".+
 #' @param xbreaks A vector of breaks between x-axis labels, used in ggplot2::scale_x_continous() (numeric).
@@ -30,6 +29,7 @@
 #' @param MLS_colour Colour of MLS line (character). Default is "black".
 #' @param MLS_label Label of MLS line (character). Default is "MLS".
 #' @param financial_year Set to TRUE if the assessment was based on financial year (logical). Adjusts the x-axis to show full financial year notation.
+#' @param text_size,legend_text_size,text_colour,legend_text_colour,legend_position,legend_box,legend_title_blank,panel_border,panel_border_colour,xangle Optional plotting theme overrides. Defaults are controlled by `theme_ssand()`
 #'
 #' @return A length plot, with an option to add model fits
 #' @export
@@ -44,7 +44,6 @@ lengthplot <- function(data,
                        partition = 0,
                        point_size = 1,
                        colours = c("#AD3D25", "#0085B8", "#FCC17E"),
-                       legend_position = "top",
                        financial_year = FALSE,
                        xlab = "Length (cm)",
                        ylab = "Proportion",
@@ -60,13 +59,21 @@ lengthplot <- function(data,
                        MLS = NULL,
                        MLS_colour = "black",
                        MLS_label = "MLS",
-                       show_fits = TRUE) {
+                       show_fits = TRUE,
+                       text_size = NULL,
+                       legend_text_size = NULL,
+                       text_colour = NULL,
+                       legend_text_colour = NULL,
+                       legend_position = NULL,
+                       legend_box = NULL,
+                       legend_title_blank = NULL,
+                       panel_border = NULL,
+                       panel_border_colour = NULL,
+                       xangle = NULL) {
 
   # ___________________
   # Data validation
   # ___________________
-
-  # Data input warnings
   check_data_columns(data, c("year","fleet","bin","sex","obs","exp","scenario"))
   if (direction == "vertical") {direction = "v"}
   if (direction == "horizontal") {direction = "h"}
@@ -76,7 +83,6 @@ lengthplot <- function(data,
   # ___________________
   # Custom to this plot
   # ___________________
-
   fleet_val <- fleet
   data <- data |> dplyr::filter(fleet==fleet_val)
 
@@ -93,7 +99,37 @@ lengthplot <- function(data,
   # ___________________
   # Basic plot set up
   # ___________________
+  p <- ggplot2::ggplot(data)
 
+  # ___________________
+  # Build MLE plot
+  # ___________________
+  p <- p +
+    ggplot2::facet_wrap(~year, scales=scales, ncol = ncol, dir = direction) +
+    ggplot2::scale_fill_manual(name = "Sex", values=c("grey60", "grey30", "grey80"))
+
+  if (!show_fits) {
+    p <- p +
+      ggplot2::geom_bar(ggplot2::aes(x=bin, y=obs, group=sex, fill=as.factor(sex)), stat="identity")
+  }
+
+  if (show_fits) {
+    p <- p +
+      ggplot2::geom_area(ggplot2::aes(x=bin, y=obs, group=sex, fill=as.factor(sex)),alpha=0.7, colour="black", outline.type = "full") +
+      ggplot2::geom_point(ggplot2::aes(x=bin, y=obs, group=sex), size = point_size) +
+      ggplot2::geom_line(ggplot2::aes(x=bin, y=exp, group=sex, colour=sex), linewidth=1) +
+      ggplot2::scale_colour_manual(name="Sex", values = colours)
+  }
+
+  if (!missing(MLS)) {
+    p <- p +
+      ggplot2::geom_vline(aes(xintercept = MLS, linetype = MLS_label), colour = MLS_colour) +
+      ggplot2::scale_linetype_manual(values = "dashed", name = ggplot2::element_blank())
+  }
+
+  # ___________________
+  # Axes and theme
+  # ___________________
   x_axis <- build_x_axis(x = data$xvar,
                          xlab = xlab,
                          xlim = xlim,
@@ -112,39 +148,20 @@ lengthplot <- function(data,
                          lower = 0,
                          upper = data$upper)
 
-
-  p <- ggplot2::ggplot(data) + get_theme_ssand()
   p <- add_x_scale_continuous(p, x_axis)
   p <- add_y_scale_continuous(p, y_axis)
 
-  # ___________________
-  # Build MLE plot
-  # ___________________
-
-
-  p <- p +
-    ggplot2::facet_wrap(~year, scales=scales, ncol = ncol, dir = direction) +
-    ggplot2::scale_fill_manual(name = "Sex", values=c("grey60", "grey30", "grey80"))
-
-  if (!show_fits) {
-    p <- p +
-      ggplot2::geom_bar(ggplot2::aes(x=bin, y=obs, group=sex, fill=as.factor(sex)), stat="identity")
-  }
-
-  if (show_fits) {
-    p <- p +
-      ggplot2::geom_area(ggplot2::aes(x=bin, y=obs, group=sex, fill=as.factor(sex)),alpha=0.7, colour="black", outline.type = "full") +
-      ggplot2::geom_point(ggplot2::aes(x=bin, y=obs, group=sex), size = point_size) +
-      ggplot2::geom_line(ggplot2::aes(x=bin, y=exp, group=sex, colour=sex), linewidth=1) +
-      ggplot2::scale_colour_manual(name="Sex", values = colours)
-  }
-
-
-  if (!missing(MLS)) {
-    p <- p +
-      ggplot2::geom_vline(aes(xintercept = MLS, linetype = MLS_label), colour = MLS_colour) +
-      ggplot2::scale_linetype_manual(values = "dashed", name = ggplot2::element_blank())
-  }
+  p <- add_ssand_theme(p,
+                       text_size = text_size,
+                       legend_text_size = legend_text_size,
+                       text_colour = text_colour,
+                       legend_text_colour = legend_text_colour,
+                       legend_position = legend_position,
+                       legend_box = legend_box,
+                       legend_title_blank = legend_title_blank,
+                       panel_border = panel_border,
+                       panel_border_colour = panel_border_colour,
+                       xangle = x_axis$angle)
 
   return(p)
 }

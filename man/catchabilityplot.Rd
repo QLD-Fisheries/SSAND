@@ -8,13 +8,23 @@ catchabilityplot(
   data,
   xlab = "Month",
   ylab = "Catchability coefficient (q)",
-  text_size = 12,
   ncol = 2,
   scales = "free",
   colours = fq_palette("alisecolours"),
   scenarios = NULL,
   scenario_labels = NULL,
-  scenario_order = NULL
+  scenario_order = NULL,
+  xangle = NULL,
+  legend_position = NULL,
+  financial_year = FALSE,
+  text_size = NULL,
+  legend_text_size = NULL,
+  text_colour = NULL,
+  legend_text_colour = NULL,
+  legend_box = NULL,
+  legend_title_blank = NULL,
+  panel_border = NULL,
+  panel_border_colour = NULL
 )
 }
 \arguments{
@@ -23,8 +33,6 @@ catchabilityplot(
 \item{xlab}{Label for x-axis (character). Default is "Month".}
 
 \item{ylab}{Label for y-axis (character). Default is "Catchability coefficient (q)".}
-
-\item{text_size}{Text size (num). Default is 12.}
 
 \item{ncol}{Number of columns for facet_wrap(). Default is 2.}
 
@@ -39,6 +47,11 @@ catchabilityplot(
 \item{scenario_order}{A vector to reorder how scenarios are displayed (character). Use the label names defined in "scenario_labels".
 If "scenario_labels" is left blank, the labels will be "Scenario 1", "Scenario 2" etc.
 Any scenarios not included in "scenario_order" will be tacked on in the order they appear in the input data.}
+
+\item{text_size}{Text size (num). Default is 12.}
+
+\item{text_size, legend_text_size, text_colour, legend_text_colour, legend_position, legend_box, legend_title_blank, panel_border, panel_border_colour, xangle}{Optional plotting theme overrides. Defaults are controlled by \code{theme_ssand()}
+and can be set globally via \code{set_ssand_style()}.}
 }
 \value{
 A plot of catchability pattern

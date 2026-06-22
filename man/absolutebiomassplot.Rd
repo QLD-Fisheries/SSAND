@@ -23,17 +23,13 @@ absolutebiomassplot(
   xlabels = NULL,
   ylabels = NULL,
   show_colour = TRUE,
-  xangle = NULL,
   show_CI_ribbon = TRUE,
   show_error_bar = FALSE,
   show_negative = TRUE,
   point_size = 2,
-  text_size = 12,
-  colours = NULL,
-  legend_position = "top",
+  colours = c("black", fq_palette("cols")),
   ncol = 2,
   scales = "free",
-  financial_year = FALSE,
   seasonal = NULL,
   show_point = TRUE,
   show_line = NULL,
@@ -44,13 +40,23 @@ absolutebiomassplot(
   mcmc_style = "banded",
   line_width = 1,
   hair_width = 0.5,
-  legend_box = "horizontal",
   input_colour = "black",
   input_range_colour = "black",
   aggregate_scenarios = FALSE,
   CI_range = 0.95,
   alpha = NULL,
-  boxplot_outliers = TRUE
+  boxplot_outliers = TRUE,
+  xangle = NULL,
+  legend_position = NULL,
+  financial_year = FALSE,
+  text_size = NULL,
+  legend_text_size = NULL,
+  text_colour = NULL,
+  legend_text_colour = NULL,
+  legend_box = NULL,
+  legend_title_blank = NULL,
+  panel_border = NULL,
+  panel_border_colour = NULL
 )
 }
 \arguments{
@@ -92,8 +98,6 @@ Any scenarios not included in "scenario_order" will be tacked on in the order th
 
 \item{show_colour}{Set to TRUE to activate coloured mode, or FALSE for greyscale (logical).}
 
-\item{xangle}{Set to 90 to rotate x-axis labels 90 degrees.}
-
 \item{show_CI_ribbon}{Set to TRUE to show a confidence interval ribbon (logical).}
 
 \item{show_error_bar}{Set to TRUE to include error bar (logical). If wanting to use confidence interval lines with error bars use make error_bar = FALSE}
@@ -102,17 +106,11 @@ Any scenarios not included in "scenario_order" will be tacked on in the order th
 
 \item{point_size}{Size of points used in ggplot2::geom_line(). Default is 1.5.}
 
-\item{text_size}{Text size (num). Default is 12.}
-
 \item{colours}{A vector of colours used (character).}
-
-\item{legend_position}{Position of the legend ("none", "left", "right", "bottom", "top", or two-element numeric vector for x and y position). Default is "top".}
 
 \item{ncol}{Number of columns for facet_wrap(). Default is 2.}
 
 \item{scales}{Scales for ggplot2::facet_wrap(). Default is 'free', see ?ggplot2::facet_wrap for options.}
-
-\item{financial_year}{Set to TRUE if the assessment was based on financial year (logical). Adds 1 to each year in the dataset.}
 
 \item{seasonal}{Set to TRUE if the model is seasonal (i.e. has more than one timestep per year), to display a more detailed x-axis. If missing, or set to FALSE, the x-axis will just display year, not month.}
 
@@ -126,17 +124,14 @@ Any scenarios not included in "scenario_order" will be tacked on in the order th
 
 \item{band_colour}{Colour of bands (character). Only used when mcmc_style=="banded". Input one colour, bands will be distinguished using an alpha.}
 
-\item{show_median}{Type of median shown. Default "median_cpue" shows the median of each year,
-"trajectory" shows median trajectory based on biomass in final year,
-"parameters" uses median of each parameter (not yet implemented)}
+\item{show_median}{Type of median shown. Default "annual_biomass" shows the median of each year,
+"trajectory" shows median trajectory based on biomass in final year,}
 
 \item{mcmc_style}{The type of MCMC plot to be displayed (character). Options are "banded", "hairy", "boxplot", "CI" and "joy", the default is "banded". Only one option can be selected.}
 
 \item{line_width}{Width of median lines (numeric). Default is 1.}
 
 \item{hair_width}{Width of fine MCMC hairs (numeric). Default is 0.5.}
-
-\item{legend_box}{Display option for legend (character). Choose "vertical" to stack legend types vertically, or "horizontal" to keep legends in one row.}
 
 \item{input_colour}{Specify colour of input data (MCMC)}
 
@@ -149,6 +144,19 @@ Any scenarios not included in "scenario_order" will be tacked on in the order th
 \item{alpha}{Transparency for range (numeric) used in ggplot2::geom_density_ridges(). Default is 0.7.}
 
 \item{boxplot_outliers}{Set to FALSE to remove outlier points from boxplot. Default is TRUE.}
+
+\item{xangle}{Set to 90 to rotate x-axis labels 90 degrees.}
+
+\item{legend_position}{Position of the legend ("none", "left", "right", "bottom", "top", or two-element numeric vector for x and y position). Default is "top".}
+
+\item{financial_year}{Set to TRUE if the assessment was based on financial year (logical). Adds 1 to each year in the dataset.}
+
+\item{text_size}{Text size (num). Default is 12.}
+
+\item{legend_box}{Display option for legend (character). Choose "vertical" to stack legend types vertically, or "horizontal" to keep legends in one row.}
+
+\item{text_size, legend_text_size, text_colour, legend_text_colour, legend_position, legend_box, legend_title_blank, panel_border, panel_border_colour, xangle}{Optional plotting theme overrides. Defaults are controlled by \code{theme_ssand()}
+and can be set globally via \code{set_ssand_style()}.}
 }
 \value{
 A plot that shows input data and model fits to CPUE data

@@ -24,12 +24,12 @@
 #' @param ylim A vector of lower and upper y-axis limits (e.g. c(0,1)) (numeric).
 #' @param xlabels A vector of labels for the x-axis breaks.
 #' @param ylabels A vector of labels for the y-axis breaks.
-#' @param xangle Set to 90 to rotate x-axis labels 90 degrees.
 #' @param financial_year Set to TRUE if the assessment was based on financial year (logical). Adjusts the x-axis to show full financial year notation.
-#' @param text_size Text size (num). Default is 12.
 #' @param point_size Size of points used in ggplot2::geom_point(). Default is 1.5.
 #' @param show_dates_on_axis Set to TRUE to show full dates on x-axis as opposed to years.
 #' @param colours A vector of colours used (character).
+#' @param text_size,legend_text_size,text_colour,legend_text_colour,legend_position,legend_box,legend_title_blank,panel_border,panel_border_colour,xangle Optional plotting theme overrides. Defaults are controlled by `theme_ssand()`
+#'   and can be set globally via `set_ssand_style()`.
 #'
 #' @return Discard plot
 #' @export
@@ -55,73 +55,42 @@ discardplot <- function(data,
                         ylim = NULL,
                         xlabels = NULL,
                         ylabels = NULL,
-                        xangle = NULL,
-                        financial_year = FALSE,
-                        text_size = 12,
                         point_size = 1.5,
                         show_dates_on_axis = FALSE,
-                        colours = c("black",fq_palette("alisecolours"))) {
+                        colours = c("black",fq_palette("alisecolours")),
+                        xangle = NULL,
+                        legend_position = NULL,
+                        financial_year = FALSE,
+                        text_size = NULL,
+                        legend_text_size = NULL,
+                        text_colour = NULL,
+                        legend_text_colour = NULL,
+                        legend_box = NULL,
+                        legend_title_blank = NULL,
+                        panel_border = NULL,
+                        panel_border_colour = NULL) {
 
   # ___________________
   # Data validation
   # ___________________
-
-  # Data input warnings
   check_data_columns(data, c("year","fleet","obs","upper","lower","exp"))
-
   data$xvar <- data$year
   data$upper <- data$prob_upper; data$lower <- data$prob_lower
 
   # ___________________
-  # Custom to this plot
+  # Filter data
   # ___________________
-
-  if (!missing(fleets)) {
-    data <- data |> dplyr::filter(fleet %in% fleets)
-  }
-
-  if (missing(fleet_names)) {
-    data <- data |> dplyr::mutate(fleet_names = as.factor(paste0("Fleet ",fleet)))
-  } else {
-    fleet.lookup <- data.frame(fleet = unique(data$fleet), fleet_names = fleet_names)
-    data <- data |>
-      dplyr::left_join(fleet.lookup, by = "fleet") |>
-      dplyr::mutate(fleet_names = as.factor(fleet_names))
-  }
+  data <- apply_fleet_names(data, fleets, fleet_names)
+  data <- apply_scenarios(data, scenarios, scenario_labels, scenario_order)
 
   # ___________________
   # Basic plot set up
   # ___________________
-
-  data <- apply_scenarios(data, scenarios, scenario_labels, scenario_order)
-
-  x_axis <- build_x_axis(x = data$xvar,
-                         xlab = xlab,
-                         xlim = xlim,
-                         xbreaks = xbreaks,
-                         xlabels = xlabels,
-                         financial_year = financial_year,
-                         expand_upper = as.numeric(show_final_biomass),
-                         xangle = xangle,
-                         is_date = FALSE)
-
-  y_axis <- build_y_axis(y = data$value,
-                         ylab = ylab,
-                         ylim = ylim,
-                         ybreaks = ybreaks,
-                         ylabels = ylabels,
-                         lower = 0,
-                         upper = data$upper)
-
-
-  p <- ggplot2::ggplot(data) + get_theme_ssand()
-  p <- add_x_scale_continuous(p, x_axis)
-  p <- add_y_scale_continuous(p, y_axis)
+  p <- ggplot2::ggplot(data)
 
   # ___________________
   # Build MLE plot
   # ___________________
-
   p <- p +
     ggplot2::geom_errorbar(ggplot2::aes(x=year, ymin=lower, ymax=upper), colour=colours[1], width=.2, position=ggplot2::position_dodge(.1)) +
     ggplot2::geom_point(ggplot2::aes(x=year, y=obs), colour=colours[1], shape=19, size=point_size, position=ggplot2::position_dodge(0))
@@ -145,6 +114,43 @@ discardplot <- function(data,
     p <- p +
       ggplot2::facet_wrap(~fleet_names)
   }
+
+  # ___________________
+  # Axes and theme
+  # ___________________
+  x_axis <- build_x_axis(x = data$xvar,
+                         xlab = xlab,
+                         xlim = xlim,
+                         xbreaks = xbreaks,
+                         xlabels = xlabels,
+                         financial_year = financial_year,
+                         expand_upper = as.numeric(show_final_biomass),
+                         xangle = xangle,
+                         is_date = FALSE)
+
+  y_axis <- build_y_axis(y = data$value,
+                         ylab = ylab,
+                         ylim = ylim,
+                         ybreaks = ybreaks,
+                         ylabels = ylabels,
+                         lower = 0,
+                         upper = data$upper)
+
+
+  p <- add_x_scale_continuous(p, x_axis)
+  p <- add_y_scale_continuous(p, y_axis)
+
+  p <- add_ssand_theme(p,
+                       text_size = text_size,
+                       legend_text_size = legend_text_size,
+                       text_colour = text_colour,
+                       legend_text_colour = legend_text_colour,
+                       legend_position = legend_position,
+                       legend_box = legend_box,
+                       legend_title_blank = legend_title_blank,
+                       panel_border = panel_border,
+                       panel_border_colour = panel_border_colour,
+                       xangle = x_axis$angle)
 
   return(p)
 }

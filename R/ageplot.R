@@ -12,7 +12,6 @@
 #' @param fleet Specify which fleet to plot (numeric). By default, fleet 1 will be shown.
 #' @param point_size Size of points used in ggplot2::geom_line(). Default is 1.
 #' @param colours A vector of colours used for sex types (character).
-#' @param legend_position Position of the legend ("none", "left", "right", "bottom", "top", or two-element numeric vector for x and y position). Default is "top".
 #' @param xlab Label for x-axis (character). Default is "Year".
 #' @param ylab Label for y-axis (character). Default is "Spawning biomass (relative)".
 #' @param xbreaks A vector of breaks between x-axis labels, used in ggplot2::scale_x_continous() (numeric).
@@ -29,6 +28,8 @@
 #' @param MLS_colour Colour of MLS line (character). Default is "black".
 #' @param MLS_label Label of MLS line (character). Default is "MLS".
 #' @param scales Scales for ggplot2::facet_wrap(). Default is 'free', see ?ggplot2::facet_wrap for options.
+#' @param text_size,legend_text_size,text_colour,legend_text_colour,legend_position,legend_box,legend_title_blank,panel_border,panel_border_colour,xangle Optional plotting theme overrides. Defaults are controlled by `theme_ssand()`
+#'   and can be set globally via `set_ssand_style()`.
 #'
 #' @return An age plot, with an option to add model fits
 #' @export
@@ -44,7 +45,6 @@ ageplot <- function(data,
                     fleet = 1,
                     point_size = 1,
                     colours = c("#9E480E", "#7CC8FC"),
-                    legend_position = "top",
                     xlab = "Age (years)",
                     ylab = "Proportion",
                     xbreaks = NULL,
@@ -53,13 +53,23 @@ ageplot <- function(data,
                     ylabels = NULL,
                     xlim = NULL,
                     ylim = NULL,
-                    financial_year = FALSE,
                     scales = "fixed",
                     ncol = 4,
                     direction = "v",
                     MLS = NULL,
                     MLS_colour = "black",
-                    MLS_label = "MLS") {
+                    MLS_label = "MLS",
+                    xangle = NULL,
+                    legend_position = NULL,
+                    financial_year = FALSE,
+                    text_size = NULL,
+                    legend_text_size = NULL,
+                    text_colour = NULL,
+                    legend_text_colour = NULL,
+                    legend_box = NULL,
+                    legend_title_blank = NULL,
+                    panel_border = NULL,
+                    panel_border_colour = NULL) {
 
   # ___________________
   # Data validation
@@ -81,13 +91,37 @@ ageplot <- function(data,
   # Custom to this plot
   # ___________________
   data <- data |> dplyr::filter(fleet==fleet)
-
+  data <- apply_scenarios(data, scenarios, scenario_labels, scenario_order)
 
   # ___________________
   # Basic plot set up
   # ___________________
-  data <- apply_scenarios(data, scenarios, scenario_labels, scenario_order)
+  p <- ggplot2::ggplot(data)
 
+  # ___________________
+  # Build MLE plot
+  # ___________________
+  p <- p +
+    ggplot2::geom_area( ggplot2::aes(x=bin, y=obs, group=sex, fill=as.factor(sex)),alpha=0.7, colour="black", outline.type = "full") +
+    ggplot2::geom_point(ggplot2::aes(x=bin, y=obs, group=sex), size = point_size) +
+    ggplot2::facet_wrap(~year, scales=scales, ncol = ncol, dir = direction) +
+    ggplot2::scale_fill_manual(name = "Sex", values=c("grey60", "grey30", "grey80"))
+
+  if (show_fits) {
+    p <- p +
+      ggplot2::geom_line(ggplot2::aes(x=bin, y=exp, group=sex, colour=sex), linewidth=1) +
+      ggplot2::scale_colour_manual(name="Sex", values = colours)
+  }
+
+  if (!missing(MLS)) {
+    p <- p +
+      ggplot2::geom_vline(aes(xintercept = MLS, linetype = MLS_label), colour = MLS_colour) +
+      ggplot2::scale_linetype_manual(values = "dashed", name = ggplot2::element_blank())
+  }
+
+  # ___________________
+  # Axes and theme
+  # ___________________
   x_axis <- build_x_axis(x = data$xvar,
                          xlab = xlab,
                          xlim = xlim,
@@ -106,33 +140,20 @@ ageplot <- function(data,
                          lower = 0,
                          upper = data$upper)
 
-
-  p <- ggplot2::ggplot(data) + get_theme_ssand()
   p <- add_x_scale_continuous(p, x_axis)
   p <- add_y_scale_continuous(p, y_axis)
 
-  # ___________________
-  # Build MLE plot
-  # ___________________
-
-  p <- p +
-    ggplot2::geom_area( ggplot2::aes(x=bin, y=obs, group=sex, fill=as.factor(sex)),alpha=0.7, colour="black", outline.type = "full") +
-    ggplot2::geom_point(ggplot2::aes(x=bin, y=obs, group=sex), size = point_size) +
-    ggplot2::facet_wrap(~year, scales=scales, ncol = ncol, dir = direction) +
-    ggplot2::scale_fill_manual(name = "Sex", values=c("grey60", "grey30", "grey80"))
-
-  if (show_fits) {
-    p <- p +
-      ggplot2::geom_line(ggplot2::aes(x=bin, y=exp, group=sex, colour=sex), linewidth=1) +
-      ggplot2::scale_colour_manual(name="Sex", values = colours)
-  }
-
-
-  if (!missing(MLS)) {
-    p <- p +
-      ggplot2::geom_vline(aes(xintercept = MLS, linetype = MLS_label), colour = MLS_colour) +
-      ggplot2::scale_linetype_manual(values = "dashed", name = ggplot2::element_blank())
-  }
+  p <- add_ssand_theme(p,
+                       text_size = text_size,
+                       legend_text_size = legend_text_size,
+                       text_colour = text_colour,
+                       legend_text_colour = legend_text_colour,
+                       legend_position = legend_position,
+                       legend_box = legend_box,
+                       legend_title_blank = legend_title_blank,
+                       panel_border = panel_border,
+                       panel_border_colour = panel_border_colour,
+                       xangle = x_axis$angle)
 
   return(p)
 }

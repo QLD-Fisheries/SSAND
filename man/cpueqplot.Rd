@@ -8,8 +8,18 @@ cpueqplot(
   data,
   xlab = "Year",
   ylab = "Catch rate (kg/fisher day)",
-  text_size = 12,
-  colours = c("#FFC000", "#9E480E", "#70AD47")
+  colours = c("#FFC000", "#9E480E", "#70AD47"),
+  xangle = NULL,
+  legend_position = NULL,
+  financial_year = FALSE,
+  text_size = NULL,
+  legend_text_size = NULL,
+  text_colour = NULL,
+  legend_text_colour = NULL,
+  legend_box = NULL,
+  legend_title_blank = NULL,
+  panel_border = NULL,
+  panel_border_colour = NULL
 )
 }
 \arguments{
@@ -19,9 +29,12 @@ cpueqplot(
 
 \item{ylab}{Label for y-axis (character). Default is "Catch rate (kg/fisher day)".}
 
+\item{colours}{A vector of colours used for scenarios (character).}
+
 \item{text_size}{Text size (num). Default is 12.}
 
-\item{colours}{A vector of colours used for scenarios (character).}
+\item{text_size, legend_text_size, text_colour, legend_text_colour, legend_position, legend_box, legend_title_blank, panel_border, panel_border_colour, xangle}{Optional plotting theme overrides. Defaults are controlled by \code{theme_ssand()}
+and can be set globally via \code{set_ssand_style()}.}
 }
 \value{
 A plot that illustrates the impact of catchability rescaling how the model perceives catch rates

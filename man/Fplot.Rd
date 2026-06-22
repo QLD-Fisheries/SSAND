@@ -14,28 +14,37 @@ Fplot(
   ylabels = NULL,
   xlim = NULL,
   ylim = NULL,
-  xangle = NULL,
   point_size = 1.5,
-  text_size = 12,
   scenarios = NULL,
   scenario_labels = NULL,
   scenario_order = NULL,
   scales = "free",
   ncol = 2,
-  financial_year = FALSE,
+  sample = NULL,
   show_CI = TRUE,
   mcmc_style = "CI",
   show_median = c("median_F", "trajectory"),
   aggregate_scenarios = FALSE,
-  alpha = 0.7,
+  CI_range = 0.95,
+  alpha = NULL,
   line_width = 0.7,
   hair_width = 0.5,
-  legend_box = "horizontal",
-  legend_position = "top",
   band_colour = "black",
+  band_labels = NULL,
   line_type = c("solid", "dashed"),
   colours = c("black", "darkred"),
-  boxplot_outliers = TRUE
+  boxplot_outliers = TRUE,
+  xangle = NULL,
+  legend_position = NULL,
+  financial_year = FALSE,
+  text_size = NULL,
+  legend_text_size = NULL,
+  text_colour = NULL,
+  legend_text_colour = NULL,
+  legend_box = NULL,
+  legend_title_blank = NULL,
+  panel_border = NULL,
+  panel_border_colour = NULL
 )
 }
 \arguments{
@@ -59,11 +68,7 @@ For MCMC, a dataframe with columns rownum (num), scenario (int), year (num), val
 
 \item{ylim}{A vector of lower and upper y-axis limits (e.g. c(0,1)) (numeric).}
 
-\item{xangle}{Set to 90 to rotate x-axis labels 90 degrees.}
-
 \item{point_size}{Size of points used in ggplot2::geom_line(). Default is 1.5.}
-
-\item{text_size}{Text size (num). Default is 12.}
 
 \item{scenarios}{A vector of scenario numbers to be shown on plot (numeric). This was already specified in prep file, but this is a manual override to save running the prep function again.}
 
@@ -77,15 +82,12 @@ Any scenarios not included in "scenario_order" will be tacked on in the order th
 
 \item{ncol}{Number of columns for facet_wrap(). Default is 2.}
 
-\item{financial_year}{Set to TRUE if the assessment was based on financial year (logical). Adjusts the x-axis to show full financial year notation.}
-
 \item{show_CI}{Set to TRUE to show CI range for MLE plots only (logical).}
 
 \item{mcmc_style}{The type of MCMC plot to be displayed (character). Options are "banded", "hairy", "boxplot", "CI" and "joy", the default is "banded". Only one option can be selected.}
 
 \item{show_median}{Type of median shown. Default "annual_biomass" shows the median of each year,
-"trajectory" shows median trajectory based on biomass in final year,
-"parameters" uses median of each parameter (not yet implemented)}
+"trajectory" shows median trajectory based on biomass in final year}
 
 \item{aggregate_scenarios}{Set to TRUE to calculate credible intervals across all scenarios (logical). Only activated if mcmc_style==CI.}
 
@@ -95,10 +97,6 @@ Any scenarios not included in "scenario_order" will be tacked on in the order th
 
 \item{hair_width}{Width of fine MCMC hairs (numeric). Default is 0.5.}
 
-\item{legend_box}{Display option for legend (character). Choose "vertical" to stack legend types vertically, or "horizontal" to keep legends in one row.}
-
-\item{legend_position}{Position of the legend ("none", "left", "right", "bottom", "top", or two-element numeric vector for x and y position). Default is "top".}
-
 \item{band_colour}{Colour of bands (character). Only used when mcmc_style=="banded". Input one colour, bands will be distinguished using an alpha.}
 
 \item{line_type}{A vector of linetypes (e.g. "solid", "dashed") for median lines.}
@@ -106,6 +104,13 @@ Any scenarios not included in "scenario_order" will be tacked on in the order th
 \item{colours}{A vector of colours used (character).}
 
 \item{boxplot_outliers}{Set to FALSE to remove outlier points from boxplot. Default is TRUE.}
+
+\item{xangle}{Set to 90 to rotate x-axis labels 90 degrees.}
+
+\item{financial_year}{Set to TRUE if the assessment was based on financial year (logical). Adjusts the x-axis to show full financial year notation.}
+
+\item{text_size, legend_text_size, text_colour, legend_text_colour, legend_position, legend_box, legend_title_blank, panel_border, panel_border_colour, xangle}{Optional plotting theme overrides. Defaults are controlled by \code{theme_ssand()}
+and can be set globally via \code{set_ssand_style()}.}
 }
 \value{
 Fishing mortality plot

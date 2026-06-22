@@ -11,7 +11,18 @@ mcmc_posteriordensityplot(
   ylab = "Density",
   ncol = 3,
   parameter_labels = NULL,
-  xmax = NULL
+  xmax = NULL,
+  xangle = NULL,
+  legend_position = NULL,
+  financial_year = FALSE,
+  text_size = NULL,
+  legend_text_size = NULL,
+  text_colour = NULL,
+  legend_text_colour = NULL,
+  legend_box = NULL,
+  legend_title_blank = NULL,
+  panel_border = NULL,
+  panel_border_colour = NULL
 )
 }
 \arguments{
@@ -28,6 +39,9 @@ mcmc_posteriordensityplot(
 \item{parameter_labels}{Vector of customised parameter labels for facet wrap, e.g. expression(xi)}
 
 \item{xmax}{Named vector of maximum x-axis limit, e.g. c('R\[0\]' = 50).}
+
+\item{text_size, legend_text_size, text_colour, legend_text_colour, legend_position, legend_box, legend_title_blank, panel_border, panel_border_colour, xangle}{Optional plotting theme overrides. Defaults are controlled by \code{theme_ssand()}
+and can be set globally via \code{set_ssand_style()}.}
 }
 \value{
 Posterior density plot

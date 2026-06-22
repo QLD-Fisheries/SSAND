@@ -14,6 +14,9 @@
 #' @param ylab Label for y-axis (character). Default is "Density".
 #' @param parameter_labels Vector of customised parameter labels for facet wrap, e.g. expression(xi)
 #' @param xmax Named vector of maximum x-axis limit, e.g. c('R\\[0\\]' = 50).
+#' @param financial_year Set to TRUE if the assessment was based on financial year (logical). Adjusts the x-axis to show full financial year notation.
+#' @param text_size,legend_text_size,text_colour,legend_text_colour,legend_position,legend_box,legend_title_blank,panel_border,panel_border_colour,xangle Optional plotting theme overrides. Defaults are controlled by `theme_ssand()`
+#'   and can be set globally via `set_ssand_style()`.
 #'
 #' @return Posterior density plot
 #' @export
@@ -28,22 +31,20 @@ mcmc_posteriordensityplot <- function(data,
                                       ylab = "Density",
                                       ncol = 3,
                                       parameter_labels = NULL,
-                                      xmax = NULL) {
-  # Data input warnings
-  # if (!"chain" %in% names(data[[1]])) {warning("Input data is missing chain column")}
-  # if (!"iter" %in% names(data[[1]])) {warning("Input data is missing iter column")}
-  # if (!"parameter" %in% names(data[[1]])) {warning("Input data is missing parameter column")}
-  # if (!"value" %in% names(data[[1]])) {warning("Input data is missing value column")}
-  #
-  # if (!"parameter" %in% names(data[[2]])) {warning("Input data is missing parameter column")}
-  # if (!"value" %in% names(data[[2]])) {warning("Input data is missing value column")}
-  #
-  # if (!"parameter" %in% names(data[[3]])) {warning("Input data is missing parameter column")}
-  # if (!"value" %in% names(data[[3]])) {warning("Input data is missing value column")}
-  #
-  # if (!"parameter" %in% names(data[[4]])) {warning("Input data is missing parameter column")}
-  # if (!"value" %in% names(data[[4]])) {warning("Input data is missing value column")}
+                                      xmax = NULL,
+                                      xangle = NULL,
+                                      legend_position = NULL,
+                                      financial_year = FALSE,
+                                      text_size = NULL,
+                                      legend_text_size = NULL,
+                                      text_colour = NULL,
+                                      legend_text_colour = NULL,
+                                      legend_box = NULL,
+                                      legend_title_blank = NULL,
+                                      panel_border = NULL,
+                                      panel_border_colour = NULL) {
 
+  # Data input warnings
   check_data_columns(data[[1]], c("chain","iter","parameter","value"))
   check_data_columns(data[[2]], c("parameter","value"))
   check_data_columns(data[[3]], c("parameter","value"))
@@ -53,7 +54,6 @@ mcmc_posteriordensityplot <- function(data,
   opt_df <- data[[2]]
   med_par_df <- data[[3]]
   med_traj_df <- data[[4]]
-
 
   if (!missing(parameter_labels)) {
     label_lookup <- data.frame(parameter = parameters,
@@ -87,11 +87,9 @@ mcmc_posteriordensityplot <- function(data,
   }
 
   p <- ggplot2::ggplot(mcmc_df_trace) +
-    get_theme_ssand()
     ggplot2::geom_density(ggplot2::aes(x = value, fill = chain), linewidth = 0.5, alpha = 0.5) +
     ggplot2::labs(linetype = NULL) +
     ggplot2::facet_wrap(~parameter, scales = "free", labeller = ggplot2::label_parsed, ncol = ncol) +
-    ggplot2::theme(legend.position = "bottom")+
     ggplot2::xlab(xlab) +
     ggplot2::ylab(ylab)
 
@@ -108,10 +106,25 @@ mcmc_posteriordensityplot <- function(data,
       ggplot2::geom_vline(data = med_traj_df, ggplot2::aes(xintercept = value, linetype = "Median Trajectory"))
   }
 
-  if (length(unique(data[[1]]$chain))==1) {
+  if (length(unique(data[[1]]$chain))==1) p <- p + ggplot2::guides(fill = "none")
+
+  # ___________________
+  # Axes and theme
+  # ___________________
+    p <- add_ssand_theme(p,
+                         text_size = text_size,
+                         legend_text_size = legend_text_size,
+                         text_colour = text_colour,
+                         legend_text_colour = legend_text_colour,
+                         legend_position = legend_position,
+                         legend_box = legend_box,
+                         legend_title_blank = legend_title_blank,
+                         panel_border = panel_border,
+                         panel_border_colour = panel_border_colour,
+                         xangle = x_axis$angle)
+
     p <- p +
-      ggplot2::guides(fill = "none")
-  }
+      ggplot2::theme(legend.position = "bottom")
 
   return(p)
 }

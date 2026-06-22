@@ -9,7 +9,6 @@
 #'
 #' @param data Output from phaseplot_prep()
 #' @param xbreaks A vector of breaks between x-axis labels, used in ggplot2::scale_x_continous() (numeric).
-#' @param text_size Text size (num). Default is 12.
 #' @param year_labels A vector of years to be displayed on plot (numeric).
 #' @param year_label_size Text size for year labels (num). Default is 3.
 #' @param scenarios A vector of scenario numbers to be shown on plot (numeric). This was already specified in prep file, but this is a manual override to save running the prep function again.
@@ -21,6 +20,8 @@
 #' @param ncol Number of columns for facet_wrap(). Default is 2.
 #' @param xlab Label for x-axis (character). Default is "Biomass (relative)".
 #' @param ylab Label for y-axis (character). Default is "Fishing pressure ratio (relative to FMSY))".
+#' @param text_size,legend_text_size,text_colour,legend_text_colour,legend_position,legend_box,legend_title_blank,panel_border,panel_border_colour,xangle Optional plotting theme overrides. Defaults are controlled by `theme_ssand()`
+#'   and can be set globally via `set_ssand_style()`.
 #'
 #' @return A phase plot
 #' @export
@@ -34,7 +35,6 @@
 phaseplot <- function(data,
                       xbreaks = seq(0,2,0.2),
                       scales = 'free_y',
-                      text_size = 12,
                       year_label_size = 3,
                       ncol = 2,
                       year_labels = NULL,
@@ -42,13 +42,22 @@ phaseplot <- function(data,
                       scenario_labels = NULL,
                       scenario_order = NULL,
                       xlab = "Biomass (relative)",
-                      ylab = expression(Fishing~pressure~ratio~(relative~to~F[MSY]))) {
+                      ylab = expression(Fishing~pressure~ratio~(relative~to~F[MSY])),
+                      xangle = NULL,
+                      legend_position = NULL,
+                      text_size = NULL,
+                      legend_text_size = NULL,
+                      text_colour = NULL,
+                      legend_text_colour = NULL,
+                      legend_box = NULL,
+                      legend_title_blank = NULL,
+                      panel_border = NULL,
+                      panel_border_colour = NULL) {
 
   # Data input warnings
   check_data_columns(data, c("year","Bratio","F_","scenario","B_MSY","F_max"))
 
   data <- apply_scenarios(data, scenarios, scenario_labels, scenario_order)
-
 
   PhaseData <- data
   cols <- c("#ECB1A2","#FFD699","#FFE699","#C6DEB5","#CC6677")
@@ -79,13 +88,27 @@ phaseplot <- function(data,
                              max.overlaps = Inf) +
     ggplot2::xlab(xlab) +
     ggplot2::ylab(ylab) +
-    get_theme_ssand() +
-    ggplot2::scale_x_continuous(breaks=xbreaks)+
-    ggplot2::theme(text = ggplot2::element_text(size=text_size))
+    ggplot2::scale_x_continuous(breaks=xbreaks)
+    # ggplot2::theme(text = ggplot2::element_text(size=text_size))
+
   if (length(unique(PhaseData$scenario))>1){
     p <- p + ggplot2::facet_wrap(~scenario, scales = scales, ncol = ncol)
   }
 
+  # ___________________
+  # Axes and theme
+  # ___________________
+  p <- add_ssand_theme(p,
+                       text_size = text_size,
+                       legend_text_size = legend_text_size,
+                       text_colour = text_colour,
+                       legend_text_colour = legend_text_colour,
+                       legend_position = legend_position,
+                       legend_box = legend_box,
+                       legend_title_blank = legend_title_blank,
+                       panel_border = panel_border,
+                       panel_border_colour = panel_border_colour,
+                       xangle = x_axis$angle)
   return(p)
 }
 

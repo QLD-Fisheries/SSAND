@@ -20,6 +20,8 @@
 #' @param scales Scales for ggplot2::facet_wrap(). Default is 'free', see ?ggplot2::facet_wrap for options.
 #' @param ncol Number of columns for facet_wrap(). Default is 2.
 #' @param colours A vector of colours used (character).
+#' @param text_size,legend_text_size,text_colour,legend_text_colour,legend_position,legend_box,legend_title_blank,panel_border,panel_border_colour,xangle Optional plotting theme overrides. Defaults are controlled by `theme_ssand()`
+#'   and can be set globally via `set_ssand_style()`.
 #'
 #' @return Plot of recruitment pattern
 #' @export
@@ -35,29 +37,29 @@ recruitmentpatternplot <- function(data,
                                    scenario_order = NULL,
                                    ncol = 2,
                                    scales = 'free',
-                                   colours= c("black","grey80","grey20","grey60","grey40")){
+                                   colours= c("black","grey80","grey20","grey60","grey40"),
+                                   xangle = NULL,
+                                   legend_position = NULL,
+                                   text_size = NULL,
+                                   legend_text_size = NULL,
+                                   text_colour = NULL,
+                                   legend_text_colour = NULL,
+                                   legend_box = NULL,
+                                   legend_title_blank = NULL,
+                                   panel_border = NULL,
+                                   panel_border_colour = NULL){
 
   # ___________________
   # Data validation
   # ___________________
-
   check_data_columns(data, c("recruitment","months","monthnames","scenario"))
-
-
-  # ___________________
-  # Custom to this plot
-  # ___________________
-
 
   # ___________________
   # Basic plot set up
   # ___________________
-
   data <- apply_scenarios(data, scenarios, scenario_labels, scenario_order)
 
-
   p <- ggplot2::ggplot() +
-    get_theme_ssand() +
     ggplot2::geom_point(data = data, ggplot2::aes(x=months,y=recruitment,colour=area))
 
   if (length(unique(data$monthnames))>1) {
@@ -69,11 +71,27 @@ recruitmentpatternplot <- function(data,
     ggplot2::scale_x_discrete(limits=month.name)+
     ggplot2::xlab(xlab) +
     ggplot2::ylab(ylab)+
-    ggplot2::theme(legend.position = 'top')+
-    ggplot2::theme(axis.text.x = ggplot2::element_text(angle=90,vjust=0.5, hjust = 1)) +
     ggplot2::scale_colour_manual(name="Area",values=colours)
 
   p <- add_scenario_facets(p, data, scales = scales, ncol = ncol)
+
+  # ___________________
+  # Axes and theme
+  # ___________________
+  p <- add_ssand_theme(p,
+                       text_size = text_size,
+                       legend_text_size = legend_text_size,
+                       text_colour = text_colour,
+                       legend_text_colour = legend_text_colour,
+                       legend_position = legend_position,
+                       legend_box = legend_box,
+                       legend_title_blank = legend_title_blank,
+                       panel_border = panel_border,
+                       panel_border_colour = panel_border_colour,
+                       xangle = x_axis$angle)
+
+  # ggplot2::theme(legend.position = 'top')+
+  # ggplot2::theme(axis.text.x = ggplot2::element_text(angle=90,vjust=0.5, hjust = 1)) +
 
   return(p)
 }

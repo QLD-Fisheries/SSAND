@@ -8,12 +8,19 @@ catchdatasourcesplot(
   data,
   ylab = "",
   xlab = "",
-  legend_position = "none",
-  colours = NULL,
-  text_size = 12,
+  colours = c("#FFC000", "#9D9D9D", "#FFE699"),
+  legend_size = 6,
   xangle = NULL,
+  legend_position = NULL,
   financial_year = FALSE,
-  legend_size = 6
+  text_size = NULL,
+  legend_text_size = NULL,
+  text_colour = NULL,
+  legend_text_colour = NULL,
+  legend_box = NULL,
+  legend_title_blank = NULL,
+  panel_border = NULL,
+  panel_border_colour = NULL
 )
 }
 \arguments{
@@ -23,17 +30,20 @@ catchdatasourcesplot(
 
 \item{xlab}{Label for x-axis (character). Default is "".}
 
-\item{legend_position}{Position of the legend ("none", "left", "right", "bottom", "top", or two-element numeric vector for x and y position). Default is "none".}
-
 \item{colours}{A vector of colours used (character). Default is c("#FFC000","#9D9D9D","#FFE699").}
 
-\item{text_size}{Text size (num). Default is 12.}
+\item{legend_size}{Size of legend markers. Default is 6.}
 
 \item{xangle}{Set to 90 to rotate x-axis labels 90 degrees.}
 
+\item{legend_position}{Position of the legend ("none", "left", "right", "bottom", "top", or two-element numeric vector for x and y position). Default is "none".}
+
 \item{financial_year}{Set to TRUE if the assessment was based on financial year (logical). Adjusts the x-axis to show full financial year notation.}
 
-\item{legend_size}{Size of legend markers. Default is 6.}
+\item{text_size}{Text size (num). Default is 12.}
+
+\item{text_size, legend_text_size, text_colour, legend_text_colour, legend_position, legend_box, legend_title_blank, panel_border, panel_border_colour, xangle}{Optional plotting theme overrides. Defaults are controlled by \code{theme_ssand()}
+and can be set globally via \code{set_ssand_style()}.}
 }
 \value{
 Catch reconstruction data sources plot

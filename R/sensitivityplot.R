@@ -19,9 +19,10 @@
 #' @param ncol Number of columns for facet_wrap(). Default is 2.
 #' @param scales Scales for ggplot2::facet_wrap(). Default is 'free', see ?ggplot2::facet_wrap for options.
 #' @param show_x_labels Set to TRUE to include scenario names on the x-axis (logical).
-#' @param xangle Set to 90 to rotate x-axis labels 90 degrees.
 #' @param xlab Label for x-axis (character). Default is "Scenario".
 #' @param ylab Label for y-axis (character). Default is "".
+#' @param text_size,legend_text_size,text_colour,legend_text_colour,legend_position,legend_box,legend_title_blank,panel_border,panel_border_colour,xangle Optional plotting theme overrides. Defaults are controlled by `theme_ssand()`
+#'   and can be set globally via `set_ssand_style()`.
 #'
 #' @return This function produces comparison plot of parameter estimates across all scenarios.
 #' @export
@@ -48,17 +49,25 @@ sensitivityplot <- function(data,
                             ncol = 2,
                             scales = 'free',
                             show_x_labels = FALSE,
-                            xangle = NULL,
                             xlab = "Scenario",
-                            ylab = "") {
+                            ylab = "",
+                            xangle = NULL,
+                            legend_position = NULL,
+                            text_size = NULL,
+                            legend_text_size = NULL,
+                            text_colour = NULL,
+                            legend_text_colour = NULL,
+                            legend_box = NULL,
+                            legend_title_blank = NULL,
+                            panel_border = NULL,
+                            panel_border_colour = NULL) {
 
   # Data input warnings
   check_data_columns(data, c("scenario","name","value","ub","lb","fixed"))
 
+  if (!is.null(scenarios)){data <- data |> dplyr::filter(scenario %in% scenarios)}
 
-  if (!missing(scenarios)){data <- data |> dplyr::filter(scenario %in% scenarios)}
-
-  if (missing(xangle)) {
+  if (is.null(xangle)) {
     xangle <- 0
     vjust <- 0.5
     hjust <- 0.5
@@ -69,9 +78,8 @@ sensitivityplot <- function(data,
 
   data <- apply_scenarios(data, scenarios, scenario_labels, scenario_order)
 
-
   # Filter if specific list of parameters is given
-  if (!missing(parameters)) {
+  if (!is.null(parameters)) {
     data <- data |> dplyr::filter(name %in% parameters)
   }
 
@@ -94,10 +102,9 @@ sensitivityplot <- function(data,
 
   data <- dplyr::left_join(data, ylimits, by='name')
 
-  # data$scenario_labels <- as.factor(data$scenario_labels)
   data$name <- as.factor(data$name)
 
-  if (!missing(parameter_labels)) {
+  if (!is.null(parameter_labels)) {
     levels(data$name) <- parameter_labels
   }
 
@@ -105,24 +112,34 @@ sensitivityplot <- function(data,
   p <- ggplot2::ggplot(data, ggplot2::aes(x=scenario_labels, y = value)) +
     ggplot2::geom_errorbar(ggplot2::aes(ymin=lb, ymax=ub, colour=as.factor(scenario_labels)), width = .2) +
     ggplot2::geom_point(ggplot2::aes(x=scenario_labels, y=value, colour=as.factor(scenario_labels), shape = fixed),size=3) +
-    ggplot2::facet_wrap(~name, ncol=ncol, scales=scales, labeller = ggplot2::label_parsed)
-
-
-  p <- p +
-    get_theme_ssand() +
-    ggplot2::scale_colour_manual(values=colours)
+    ggplot2::facet_wrap(~name, ncol=ncol, scales=scales, labeller = ggplot2::label_parsed) +
+    ggplot2::scale_colour_manual(values=colours) +
     ggplot2::scale_shape_manual(values=c(19,15), labels=c("Estimated","Fixed")) +
     ggplot2::geom_blank(ggplot2::aes(y = ymin)) +
     ggplot2::geom_blank(ggplot2::aes(y = ymax)) +
-    ggplot2::theme(legend.position="top", legend.title = ggplot2::element_blank(),
-                   axis.text.x = ggplot2::element_text(angle = xangle, hjust = hjust)) +
     ggplot2::xlab(xlab) +
     ggplot2::ylab(ylab)
 
-  if (!show_x_labels) {
-    p <- p +
-      ggplot2::theme(axis.text.x=ggplot2::element_blank())
-  }
+  # ___________________
+  # Axes and theme
+  # ___________________
+  if (!show_x_labels) p <- p + ggplot2::theme(axis.text.x=ggplot2::element_blank())
+
+  p <- add_ssand_theme(p,
+                       text_size = text_size,
+                       legend_text_size = legend_text_size,
+                       text_colour = text_colour,
+                       legend_text_colour = legend_text_colour,
+                       legend_position = legend_position,
+                       legend_box = legend_box,
+                       legend_title_blank = legend_title_blank,
+                       panel_border = panel_border,
+                       panel_border_colour = panel_border_colour,
+                       xangle = x_axis$angle)
+
+
+  # ggplot2::theme(legend.position="top", legend.title = ggplot2::element_blank(),
+  #                axis.text.x = ggplot2::element_text(angle = xangle, hjust = hjust)) +
 
   return(p)
 

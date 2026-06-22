@@ -14,6 +14,9 @@
 #' @param sample Number of samples to plot from each MCMC chain to ease burden of rendering dense plots (numeric).
 #' @param xlab Label for x-axis (character). Default is "".
 #' @param ylab Label for y-axis (character). Default is "".
+#' @param financial_year Set to TRUE if the assessment was based on financial year (logical). Adjusts the x-axis to show full financial year notation.
+#' @param text_size,legend_text_size,text_colour,legend_text_colour,legend_position,legend_box,legend_title_blank,panel_border,panel_border_colour,xangle Optional plotting theme overrides. Defaults are controlled by `theme_ssand()`
+#'   and can be set globally via `set_ssand_style()`.
 #'
 #' @return Trace plot
 #' @export
@@ -40,20 +43,20 @@ mcmc_traceplot <- function(data,
                            ncol = 2,
                            sample = NULL,
                            xlab = "",
-                           ylab = ""){
+                           ylab = "",
+                           xangle = NULL,
+                           legend_position = NULL,
+                           financial_year = FALSE,
+                           text_size = NULL,
+                           legend_text_size = NULL,
+                           text_colour = NULL,
+                           legend_text_colour = NULL,
+                           legend_box = NULL,
+                           legend_title_blank = NULL,
+                           panel_border = NULL,
+                           panel_border_colour = NULL){
 
   # Data input warnings
-  # if (!"chain" %in% names(data[[1]])) {warning("Input data is missing chain column")}
-  # if (!"iter" %in% names(data[[1]])) {warning("Input data is missing iter column")}
-  # if (!"parameter" %in% names(data[[1]])) {warning("Input data is missing parameter column")}
-  # if (!"value" %in% names(data[[1]])) {warning("Input data is missing value column")}
-  # if (!"parameter" %in% names(data[[2]])) {warning("Input data is missing parameter column")}
-  # if (!"value" %in% names(data[[2]])) {warning("Input data is missing value column")}
-  # if (!"parameter" %in% names(data[[3]])) {warning("Input data is missing parameter column")}
-  # if (!"value" %in% names(data[[3]])) {warning("Input data is missing value column")}
-  # if (!"parameter" %in% names(data[[4]])) {warning("Input data is missing parameter column")}
-  # if (!"value" %in% names(data[[4]])) {warning("Input data is missing value column")}
-
   check_data_columns(data[[1]], c("chain","iter","parameter","value"))
   check_data_columns(data[[2]], c("parameter","value"))
   check_data_columns(data[[3]], c("parameter","value"))
@@ -65,7 +68,6 @@ mcmc_traceplot <- function(data,
       dplyr::filter(iter %in% itersubsample)
   }
 
-
   mcmc_df_trace <- data[[1]]
   opt_df <- data[[2]]
 
@@ -74,21 +76,32 @@ mcmc_traceplot <- function(data,
     ggplot2::scale_colour_manual("Chain",values=colours) +
     ggplot2::labs(linetype = NULL) +
     ggplot2::facet_wrap(~parameter, scales = "free_y", labeller = ggplot2::label_parsed, ncol = ncol) +
-    get_theme_ssand() +
-    ggplot2::theme(legend.position = "bottom")+
+    # ggplot2::theme(legend.position = "bottom")+
     ggplot2::guides(colour = ggplot2::guide_legend(override.aes = list(size=2))) +
     ggplot2::xlab(xlab) +
     ggplot2::ylab(ylab)
+
   if (show_opt){
     p <- p +
       ggplot2::geom_hline(data = opt_df, ggplot2::aes(yintercept = value, linetype = "Optimised"), colour = "red")
   }
 
-  if (length(unique(data[[1]]$chain))==1) {
-    p <- p +
-      ggplot2::guides(colour = "none")
-  }
+  if (length(unique(data[[1]]$chain))==1) p <- p + ggplot2::guides(colour = "none")
 
+  # ___________________
+  # Axes and theme
+  # ___________________
+  p <- add_ssand_theme(p,
+                       text_size = text_size,
+                       legend_text_size = legend_text_size,
+                       text_colour = text_colour,
+                       legend_text_colour = legend_text_colour,
+                       legend_position = legend_position,
+                       legend_box = legend_box,
+                       legend_title_blank = legend_title_blank,
+                       panel_border = panel_border,
+                       panel_border_colour = panel_border_colour,
+                       xangle = x_axis$angle)
 
   return(p)
 }

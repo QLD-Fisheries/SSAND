@@ -10,7 +10,6 @@ ageplot(
   fleet = 1,
   point_size = 1,
   colours = c("#9E480E", "#7CC8FC"),
-  legend_position = "top",
   xlab = "Age (years)",
   ylab = "Proportion",
   xbreaks = NULL,
@@ -19,13 +18,23 @@ ageplot(
   ylabels = NULL,
   xlim = NULL,
   ylim = NULL,
-  financial_year = FALSE,
   scales = "fixed",
   ncol = 4,
   direction = "v",
   MLS = NULL,
   MLS_colour = "black",
-  MLS_label = "MLS"
+  MLS_label = "MLS",
+  xangle = NULL,
+  legend_position = NULL,
+  financial_year = FALSE,
+  text_size = NULL,
+  legend_text_size = NULL,
+  text_colour = NULL,
+  legend_text_colour = NULL,
+  legend_box = NULL,
+  legend_title_blank = NULL,
+  panel_border = NULL,
+  panel_border_colour = NULL
 )
 }
 \arguments{
@@ -38,8 +47,6 @@ ageplot(
 \item{point_size}{Size of points used in ggplot2::geom_line(). Default is 1.}
 
 \item{colours}{A vector of colours used for sex types (character).}
-
-\item{legend_position}{Position of the legend ("none", "left", "right", "bottom", "top", or two-element numeric vector for x and y position). Default is "top".}
 
 \item{xlab}{Label for x-axis (character). Default is "Year".}
 
@@ -57,8 +64,6 @@ ageplot(
 
 \item{ylim}{A vector of lower and upper y-axis limits (e.g. c(0,1)) (numeric).}
 
-\item{financial_year}{Set to TRUE if the assessment was based on financial year (logical). Adjusts the x-axis to show full financial year notation.}
-
 \item{scales}{Scales for ggplot2::facet_wrap(). Default is 'free', see ?ggplot2::facet_wrap for options.}
 
 \item{ncol}{Number of columns for facet_wrap(). Default is 2.}
@@ -70,6 +75,13 @@ ageplot(
 \item{MLS_colour}{Colour of MLS line (character). Default is "black".}
 
 \item{MLS_label}{Label of MLS line (character). Default is "MLS".}
+
+\item{legend_position}{Position of the legend ("none", "left", "right", "bottom", "top", or two-element numeric vector for x and y position). Default is "top".}
+
+\item{financial_year}{Set to TRUE if the assessment was based on financial year (logical). Adjusts the x-axis to show full financial year notation.}
+
+\item{text_size, legend_text_size, text_colour, legend_text_colour, legend_position, legend_box, legend_title_blank, panel_border, panel_border_colour, xangle}{Optional plotting theme overrides. Defaults are controlled by \code{theme_ssand()}
+and can be set globally via \code{set_ssand_style()}.}
 }
 \value{
 An age plot, with an option to add model fits

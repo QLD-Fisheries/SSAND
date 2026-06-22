@@ -15,12 +15,11 @@
 #' @param data No prep function provided, see example. A data frame with sector (factor), source (chr), startyr (num), endyr (num), col (a colour category, chr), label (a label category, num)
 #' @param xlab Label for x-axis (character). Default is "".
 #' @param ylab Label for y-axis (character). Default is "".
-#' @param legend_position Position of the legend ("none", "left", "right", "bottom", "top", or two-element numeric vector for x and y position). Default is "none".
 #' @param colours A vector of colours used (character). Default is c("#FFC000","#9D9D9D","#FFE699").
-#' @param text_size Text size (num). Default is 12.
 #' @param financial_year Set to TRUE if the assessment was based on financial year (logical). Adjusts the x-axis to show full financial year notation.
-#' @param xangle Set to 90 to rotate x-axis labels 90 degrees.
 #' @param legend_size Size of legend markers. Default is 6.
+#' @param text_size,legend_text_size,text_colour,legend_text_colour,legend_position,legend_box,legend_title_blank,panel_border,panel_border_colour,xangle Optional plotting theme overrides. Defaults are controlled by `theme_ssand()`
+#'   and can be set globally via `set_ssand_style()`.
 #'
 # Copyright 2024 Fisheries Queensland
 
@@ -68,30 +67,43 @@
 catchdatasourcesplot <- function(data,
                                  ylab = "",
                                  xlab = "",
-                                 legend_position = "none",
                                  colours = c("#FFC000","#9D9D9D","#FFE699"),
-                                 text_size = 12,
+                                 legend_size = 6,
                                  xangle = NULL,
+                                 legend_position = NULL,
                                  financial_year = FALSE,
-                                 legend_size = 6){
+                                 text_size = NULL,
+                                 legend_text_size = NULL,
+                                 text_colour = NULL,
+                                 legend_text_colour = NULL,
+                                 legend_box = NULL,
+                                 legend_title_blank = NULL,
+                                 panel_border = NULL,
+                                 panel_border_colour = NULL){
   # ___________________
   # Data validation
   # ___________________
-
-  # Data input warnings
   check_data_columns(data, c("sector","source","startyr","endyr","col","label"))
-
-
-  # ___________________
-  # Custom to this plot
-  # ___________________
-
+  xlim <- c(min(data$startyr),max(data$endyr))
 
   # ___________________
   # Basic plot set up
   # ___________________
-  xlim <- c(min(data$startyr),max(data$endyr))
+  p <- ggplot2::ggplot(data)
 
+  # ___________________
+  # Build MLE plot
+  # ___________________
+  p <- p +
+    ggplot2::scale_colour_manual(values=c(colours,"#C1C0C0")) +
+    ggplot2::geom_segment(ggplot2::aes(x=startyr-0.5,xend=endyr+0.5,y=sector,yend=sector,color=col),linewidth=30) +
+    ggplot2::geom_text(data=data|>dplyr::filter(label==1),ggplot2::aes(x=startyr-0.5 + 0.5*(endyr - (startyr)), y=sector, label=source),color="#000000") +
+    ggplot2::geom_text(data=data|>dplyr::filter(label==2),ggplot2::aes(x=startyr-0.5 + 0.5*(endyr - (startyr)), y=sector, label=source),color="#000000", angle = 90) +
+    ggplot2::geom_text(data=data|>dplyr::filter(label==4),ggplot2::aes(x=startyr-0.5 + 0.5*(endyr - (startyr)), y=sector, label=source),color="#000000", angle = 90, size=3)
+
+  # ___________________
+  # Axes and theme
+  # ___________________
   x_axis <- build_x_axis(x = data$xvar,
                          xlab = xlab,
                          xlim = xlim,
@@ -110,27 +122,29 @@ catchdatasourcesplot <- function(data,
                          lower = 0,
                          upper = data$upper)
 
-
-  p <- ggplot2::ggplot(data) + get_theme_ssand()
   p <- add_x_scale_continuous(p, x_axis)
   p <- add_y_scale_continuous(p, y_axis)
+
+  p <- p +
+    ggplot2::scale_x_continuous(breaks=xbreaks, labels = xlabels, expand = c(0,0))
 
   # p <- p +
   #   ggplot2::guides(color = ggplot2::guide_legend(override.aes = list(linewidth = legend_size)))
 
-  p <- p +
-    ggplot2::scale_x_continuous(breaks=xbreaks, labels = xlabels, expand = c(0,0))
-  # ___________________
-  # Build MLE plot
-  # ___________________
+  if (is.null(text_colour)) legend_position <- "none"
 
 
-  p <- p +
-    ggplot2::geom_segment(ggplot2::aes(x=startyr-0.5,xend=endyr+0.5,y=sector,yend=sector,color=col),linewidth=30) +
-    ggplot2::scale_colour_manual(values=c(colours,"#C1C0C0")) +
-    ggplot2::geom_text(data=data|>dplyr::filter(label==1),ggplot2::aes(x=startyr-0.5 + 0.5*(endyr - (startyr)), y=sector, label=source),color="#000000") +
-    ggplot2::geom_text(data=data|>dplyr::filter(label==2),ggplot2::aes(x=startyr-0.5 + 0.5*(endyr - (startyr)), y=sector, label=source),color="#000000", angle = 90) +
-    ggplot2::geom_text(data=data|>dplyr::filter(label==4),ggplot2::aes(x=startyr-0.5 + 0.5*(endyr - (startyr)), y=sector, label=source),color="#000000", angle = 90, size=3)
+  p <- add_ssand_theme(p,
+                       text_size = text_size,
+                       legend_text_size = legend_text_size,
+                       text_colour = text_colour,
+                       legend_text_colour = legend_text_colour,
+                       legend_position = legend_position,
+                       legend_box = legend_box,
+                       legend_title_blank = legend_title_blank,
+                       panel_border = panel_border,
+                       panel_border_colour = panel_border_colour,
+                       xangle = x_axis$angle)
 
   return(p)
 }

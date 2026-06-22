@@ -19,6 +19,8 @@
 #' Any scenarios not included in "scenario_order" will be tacked on in the order they appear in the input data.
 #' @param scales Scales for ggplot2::facet_wrap(). Default is 'free', see ?ggplot2::facet_wrap for options.
 #' @param ncol Number of columns for facet_wrap(). Default is 2.
+#' @param text_size,legend_text_size,text_colour,legend_text_colour,legend_position,legend_box,legend_title_blank,panel_border,panel_border_colour,xangle Optional plotting theme overrides. Defaults are controlled by `theme_ssand()`
+#'   and can be set globally via `set_ssand_style()`.
 #'
 #' @return Plot of S-R curve
 #' @export
@@ -38,17 +40,24 @@ srplot <- function(data,
                    scenario_labels = NULL,
                    scenario_order = NULL,
                    scales = 'free',
-                   ncol = 2){
+                   ncol = 2,
+                   xangle = NULL,
+                   legend_position = NULL,
+                   text_size = NULL,
+                   legend_text_size = NULL,
+                   text_colour = NULL,
+                   legend_text_colour = NULL,
+                   legend_box = NULL,
+                   legend_title_blank = NULL,
+                   panel_border = NULL,
+                   panel_border_colour = NULL){
 
   # Data input warnings
   check_data_columns(data, c("year","spawn_bio","pred_recr","exp_recr","dev","bias_adjusted","scenario"))
 
-
-
   if (missing(xbreaks)) {xbreaks <- seq(0,1,0.2)}
 
   data <- apply_scenarios(data, scenarios, scenario_labels, scenario_order)
-
 
   data2 = data[order(data$spawn_bio),]
   data$year = as.numeric(data$year)
@@ -76,14 +85,29 @@ srplot <- function(data,
                                   breaks = year_breaks, labels = year_breaks) +
     ggplot2::scale_x_continuous(breaks = xbreaks, limits = c(0,NA)) +
     ggplot2::labs(x = xlab, y = ylab) +
-    ggplot2::ylim(0,NA) +
-    get_theme_ssand()
+    ggplot2::ylim(0,NA)
 
   p <- add_scenario_facets(p, data, scales = scales, ncol = ncol)
 
   if(show_bias_adjust) {
     p <- p + ggplot2::geom_path(data = data, ggplot2::aes(x = spawn_bio, y = bias_adjusted, linetype = "B", colour = "B"))
   }
+
+  # ___________________
+  # Axes and theme
+  # ___________________
+  p <- add_ssand_theme(p,
+                       text_size = text_size,
+                       legend_text_size = legend_text_size,
+                       text_colour = text_colour,
+                       legend_text_colour = legend_text_colour,
+                       legend_position = legend_position,
+                       legend_box = legend_box,
+                       legend_title_blank = legend_title_blank,
+                       panel_border = panel_border,
+                       panel_border_colour = panel_border_colour,
+                       xangle = x_axis$angle)
+
   return(p)
 }
 

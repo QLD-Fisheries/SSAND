@@ -10,7 +10,6 @@
 #' @param data A data frame with variables age (int), value (num), lower (num), upper (num), sex (int), scenario (int)
 #' @param xlab Label for x-axis (character). Default is "Age".
 #' @param ylab Label for y-axis (character). Default is "Carapace length (cm, beginning of year)".
-#' @param text_size Text size (num). Default is 12.
 #' @param show_two_sex Set to TRUE to activate a feature that is relevant for two-sex models (logical).
 #' @param scenarios A vector of scenario numbers to be shown on plot (numeric). This was already specified in prep file, but this is a manual override to save running the prep function again.
 #' @param scenario_labels A vector of customised scenario names (character). Default is "Scenario 1", "Scenario 2", etc.
@@ -21,6 +20,9 @@
 #' @param scales Scales for ggplot2::facet_wrap(). Default is 'free', see ?ggplot2::facet_wrap for options.
 #' @param ncol Number of columns for facet_wrap(). Default is 2.
 #' @param variation_on_variation Set to TRUE to illustrate MCMC variation on the CV or SD values. Default (FALSE) sets the variation in growth to the median MCMC value.
+#' @param financial_year Set to TRUE if the assessment was based on financial year (logical). Adjusts the x-axis to show full financial year notation.
+#' @param text_size,legend_text_size,text_colour,legend_text_colour,legend_position,legend_box,legend_title_blank,panel_border,panel_border_colour,xangle Optional plotting theme overrides. Defaults are controlled by `theme_ssand()`
+#'   and can be set globally via `set_ssand_style()`.
 #'
 #' @return Growth plot
 #' @export
@@ -34,7 +36,6 @@
 growthplot <- function(data,
                        xlab = "Age",
                        ylab = "Carapace length (cm, beginning of year)",
-                       text_size = 12,
                        show_two_sex=NULL,
                        scenarios = NULL,
                        scenario_labels = NULL,
@@ -42,12 +43,22 @@ growthplot <- function(data,
                        colours = NULL,
                        scales = 'free',
                        ncol = 2,
-                       variation_on_variation = FALSE) {
+                       variation_on_variation = FALSE,
+                       xangle = NULL,
+                       legend_position = NULL,
+                       financial_year = FALSE,
+                       text_size = NULL,
+                       legend_text_size = NULL,
+                       text_colour = NULL,
+                       legend_text_colour = NULL,
+                       legend_box = NULL,
+                       legend_title_blank = NULL,
+                       panel_border = NULL,
+                       panel_border_colour = NULL) {
 
   # ___________________
   # Data validation
   # ___________________
-
   # Identify MCMC or MLE
   MCMC <- "CV_lower" %in% names(data)
 
@@ -60,7 +71,6 @@ growthplot <- function(data,
   # ___________________
   # Custom to this plot
   # ___________________
-
   if (missing(show_two_sex)) {
     tmp1 <- 1 %in% data$sex
     tmp2 <- 2 %in% data$sex
@@ -78,36 +88,13 @@ growthplot <- function(data,
   # ___________________
   # Basic plot set up
   # ___________________
-
   data <- apply_scenarios(data, scenarios, scenario_labels, scenario_order)
 
-  x_axis <- build_x_axis(x = data$xvar,
-                         xlab = xlab,
-                         xlim = xlim,
-                         xbreaks = xbreaks,
-                         xlabels = xlabels,
-                         financial_year = financial_year,
-                         expand_upper = as.numeric(show_final_biomass),
-                         xangle = xangle,
-                         is_date = FALSE)
-
-  y_axis <- build_y_axis(y = data$value,
-                         ylab = ylab,
-                         ylim = ylim,
-                         ybreaks = ybreaks,
-                         ylabels = ylabels,
-                         lower = 0,
-                         upper = data$upper)
-
-
-  p <- ggplot2::ggplot(data) + get_theme_ssand()
-  p <- add_x_scale_continuous(p, x_axis)
-  p <- add_y_scale_continuous(p, y_axis)
+  p <- ggplot2::ggplot(data)
 
   # ___________________
   # Build MLE plot
   # ___________________
-
   if (!MCMC) {
     if(show_two_sex) {
       dataF <- data[data$sex == 1, ]
@@ -139,7 +126,6 @@ growthplot <- function(data,
   # ___________________
   # Build MCMC plot
   # ___________________
-
   if (MCMC) {
     if (!variation_on_variation) {
       p <- p +
@@ -164,8 +150,44 @@ growthplot <- function(data,
   # ___________________
   # Final layers
   # ___________________
-
   p <- add_scenario_facets(p, data, scales = scales, ncol = ncol)
+
+  # ___________________
+  # Axes and theme
+  # ___________________
+  x_axis <- build_x_axis(x = data$xvar,
+                         xlab = xlab,
+                         xlim = xlim,
+                         xbreaks = xbreaks,
+                         xlabels = xlabels,
+                         financial_year = financial_year,
+                         expand_upper = as.numeric(show_final_biomass),
+                         xangle = xangle,
+                         is_date = FALSE)
+
+  y_axis <- build_y_axis(y = data$value,
+                         ylab = ylab,
+                         ylim = ylim,
+                         ybreaks = ybreaks,
+                         ylabels = ylabels,
+                         lower = 0,
+                         upper = data$upper)
+
+  p <- add_x_scale_continuous(p, x_axis)
+  p <- add_y_scale_continuous(p, y_axis)
+
+  p <- add_ssand_theme(p,
+                       text_size = text_size,
+                       legend_text_size = legend_text_size,
+                       text_colour = text_colour,
+                       legend_text_colour = legend_text_colour,
+                       legend_position = legend_position,
+                       legend_box = legend_box,
+                       legend_title_blank = legend_title_blank,
+                       panel_border = panel_border,
+                       panel_border_colour = panel_border_colour,
+                       xangle = x_axis$angle)
+
 
   return(p)
 }

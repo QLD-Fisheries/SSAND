@@ -19,6 +19,8 @@
 #' @param show_two_sex Default is FALSE. Set to TRUE to show two sexes on the plot (logical).
 #' @param scales Scales for ggplot2::facet_wrap(). Default is 'free', see ?ggplot2::facet_wrap for options.
 #' @param ncol Number of columns for facet_wrap(). Default is 2.
+#' @param text_size,legend_text_size,text_colour,legend_text_colour,legend_position,legend_box,legend_title_blank,panel_border,panel_border_colour,xangle Optional plotting theme overrides. Defaults are controlled by `theme_ssand()`
+#'   and can be set globally via `set_ssand_style()`.
 #'
 #' @return Weight plot
 #' @export
@@ -35,31 +37,32 @@ weightplot <- function(data,
                        scenario_order = NULL,
                        show_two_sex = FALSE,
                        scales = 'free',
-                       ncol = 2) {
+                       ncol = 2,
+                       xangle = NULL,
+                       legend_position = NULL,
+                       text_size = NULL,
+                       legend_text_size = NULL,
+                       text_colour = NULL,
+                       legend_text_colour = NULL,
+                       legend_box = NULL,
+                       legend_title_blank = NULL,
+                       panel_border = NULL,
+                       panel_border_colour = NULL) {
 
   # ___________________
   # Data validation
   # ___________________
-
   check_data_columns(data, c("xvar","weight","scenario","sex"))
-
-  # ___________________
-  # Custom to this plot
-  # ___________________
-
 
   # ___________________
   # Basic plot set up
   # ___________________
-
   data <- apply_scenarios(data, scenarios, scenario_labels, scenario_order)
 
   # ___________________
   # Build MLE plot
   # ___________________
-
   p <- ggplot2::ggplot(data, ggplot2::aes(x=xvar, y=weight), colour=colours) +
-    get_theme_ssand() +
     ggplot2::geom_line() +
     ggplot2::geom_point() +
     ggplot2::xlab(xlab) +
@@ -67,11 +70,25 @@ weightplot <- function(data,
 
   if (show_two_sex){
     p <- p + (aes(colour = sex)) +
-      # ggplot2::theme(legend.position = "top", legend.title = ggplot2::element_blank()) +
       ggplot2::scale_colour_manual(values = colours)
   }
 
   p <- add_scenario_facets(p, data, scales = scales, ncol = ncol)
+
+  # ___________________
+  # Axes and theme
+  # ___________________
+  p <- add_ssand_theme(p,
+                       text_size = text_size,
+                       legend_text_size = legend_text_size,
+                       text_colour = text_colour,
+                       legend_text_colour = legend_text_colour,
+                       legend_position = legend_position,
+                       legend_box = legend_box,
+                       legend_title_blank = legend_title_blank,
+                       panel_border = panel_border,
+                       panel_border_colour = panel_border_colour,
+                       xangle = xangle)
 
   return(p)
 }

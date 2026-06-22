@@ -7,7 +7,7 @@
 sensitivityplot(
   data,
   parameters = NULL,
-  colours = NULL,
+  colours = fq_palette("cols"),
   parameter_labels = NULL,
   scenarios = NULL,
   scenario_labels = NULL,
@@ -15,9 +15,19 @@ sensitivityplot(
   ncol = 2,
   scales = "free",
   show_x_labels = FALSE,
-  xangle = NULL,
   xlab = "Scenario",
-  ylab = ""
+  ylab = "",
+  xangle = NULL,
+  legend_position = NULL,
+  financial_year = FALSE,
+  text_size = NULL,
+  legend_text_size = NULL,
+  text_colour = NULL,
+  legend_text_colour = NULL,
+  legend_box = NULL,
+  legend_title_blank = NULL,
+  panel_border = NULL,
+  panel_border_colour = NULL
 )
 }
 \arguments{
@@ -43,11 +53,14 @@ Any scenarios not included in "scenario_order" will be tacked on in the order th
 
 \item{show_x_labels}{Set to TRUE to include scenario names on the x-axis (logical).}
 
-\item{xangle}{Set to 90 to rotate x-axis labels 90 degrees.}
-
 \item{xlab}{Label for x-axis (character). Default is "Scenario".}
 
 \item{ylab}{Label for y-axis (character). Default is "".}
+
+\item{xangle}{Set to 90 to rotate x-axis labels 90 degrees.}
+
+\item{text_size, legend_text_size, text_colour, legend_text_colour, legend_position, legend_box, legend_title_blank, panel_border, panel_border_colour, xangle}{Optional plotting theme overrides. Defaults are controlled by \code{theme_ssand()}
+and can be set globally via \code{set_ssand_style()}.}
 }
 \value{
 This function produces comparison plot of parameter estimates across all scenarios.

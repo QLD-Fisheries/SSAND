@@ -1,8 +1,6 @@
-
 compact_null <- function(x) {
   x[!vapply(x, is.null, logical(1))]
 }
-
 
 # This helper means your plotting functions never need to know how theme_ssand() works internally. They just pass through any plot-specific theme overrides.
 add_ssand_theme <- function(p,
@@ -207,3 +205,10 @@ use_theme_ssand <- function(...) {
 
 
 
+
+
+# _________________________________
+# Within specific plotting functions:
+# set plot-specific override ONLY if user didn't specify
+# text_colour <- text_colour %||% "blue"
+# if (is.null(text_colour)) text_colour <- "blue"

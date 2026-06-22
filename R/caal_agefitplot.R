@@ -19,6 +19,9 @@
 #' @param ylab Label for y-axis (character). Default is "Sample size".
 #' @param show_fits Set to TRUE to show model fits. Set to FALSE to show model 'inputs'.
 #' When TRUE, the input data are transformed into proportions rather than absolute values.
+#' @param financial_year Set to TRUE if the assessment was based on financial year (logical). Adjusts the x-axis to show full financial year notation.
+#' @param text_size,legend_text_size,text_colour,legend_text_colour,legend_position,legend_box,legend_title_blank,panel_border,panel_border_colour,xangle Optional plotting theme overrides. Defaults are controlled by `theme_ssand()`
+#'   and can be set globally via `set_ssand_style()`.
 #'
 #' @return A plot of age fits from conditional-age-at-length data
 #' @export
@@ -37,22 +40,29 @@ caal_agefitplot <- function(data,
                             point_size = 1.5,
                             xlab = "Age (years)",
                             ylab = "Proportion",
-                            show_fits = TRUE) {
+                            show_fits = TRUE,
+                            xangle = NULL,
+                            legend_position = NULL,
+                            financial_year = FALSE,
+                            text_size = NULL,
+                            legend_text_size = NULL,
+                            text_colour = NULL,
+                            legend_text_colour = NULL,
+                            legend_box = NULL,
+                            legend_title_blank = NULL,
+                            panel_border = NULL,
+                            panel_border_colour = NULL) {
 
   # ___________________
   # Data validation
   # ___________________
-
-  # Data input warnings
   check_data_columns(data, c("year","bin","obs","exp","scenario","sex","fleet"))
-
 
   data$xvar <- data$bin
 
   # ___________________
   # Custom to this plot
   # ___________________
-
   fleet_val <- fleet
   scenario_val <- scenario
 
@@ -61,7 +71,6 @@ caal_agefitplot <- function(data,
     dplyr::filter(fleet == fleet_val)
 
   if (length(colours) == 1) { colours = c(colours, 'black', 'black')}
-
   if (length(scenario)>1) {warning("Please enter a single scenario to display on plot.")}
 
   data <- data |>
@@ -77,9 +86,28 @@ caal_agefitplot <- function(data,
   # ___________________
   # Basic plot set up
   # ___________________
+  p <- ggplot2::ggplot(data)
 
-  data <- apply_scenarios(data, scenarios, scenario_labels, scenario_order)
+  # ___________________
+  # Build MLE plot
+  # ___________________
+  p <- p +
+    ggplot2::geom_bar(ggplot2::aes(x=bin,y=obs), fill=colours[1], stat='identity')
 
+  if (show_fits) {
+    p <- p +
+      ggplot2::geom_line(ggplot2::aes(x=bin,y=exp), colour=colours[2], linewidth=line_width) +
+      ggplot2::geom_point(ggplot2::aes(x=bin,y=exp), colour=colours[3], size=point_size)
+  }
+
+  # ___________________
+  # Final layers
+  # ___________________
+  p <- add_scenario_facets(p, data, scales = scales, ncol = ncol, dir="v")
+
+  # ___________________
+  # Axes and theme
+  # ___________________
   x_axis <- build_x_axis(x = data$xvar,
                          xlab = xlab,
                          xlim = xlim,
@@ -99,27 +127,19 @@ caal_agefitplot <- function(data,
                          upper = data$upper)
 
 
-  p <- ggplot2::ggplot(data) + get_theme_ssand()
   p <- add_x_scale_continuous(p, x_axis)
   p <- add_y_scale_continuous(p, y_axis)
 
-  # ___________________
-  # Build MLE plot
-  # ___________________
-  p <- p +
-    ggplot2::geom_bar(ggplot2::aes(x=bin,y=obs), fill=colours[1], stat='identity')
-
-  if (show_fits) {
-    p <- p +
-      ggplot2::geom_line(ggplot2::aes(x=bin,y=exp), colour=colours[2], linewidth=line_width) +
-      ggplot2::geom_point(ggplot2::aes(x=bin,y=exp), colour=colours[3], size=point_size)
-  }
-
-  # ___________________
-  # Final layers
-  # ___________________
-
-  p <- add_scenario_facets(p, data, scales = scales, ncol = ncol, dir="v")
-
+  p <- add_ssand_theme(p,
+                       text_size = text_size,
+                       legend_text_size = legend_text_size,
+                       text_colour = text_colour,
+                       legend_text_colour = legend_text_colour,
+                       legend_position = legend_position,
+                       legend_box = legend_box,
+                       legend_title_blank = legend_title_blank,
+                       panel_border = panel_border,
+                       panel_border_colour = panel_border_colour,
+                       xangle = x_axis$angle)
   return(p)
 }

@@ -18,9 +18,7 @@
 #' @param ylabels A vector of labels for the y-axis breaks.
 #' @param xlim A vector of lower and upper x-axis limits (e.g. c(1950, 2020)) (numeric).
 #' @param ylim A vector of lower and upper y-axis limits (e.g. c(0,1)) (numeric).
-#' @param xangle Set to 90 to rotate x-axis labels 90 degrees.
 #' @param point_size Size of points used in ggplot2::geom_line(). Default is 1.5.
-#' @param text_size Text size (num). Default is 12.
 #' @param scenarios A vector of scenario numbers to be shown on plot (numeric). This was already specified in prep file, but this is a manual override to save running the prep function again.
 #' @param scenario_labels A vector of customised scenario names (character). Default is "Scenario 1", "Scenario 2", etc.
 #' @param scenario_order A vector to reorder how scenarios are displayed (character). Use the label names defined in "scenario_labels".
@@ -37,12 +35,15 @@
 #' @param aggregate_scenarios Set to TRUE to calculate credible intervals across all scenarios (logical). Only activated if mcmc_style==CI.
 #' @param line_width Width of median lines (numeric). Default is 1.
 #' @param hair_width Width of fine MCMC hairs (numeric). Default is 0.5.
-#' @param legend_box Display option for legend (character). Choose "vertical" to stack legend types vertically, or "horizontal" to keep legends in one row.
 #' @param band_colour Colour of bands (character). Only used when mcmc_style=="banded". Input one colour, bands will be distinguished using an alpha.
-#' @param legend_position Position of the legend ("none", "left", "right", "bottom", "top", or two-element numeric vector for x and y position). Default is "top".
+#' @param band_labels Labels for bands. Default is NULL and interval is used.
 #' @param line_type A vector of linetypes (e.g. "solid", "dashed") for median lines.
 #' @param colours A vector of colours used (character).
 #' @param boxplot_outliers Set to FALSE to remove outlier points from boxplot. Default is TRUE.
+#' @param sample Number of samples to plot from each MCMC chain to ease burden of rendering dense plots (numeric).
+#' @param CI_range Specify credible interval range (numeric). Only activated if mcmc_style==CI.
+#' @param text_size,legend_text_size,text_colour,legend_text_colour,legend_position,legend_box,legend_title_blank,panel_border,panel_border_colour,xangle Optional plotting theme overrides. Defaults are controlled by `theme_ssand()`
+#'   and can be set globally via `set_ssand_style()`.
 #'
 #' @return Fishing mortality plot
 #' @export
@@ -63,16 +64,13 @@ Fplot <- function(data,
                   ylabels = NULL,
                   xlim = NULL,
                   ylim = NULL,
-                  xangle = NULL,
                   point_size=1.5,
-                  text_size=12,
                   scenarios = NULL,
                   scenario_labels = NULL,
                   scenario_order = NULL,
                   scales = 'free',
                   ncol = 2,
                   sample = NULL,
-                  financial_year = FALSE,
                   show_CI = TRUE,
                   mcmc_style = "CI",
                   show_median = c("median_F","trajectory"),
@@ -81,16 +79,12 @@ Fplot <- function(data,
                   alpha = NULL,
                   line_width = 0.7,
                   hair_width = 0.5,
-                  legend_box = "horizontal",
-                  legend_position= "top",
                   band_colour = "black",
                   band_labels = NULL,
                   line_type = c("solid","dashed"),
                   colours = c("black","darkred"),
                   boxplot_outliers = TRUE,
-
                   xangle = NULL,
-                  colours = NULL,
                   legend_position = NULL,
                   financial_year = FALSE,
                   text_size = NULL,
@@ -98,14 +92,13 @@ Fplot <- function(data,
                   text_colour = NULL,
                   legend_text_colour = NULL,
                   legend_box = NULL,
+                  legend_title_blank = NULL,
                   panel_border = NULL,
-                  panel_border_colour = NULL,
-                  ){
+                  panel_border_colour = NULL){
 
   # ___________________
   # Data validation
   # ___________________
-
   # Identify MCMC or MLE
   MCMC <- "med" %in% names(data)
 
@@ -115,7 +108,6 @@ Fplot <- function(data,
 
   # MCMC warnings
   show_median <- simplify_show_median(show_median, c("median_F","trajectory","none"))
-
   check_mcmc_style(mcmc_style)
   if (MCMC) {data$upper <- data$prob_upper; data$lower <- data$prob_lower}
   if (MCMC) data$med[startsWith(data$med, "median_")] <- "annual"
@@ -123,14 +115,7 @@ Fplot <- function(data,
   data$xvar <- data$year
 
   if (is.null(alpha) & mcmc_style !="banded") {alpha=0.7}
-
-  # Determine axis settings if missing
   facet_wrap <- length(unique(data$scenario))>1 & !aggregate_scenarios
-
-  # ___________________
-  # Custom to this plot
-  # ___________________
-
 
   # ___________________
   # Basic plot set up
@@ -163,7 +148,6 @@ Fplot <- function(data,
   # ___________________
   # Build MLE plot
   # ___________________
-
   if (!MCMC) {
     p <- p +
       ggplot2::geom_point(ggplot2::aes(x=year,y=value), size=point_size)
@@ -177,15 +161,15 @@ Fplot <- function(data,
   # ___________________
   # Build MCMC plot
   # ___________________
-
   if (MCMC) {
     if (mcmc_style == "boxplot") p <- mcmc_boxplot(p, data, xlim, boxplot_outliers)
     if (mcmc_style == "banded")  p <- mcmc_banded(p, data, alpha, band_labels, band_colour)
     if (mcmc_style == "hairy")   p <- mcmc_hairy(p, data, hair_width)
     if (mcmc_style == "CI")      p <- mcmc_CI(p, data, aggregate_scenarios, CI_range, alpha)
-    if (mcmc_style == "joy")     p <- mcmc_joy(p, data, CI_range, ridge_colour, rel_min_height, alpha, ridge_scale, show_CI,
-                                               ybreaks, ylin,ylab, xlab, legend_position, text_size,xbreaks,legend_box,facet_wrap,
-                                               show_median,xlabels,ylabels)
+    # if (mcmc_style == "joy")     p <- mcmc_joy(p, data, CI_range, ridge_colour, rel_min_height, alpha, ridge_scale, show_CI,
+    #                                            ybreaks, ylin,ylab, xlab, legend_position, text_size,xbreaks,legend_box,facet_wrap,
+    #                                            show_median,xlabels,ylabels)
+
     # Add median lines
     p <- show_median_lines("fishing mortality",p,data,show_median,line_width,colours)
   }
@@ -196,12 +180,8 @@ Fplot <- function(data,
   if (facet_wrap) p <- add_scenario_facets(p, data, scales = scales, ncol = ncol)
 
   # ___________________
-  # Theme
+  # Axes and theme
   # ___________________
-
-  # set plot-specific override ONLY if user didn't specify
-  # text_colour <- text_colour %||% "blue"
-  # if (is.null(text_colour)) text_colour <- "blue"
   p <- add_ssand_theme(p,
                        text_size = text_size,
                        legend_text_size = legend_text_size,

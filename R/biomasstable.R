@@ -37,7 +37,7 @@ biomasstable <- function (data,
   if (missing(caption)) {caption = paste0("Summary of model outcomes for all scenarios.$B_{",
                                           data[[3]],"}$\\% is the most likely biomass in ",
                                           data[[3]]," relative to unfished in ",
-                                          data[[2]]," with the 95\\% confidence interval for maximum likelihoods estimations and 95\\% credible interval for MCMC estimations.")
+                                          data[[2]]," with the 95\\% confidence interval for maximum likelihood estimations and 95\\% credible interval for MCMC estimations.")
   }
 
   if (!include_median) {

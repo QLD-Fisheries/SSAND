@@ -9,7 +9,6 @@ mcmc_finalbiomassposteriorplot(
   colours = c("#AD3D25", "#FCC17E", "#0085B8", "#00925B"),
   xlab = NULL,
   ylab = NULL,
-  legend_position = "top",
   CI_label_position = "bottom",
   line_type = NULL,
   line_type_label = NULL,
@@ -17,7 +16,17 @@ mcmc_finalbiomassposteriorplot(
   annotation_text_size = 5,
   legend_text_size = 11.5,
   axis_title_size = 13,
-  axis_text_size = 12
+  axis_text_size = 12,
+  xangle = NULL,
+  legend_position = NULL,
+  financial_year = FALSE,
+  text_size = NULL,
+  text_colour = NULL,
+  legend_text_colour = NULL,
+  legend_box = NULL,
+  legend_title_blank = NULL,
+  panel_border = NULL,
+  panel_border_colour = NULL
 )
 }
 \arguments{
@@ -28,8 +37,6 @@ mcmc_finalbiomassposteriorplot(
 \item{xlab}{Label for x-axis (character). Default is "".}
 
 \item{ylab}{Label for y-axis (character). Default is "".}
-
-\item{legend_position}{Position of the legend ("none", "left", "right", "bottom", "top", or two-element numeric vector for x and y position). Default is "top".}
 
 \item{CI_label_position}{Specify position for labels for 95\% confidence interval percentages. Default "bottom", alternatives are "top" or "none".}
 
@@ -46,6 +53,11 @@ mcmc_finalbiomassposteriorplot(
 \item{axis_title_size}{Sie of axis title. Default is 13.}
 
 \item{axis_text_size}{Size of axis text. Default is 12.}
+
+\item{legend_position}{Position of the legend ("none", "left", "right", "bottom", "top", or two-element numeric vector for x and y position). Default is "top".}
+
+\item{text_size, legend_text_size, text_colour, legend_text_colour, legend_position, legend_box, legend_title_blank, panel_border, panel_border_colour, xangle}{Optional plotting theme overrides. Defaults are controlled by \code{theme_ssand()}
+and can be set globally via \code{set_ssand_style()}.}
 }
 \value{
 A posterior plot for final biomass ratio with risk area (below B20) highlighted
