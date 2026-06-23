@@ -118,26 +118,26 @@ dataplot <- function(data,
   # ___________________
   # Axes and theme
   # ___________________
-  x_axis <- build_x_axis(x = data$xvar,
-                         xlab = xlab,
-                         xlim = xlim,
-                         xbreaks = xbreaks,
-                         xlabels = xlabels,
-                         financial_year = financial_year,
-                         expand_upper = as.numeric(show_final_biomass),
-                         xangle = xangle,
-                         is_date = FALSE)
+  # x_axis <- build_x_axis(x = data$xvar,
+  #                        xlab = xlab,
+  #                        xlim = xlim,
+  #                        xbreaks = xbreaks,
+  #                        xlabels = xlabels,
+  #                        financial_year = financial_year,
+  #                        expand_upper = as.numeric(show_final_biomass),
+  #                        xangle = xangle,
+  #                        is_date = FALSE)
+  #
+  # y_axis <- build_y_axis(y = data$value,
+  #                        ylab = ylab,
+  #                        ylim = ylim,
+  #                        ybreaks = ybreaks,
+  #                        ylabels = ylabels,
+  #                        lower = 0,
+  #                        upper = data$upper)
 
-  y_axis <- build_y_axis(y = data$value,
-                         ylab = ylab,
-                         ylim = ylim,
-                         ybreaks = ybreaks,
-                         ylabels = ylabels,
-                         lower = 0,
-                         upper = data$upper)
-
-  p <- add_x_scale_continuous(p, x_axis)
-  p <- add_y_scale_continuous(p, y_axis)
+  # p <- add_x_scale_continuous(p, x_axis)
+  # p <- add_y_scale_continuous(p, y_axis)
 
   p <- add_ssand_theme(p,
                        text_size = text_size,
@@ -149,7 +149,7 @@ dataplot <- function(data,
                        legend_title_blank = legend_title_blank,
                        panel_border = panel_border,
                        panel_border_colour = panel_border_colour,
-                       xangle = x_axis$angle)
+                       xangle = xangle)
 
   p <- p +
     ggplot2::theme(strip.background = ggplot2::element_rect(color=ggplot2::alpha("white",0), fill="white", linewidth = 0, linetype="solid")) +
