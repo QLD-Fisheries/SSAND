@@ -8,6 +8,12 @@ catchabilityplot(
   data,
   xlab = "Month",
   ylab = "Catchability coefficient (q)",
+  xbreaks = NULL,
+  ybreaks = NULL,
+  xlabels = NULL,
+  ylabels = NULL,
+  xlim = NULL,
+  ylim = NULL,
   ncol = 2,
   scales = "free",
   colours = fq_palette("alisecolours"),
@@ -34,6 +40,18 @@ catchabilityplot(
 
 \item{ylab}{Label for y-axis (character). Default is "Catchability coefficient (q)".}
 
+\item{xbreaks}{A vector of breaks between x-axis labels, used in ggplot2::scale_x_continous() (numeric).}
+
+\item{ybreaks}{A vector of breaks between y-axis labels, used in ggplot2::scale_y_continous() (numeric).}
+
+\item{xlabels}{A vector of labels for the x-axis breaks.}
+
+\item{ylabels}{A vector of labels for the y-axis breaks.}
+
+\item{xlim}{A vector of lower and upper x-axis limits (e.g. c(1950, 2020)) (numeric).}
+
+\item{ylim}{A vector of lower and upper y-axis limits (e.g. c(0,1)) (numeric).}
+
 \item{ncol}{Number of columns for facet_wrap(). Default is 2.}
 
 \item{scales}{Scales for ggplot2::facet_wrap(). Default is 'free', see ?ggplot2::facet_wrap for options.}
@@ -48,7 +66,7 @@ catchabilityplot(
 If "scenario_labels" is left blank, the labels will be "Scenario 1", "Scenario 2" etc.
 Any scenarios not included in "scenario_order" will be tacked on in the order they appear in the input data.}
 
-\item{text_size}{Text size (num). Default is 12.}
+\item{financial_year}{Set to TRUE if the assessment was based on financial year (logical). Adjusts the x-axis to show full financial year notation.}
 
 \item{text_size, legend_text_size, text_colour, legend_text_colour, legend_position, legend_box, legend_title_blank, panel_border, panel_border_colour, xangle}{Optional plotting theme overrides. Defaults are controlled by \code{theme_ssand()}
 and can be set globally via \code{set_ssand_style()}.}

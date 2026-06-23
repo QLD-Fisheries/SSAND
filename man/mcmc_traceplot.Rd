@@ -40,6 +40,8 @@ mcmc_traceplot(
 
 \item{ylab}{Label for y-axis (character). Default is "".}
 
+\item{financial_year}{Set to TRUE if the assessment was based on financial year (logical). Adjusts the x-axis to show full financial year notation.}
+
 \item{text_size, legend_text_size, text_colour, legend_text_colour, legend_position, legend_box, legend_title_blank, panel_border, panel_border_colour, xangle}{Optional plotting theme overrides. Defaults are controlled by \code{theme_ssand()}
 and can be set globally via \code{set_ssand_style()}.}
 }

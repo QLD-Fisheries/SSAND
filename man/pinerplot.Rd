@@ -16,7 +16,6 @@ pinerplot(
   fleet_names = NULL,
   xangle = NULL,
   legend_position = NULL,
-  financial_year = FALSE,
   text_size = NULL,
   legend_text_size = NULL,
   text_colour = NULL,
@@ -43,8 +42,6 @@ pinerplot(
 \item{shapes}{A vector of shapes used (character).}
 
 \item{fleet_names}{A vector of customised fleet names for legend (character).}
-
-\item{legend_position}{Position of the legend ("none", "left", "right", "bottom", "top", or two-element numeric vector for x and y position). Default is "top".}
 
 \item{text_size, legend_text_size, text_colour, legend_text_colour, legend_position, legend_box, legend_title_blank, panel_border, panel_border_colour, xangle}{Optional plotting theme overrides. Defaults are controlled by \code{theme_ssand()}
 and can be set globally via \code{set_ssand_style()}.}

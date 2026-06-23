@@ -56,6 +56,10 @@ globalVariables(c("Active_Cnt", "Age_Beg", "Biomass", "Exp", "Fleet", "Fleet_Nam
                   "region", "species", "species_code", "Days fished",
                   "Estimate", "Std. Error", "as.formula", "cm", "fit", "nls", "nls.control", "param", "total",
                   "region_coarse", "season", "x_var", "method_type", "CalendarYear", "MonthMM", "site", "observation_number", "fitted", "TripID",
-                  "Wt_M", "sum1"
+                  "Wt_M", "sum1",
+                  "annotation_position", "band_labels", "check_cols", "colour_categories",
+                  "default_catch_ylab", "facet_wrap", "limit_value", "scales", "scenario_order",
+                  "scenarios", "shapes", "show_dates_on_axis", "show_limit_line", "show_target_line",
+                  "target_value", "x_axis", "xbreaks", "xlabels", "xlim", "ybreaks", "ylabels", "ylim"
                   ))
 

@@ -82,6 +82,8 @@ Any scenarios not included in "scenario_order" will be tacked on in the order th
 
 \item{ncol}{Number of columns for facet_wrap(). Default is 2.}
 
+\item{sample}{Number of samples to plot from each MCMC chain to ease burden of rendering dense plots (numeric).}
+
 \item{show_CI}{Set to TRUE to show CI range for MLE plots only (logical).}
 
 \item{mcmc_style}{The type of MCMC plot to be displayed (character). Options are "banded", "hairy", "boxplot", "CI" and "joy", the default is "banded". Only one option can be selected.}
@@ -91,6 +93,8 @@ Any scenarios not included in "scenario_order" will be tacked on in the order th
 
 \item{aggregate_scenarios}{Set to TRUE to calculate credible intervals across all scenarios (logical). Only activated if mcmc_style==CI.}
 
+\item{CI_range}{Specify credible interval range (numeric). Only activated if mcmc_style==CI.}
+
 \item{alpha}{Transparency for range (numeric) used in ggplot2::geom_density_ridges(). Default is 0.7.}
 
 \item{line_width}{Width of median lines (numeric). Default is 1.}
@@ -99,13 +103,13 @@ Any scenarios not included in "scenario_order" will be tacked on in the order th
 
 \item{band_colour}{Colour of bands (character). Only used when mcmc_style=="banded". Input one colour, bands will be distinguished using an alpha.}
 
+\item{band_labels}{Labels for bands. Default is NULL and interval is used.}
+
 \item{line_type}{A vector of linetypes (e.g. "solid", "dashed") for median lines.}
 
 \item{colours}{A vector of colours used (character).}
 
 \item{boxplot_outliers}{Set to FALSE to remove outlier points from boxplot. Default is TRUE.}
-
-\item{xangle}{Set to 90 to rotate x-axis labels 90 degrees.}
 
 \item{financial_year}{Set to TRUE if the assessment was based on financial year (logical). Adjusts the x-axis to show full financial year notation.}
 

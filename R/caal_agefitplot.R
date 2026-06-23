@@ -17,9 +17,16 @@
 #' @param point_size Size of points used in ggplot2::geom_line(). Default is 1.5.
 #' @param xlab Label for x-axis (character). Default is "Age (years)".
 #' @param ylab Label for y-axis (character). Default is "Sample size".
+#' @param xbreaks A vector of breaks between x-axis labels, used in ggplot2::scale_x_continous() (numeric).
+#' @param ybreaks A vector of breaks between y-axis labels, used in ggplot2::scale_y_continous() (numeric).
+#' @param xlabels A vector of labels for the x-axis breaks.
+#' @param ylabels A vector of labels for the y-axis breaks.
+#' @param xlim A vector of lower and upper x-axis limits (e.g. c(1950, 2020)) (numeric).
+#' @param ylim A vector of lower and upper y-axis limits (e.g. c(0,1)) (numeric).
 #' @param show_fits Set to TRUE to show model fits. Set to FALSE to show model 'inputs'.
 #' When TRUE, the input data are transformed into proportions rather than absolute values.
 #' @param financial_year Set to TRUE if the assessment was based on financial year (logical). Adjusts the x-axis to show full financial year notation.
+
 #' @param text_size,legend_text_size,text_colour,legend_text_colour,legend_position,legend_box,legend_title_blank,panel_border,panel_border_colour,xangle Optional plotting theme overrides. Defaults are controlled by `theme_ssand()`
 #'   and can be set globally via `set_ssand_style()`.
 #'
@@ -38,9 +45,15 @@ caal_agefitplot <- function(data,
                             ncol = 3,
                             scales = 'free',
                             point_size = 1.5,
+                            show_fits = TRUE,
                             xlab = "Age (years)",
                             ylab = "Proportion",
-                            show_fits = TRUE,
+                            xbreaks = NULL,
+                            ybreaks = NULL,
+                            xlabels = NULL,
+                            ylabels = NULL,
+                            xlim = NULL,
+                            ylim = NULL,
                             xangle = NULL,
                             legend_position = NULL,
                             financial_year = FALSE,
@@ -57,8 +70,8 @@ caal_agefitplot <- function(data,
   # Data validation
   # ___________________
   check_data_columns(data, c("year","bin","obs","exp","scenario","sex","fleet"))
-
   data$xvar <- data$bin
+  data <- data |> dplyr::mutate(upper = max(exp,obs))
 
   # ___________________
   # Custom to this plot

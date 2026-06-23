@@ -18,7 +18,6 @@ phaseplot(
   ylab = expression(Fishing ~ pressure ~ ratio ~ (relative ~ to ~ F[MSY])),
   xangle = NULL,
   legend_position = NULL,
-  financial_year = FALSE,
   text_size = NULL,
   legend_text_size = NULL,
   text_colour = NULL,
@@ -53,8 +52,6 @@ Any scenarios not included in "scenario_order" will be tacked on in the order th
 \item{xlab}{Label for x-axis (character). Default is "Biomass (relative)".}
 
 \item{ylab}{Label for y-axis (character). Default is "Fishing pressure ratio (relative to FMSY))".}
-
-\item{text_size}{Text size (num). Default is 12.}
 
 \item{text_size, legend_text_size, text_colour, legend_text_colour, legend_position, legend_box, legend_title_blank, panel_border, panel_border_colour, xangle}{Optional plotting theme overrides. Defaults are controlled by \code{theme_ssand()}
 and can be set globally via \code{set_ssand_style()}.}

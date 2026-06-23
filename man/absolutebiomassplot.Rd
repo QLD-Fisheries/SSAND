@@ -36,6 +36,7 @@ absolutebiomassplot(
   show_dates_on_axis = FALSE,
   sample = NULL,
   band_colour = "black",
+  band_labels = NULL,
   show_median = "median_cpue",
   mcmc_style = "banded",
   line_width = 1,
@@ -124,6 +125,8 @@ Any scenarios not included in "scenario_order" will be tacked on in the order th
 
 \item{band_colour}{Colour of bands (character). Only used when mcmc_style=="banded". Input one colour, bands will be distinguished using an alpha.}
 
+\item{band_labels}{Labels for bands. Default is NULL and interval is used.}
+
 \item{show_median}{Type of median shown. Default "annual_biomass" shows the median of each year,
 "trajectory" shows median trajectory based on biomass in final year,}
 
@@ -145,15 +148,7 @@ Any scenarios not included in "scenario_order" will be tacked on in the order th
 
 \item{boxplot_outliers}{Set to FALSE to remove outlier points from boxplot. Default is TRUE.}
 
-\item{xangle}{Set to 90 to rotate x-axis labels 90 degrees.}
-
-\item{legend_position}{Position of the legend ("none", "left", "right", "bottom", "top", or two-element numeric vector for x and y position). Default is "top".}
-
 \item{financial_year}{Set to TRUE if the assessment was based on financial year (logical). Adds 1 to each year in the dataset.}
-
-\item{text_size}{Text size (num). Default is 12.}
-
-\item{legend_box}{Display option for legend (character). Choose "vertical" to stack legend types vertically, or "horizontal" to keep legends in one row.}
 
 \item{text_size, legend_text_size, text_colour, legend_text_colour, legend_position, legend_box, legend_title_blank, panel_border, panel_border_colour, xangle}{Optional plotting theme overrides. Defaults are controlled by \code{theme_ssand()}
 and can be set globally via \code{set_ssand_style()}.}

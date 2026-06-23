@@ -28,7 +28,6 @@ selectivityplot(
   years = NULL,
   xangle = NULL,
   legend_position = NULL,
-  financial_year = FALSE,
   text_size = NULL,
   legend_text_size = NULL,
   text_colour = NULL,
@@ -83,8 +82,6 @@ Any scenarios not included in "scenario_order" will be tacked on in the order th
 \item{time_blocks}{Set to TRUE to show time blocks. You might want to also set selectivity_type to something relevant such as "Discard"}
 
 \item{years}{A vector of years to show. Relevant if time_blocks==TRUE.}
-
-\item{text_size}{Text size (num). Default is 12.}
 
 \item{text_size, legend_text_size, text_colour, legend_text_colour, legend_position, legend_box, legend_title_blank, panel_border, panel_border_colour, xangle}{Optional plotting theme overrides. Defaults are controlled by \code{theme_ssand()}
 and can be set globally via \code{set_ssand_style()}.}

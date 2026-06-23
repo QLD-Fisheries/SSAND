@@ -11,6 +11,12 @@
 #' @param maturity_type To define the x-axis. Use "length1" or "age1", depending on what you'd like on the x-axis, if you modelled length-based maturity. Use "length2" or "age2", depending on what you'd like on the x-axis, if you modelled age-based maturity.
 #' @param xlab Label for x-axis (character). Default is "Age".
 #' @param ylab Label for y-axis (character). Default is "Carapace length (cm, beginning of year)".
+#' @param xbreaks A vector of breaks between x-axis labels, used in ggplot2::scale_x_continous() (numeric).
+#' @param ybreaks A vector of breaks between y-axis labels, used in ggplot2::scale_y_continous() (numeric).
+#' @param xlabels A vector of labels for the x-axis breaks.
+#' @param ylabels A vector of labels for the y-axis breaks.
+#' @param xlim A vector of lower and upper x-axis limits (e.g. c(1950, 2020)) (numeric).
+#' @param ylim A vector of lower and upper y-axis limits (e.g. c(0,1)) (numeric).
 #' @param scenarios A vector of scenario numbers to be shown on plot (numeric). This was already specified in prep file, but this is a manual override to save running the prep function again.
 #' @param scenario_labels A vector of customised scenario names (character). Default is "Scenario 1", "Scenario 2", etc.
 #' @param scenario_order A vector to reorder how scenarios are displayed (character). Use the label names defined in "scenario_labels".
@@ -36,6 +42,12 @@ maturityplot <- function(data,
                          maturity_type = "length1",
                          xlab = NULL,
                          ylab = "Maturity",
+                         xbreaks = NULL,
+                         ybreaks = NULL,
+                         xlabels = NULL,
+                         ylabels = NULL,
+                         xlim = NULL,
+                         ylim = NULL,
                          scenarios = NULL,
                          scenario_labels = NULL,
                          scenario_order = NULL,

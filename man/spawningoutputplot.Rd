@@ -17,7 +17,6 @@ spawningoutputplot(
   ncol = 2,
   xangle = NULL,
   legend_position = NULL,
-  financial_year = FALSE,
   text_size = NULL,
   legend_text_size = NULL,
   text_colour = NULL,

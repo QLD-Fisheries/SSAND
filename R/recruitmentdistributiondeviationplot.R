@@ -39,6 +39,7 @@
 #' @param sample Number of samples to plot from each MCMC chain to ease burden of rendering dense plots (numeric).
 #' @param band_labels Labels for bands. Default is NULL and interval is used.
 #' @param band_colour Colour of bands (character). Only used when mcmc_style=="banded". Input one colour, bands will be distinguished using an alpha.
+#' @param boxplot_outliers Set to FALSE to remove outlier points from boxplot. Default is TRUE.
 #' @param text_size,legend_text_size,text_colour,legend_text_colour,legend_position,legend_box,legend_title_blank,panel_border,panel_border_colour,xangle Optional plotting theme overrides. Defaults are controlled by `theme_ssand()`
 #'   and can be set globally via `set_ssand_style()`.
 #'
@@ -152,7 +153,7 @@ recruitmentdistributiondeviationplot <- function(data,
                          xbreaks = xbreaks,
                          xlabels = xlabels,
                          financial_year = financial_year,
-                         show_dates_on_axis = show_dates_on_axis,
+                         show_dates_on_axis = FALSE,
                          expand_upper = 0,
                          xangle = xangle,
                          is_date = FALSE)

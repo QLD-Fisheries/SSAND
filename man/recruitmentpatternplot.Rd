@@ -16,7 +16,6 @@ recruitmentpatternplot(
   colours = c("black", "grey80", "grey20", "grey60", "grey40"),
   xangle = NULL,
   legend_position = NULL,
-  financial_year = FALSE,
   text_size = NULL,
   legend_text_size = NULL,
   text_colour = NULL,

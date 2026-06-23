@@ -164,7 +164,7 @@ mcmc_finalbiomassposteriorplot <- function (data,
                        legend_title_blank = legend_title_blank,
                        panel_border = panel_border,
                        panel_border_colour = panel_border_colour,
-                       xangle = x_axis$angle)
+                       xangle = xangle)
 
   p <- p +
     ggplot2::theme(

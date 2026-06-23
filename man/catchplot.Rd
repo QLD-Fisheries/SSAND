@@ -81,10 +81,6 @@ Any scenarios not included in "scenario_order" will be tacked on in the order th
 
 \item{ncol}{Number of columns for facet_wrap(). Default is 2.}
 
-\item{xangle}{Set to 90 to rotate x-axis labels 90 degrees.}
-
-\item{legend_position}{Position of the legend ("none", "left", "right", "bottom", "top", or two-element numeric vector for x and y position). Default is "top".}
-
 \item{financial_year}{Set to TRUE if the assessment was based on financial year (logical). Adjusts the x-axis to show full financial year notation.}
 
 \item{text_size, legend_text_size, text_colour, legend_text_colour, legend_position, legend_box, legend_title_blank, panel_border, panel_border_colour, xangle}{Optional plotting theme overrides. Defaults are controlled by \code{theme_ssand()}
@@ -99,7 +95,7 @@ Catch plot
 \examples{
 data <- catchplot_prep_SS(ss_mle)
 catchplot(data, fleet_names = c("Commercial","Recreational"))
-catchplot(data, fleet_names = c("Commercial","Recreational"), financial_year = TRUE, xlab = "Financial year")
+catchplot(data, financial_year = TRUE, xlab = "Financial year")
 
 data <- catchplot_prep_DD(dd_mle)
 catchplot(data)

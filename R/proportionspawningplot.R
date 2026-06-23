@@ -42,7 +42,6 @@ proportionspawningplot <- function(data,
                                    ylab = "Proportion spawning",
                                    xangle = NULL,
                                    legend_position = NULL,
-                                   financial_year = FALSE,
                                    text_size = NULL,
                                    legend_text_size = NULL,
                                    text_colour = NULL,
@@ -89,7 +88,7 @@ proportionspawningplot <- function(data,
                        legend_title_blank = legend_title_blank,
                        panel_border = panel_border,
                        panel_border_colour = panel_border_colour,
-                       xangle = x_axis$angle)
+                       xangle = xangle)
 
   return(p)
 }

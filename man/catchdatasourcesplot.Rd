@@ -8,6 +8,12 @@ catchdatasourcesplot(
   data,
   ylab = "",
   xlab = "",
+  xbreaks = NULL,
+  ybreaks = NULL,
+  xlabels = NULL,
+  ylabels = NULL,
+  xlim = NULL,
+  ylim = NULL,
   colours = c("#FFC000", "#9D9D9D", "#FFE699"),
   legend_size = 6,
   xangle = NULL,
@@ -30,17 +36,23 @@ catchdatasourcesplot(
 
 \item{xlab}{Label for x-axis (character). Default is "".}
 
+\item{xbreaks}{A vector of breaks between x-axis labels, used in ggplot2::scale_x_continous() (numeric).}
+
+\item{ybreaks}{A vector of breaks between y-axis labels, used in ggplot2::scale_y_continous() (numeric).}
+
+\item{xlabels}{A vector of labels for the x-axis breaks.}
+
+\item{ylabels}{A vector of labels for the y-axis breaks.}
+
+\item{xlim}{A vector of lower and upper x-axis limits (e.g. c(1950, 2020)) (numeric).}
+
+\item{ylim}{A vector of lower and upper y-axis limits (e.g. c(0,1)) (numeric).}
+
 \item{colours}{A vector of colours used (character). Default is c("#FFC000","#9D9D9D","#FFE699").}
 
 \item{legend_size}{Size of legend markers. Default is 6.}
 
-\item{xangle}{Set to 90 to rotate x-axis labels 90 degrees.}
-
-\item{legend_position}{Position of the legend ("none", "left", "right", "bottom", "top", or two-element numeric vector for x and y position). Default is "none".}
-
 \item{financial_year}{Set to TRUE if the assessment was based on financial year (logical). Adjusts the x-axis to show full financial year notation.}
-
-\item{text_size}{Text size (num). Default is 12.}
 
 \item{text_size, legend_text_size, text_colour, legend_text_colour, legend_position, legend_box, legend_title_blank, panel_border, panel_border_colour, xangle}{Optional plotting theme overrides. Defaults are controlled by \code{theme_ssand()}
 and can be set globally via \code{set_ssand_style()}.}

@@ -18,6 +18,9 @@ ageplot(
   ylabels = NULL,
   xlim = NULL,
   ylim = NULL,
+  scenarios = NULL,
+  scenario_labels = NULL,
+  scenario_order = NULL,
   scales = "fixed",
   ncol = 4,
   direction = "v",
@@ -64,6 +67,12 @@ ageplot(
 
 \item{ylim}{A vector of lower and upper y-axis limits (e.g. c(0,1)) (numeric).}
 
+\item{scenarios}{A vector of scenario numbers to be shown on plot (numeric). This was already specified in prep file, but this is a manual override to save running the prep function again.}
+
+\item{scenario_labels}{A vector of customised scenario names (character). Default is "Scenario 1", "Scenario 2", etc.}
+
+\item{scenario_order}{A vector to reorder how scenarios are displayed (character). Use the label names defined in "scenario_labels".}
+
 \item{scales}{Scales for ggplot2::facet_wrap(). Default is 'free', see ?ggplot2::facet_wrap for options.}
 
 \item{ncol}{Number of columns for facet_wrap(). Default is 2.}
@@ -75,8 +84,6 @@ ageplot(
 \item{MLS_colour}{Colour of MLS line (character). Default is "black".}
 
 \item{MLS_label}{Label of MLS line (character). Default is "MLS".}
-
-\item{legend_position}{Position of the legend ("none", "left", "right", "bottom", "top", or two-element numeric vector for x and y position). Default is "top".}
 
 \item{financial_year}{Set to TRUE if the assessment was based on financial year (logical). Adjusts the x-axis to show full financial year notation.}
 

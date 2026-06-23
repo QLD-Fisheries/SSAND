@@ -34,7 +34,7 @@ andreplot <- function(data,
                       colours = c("black","grey80",fq_palette("DAF")),
                       legend_ratio = c(1,10),
                       xangle = NULL,
-                      legend_position = NULL,
+                      legend_position = "top",
                       financial_year = FALSE,
                       text_size = NULL,
                       legend_text_size = NULL,
@@ -69,7 +69,6 @@ andreplot <- function(data,
   # Build MLE plots
   # ___________________
   p_age <- ggplot2::ggplot(data_age, ggplot2::aes(x = length, y = obs)) +
-    get_theme_ssand() +
     ggplot2::geom_ribbon(data = data_age |>
                            dplyr::filter(!is.na(low) & !is.na(upp)),
                          ggplot2::aes(ymin = low, ymax = upp, fill = fill_var)) +
@@ -84,7 +83,6 @@ andreplot <- function(data,
     ggplot2::theme(legend.position = "top")
 
   p_sd <- ggplot2::ggplot(data_sd, ggplot2::aes(x = length, y = obs)) +
-    get_theme_ssand() +
     ggplot2::geom_ribbon(data = data_sd |> dplyr::filter(!is.na(low) & !is.na(upp)),
                          ggplot2::aes(ymin = low, ymax = upp),
                          fill = colours[2]) +
@@ -105,7 +103,7 @@ andreplot <- function(data,
                            legend_title_blank = legend_title_blank,
                            panel_border = panel_border,
                            panel_border_colour = panel_border_colour,
-                           xangle = x_axis$angle)
+                           xangle = xangle)
 
 
   p_sd <- add_ssand_theme(p_sd,
@@ -118,7 +116,7 @@ andreplot <- function(data,
                           legend_title_blank = legend_title_blank,
                           panel_border = panel_border,
                           panel_border_colour = panel_border_colour,
-                          xangle = x_axis$angle)
+                          xangle = xangle)
 
   # Combine two plots into one
   plots <- gridExtra::arrangeGrob(p_age + ggplot2::theme(legend.position="none"), p_sd, nrow=1)

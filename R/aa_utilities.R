@@ -256,6 +256,16 @@ add_x_scale_date <- function(p, axis) {
     )
 }
 
+add_x_scale_discrete <- function(p, axis) {
+  p +
+    ggplot2::scale_x_discrete(
+      name   = axis$xlab,
+      limits = axis$limits,
+      breaks = axis$breaks,
+      labels = axis$labels
+    )
+}
+
 add_x_scale_continuous <- function(p, axis) {
   p +
     ggplot2::scale_x_continuous(
@@ -423,7 +433,7 @@ show_median_lines <- function(label,p,data,show_median,line_width,colours) {
 
 
 
-show_final_biomass <- function(p, data, MCMC, colour_categories,scenario_labels) {
+show_final_biomass <- function(p, data, MCMC, scenario_labels) {
   if (MCMC) {
     plot_dat <- data |>
       dplyr::group_by(scenario_labels) |>
@@ -469,7 +479,7 @@ add_reference_line <- function(p, data, yvalue, colour, annotation_position, lab
 
 
 mcmc_joy <- function(p, data, CI_range, ridge_colour, rel_min_height, alpha, ridge_scale, show_CI,
-                     ybreaks, ylin,ylab, xlab, legend_position, text_size,xbreaks,legend_box,facet_wrap,
+                     ybreaks, ylim, ylab, xlab, legend_position, text_size,xbreaks,legend_box,facet_wrap,
                      show_median,xlabels,ylabels) {
 
   # Joy plot

@@ -28,7 +28,6 @@
 #' @param ylabels A vector of labels for the y-axis breaks.
 #' @param xlim A vector of lower and upper x-axis limits (e.g. c(1950, 2020)) (numeric).
 #' @param ylim A vector of lower and upper y-axis limits (e.g. c(0,1)) (numeric).
-#' @param xangle Set to 90 to rotate x-axis labels 90 degrees.
 #' @param text_size,legend_text_size,text_colour,legend_text_colour,legend_position,legend_box,legend_title_blank,panel_border,panel_border_colour,xangle Optional plotting theme overrides. Defaults are controlled by `theme_ssand()`
 #'   and can be set globally via `set_ssand_style()`.
 #'

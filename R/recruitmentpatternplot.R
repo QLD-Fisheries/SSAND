@@ -88,7 +88,7 @@ recruitmentpatternplot <- function(data,
                        legend_title_blank = legend_title_blank,
                        panel_border = panel_border,
                        panel_border_colour = panel_border_colour,
-                       xangle = x_axis$angle)
+                       xangle = xangle)
 
   # ggplot2::theme(legend.position = 'top')+
   # ggplot2::theme(axis.text.x = ggplot2::element_text(angle=90,vjust=0.5, hjust = 1)) +

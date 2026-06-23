@@ -13,7 +13,6 @@ correlationplot(
   sample = NULL,
   xangle = NULL,
   legend_position = NULL,
-  financial_year = FALSE,
   text_size = NULL,
   legend_text_size = NULL,
   text_colour = NULL,

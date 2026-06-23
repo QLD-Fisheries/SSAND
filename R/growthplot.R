@@ -10,6 +10,12 @@
 #' @param data A data frame with variables age (int), value (num), lower (num), upper (num), sex (int), scenario (int)
 #' @param xlab Label for x-axis (character). Default is "Age".
 #' @param ylab Label for y-axis (character). Default is "Carapace length (cm, beginning of year)".
+#' @param xbreaks A vector of breaks between x-axis labels, used in ggplot2::scale_x_continous() (numeric).
+#' @param ybreaks A vector of breaks between y-axis labels, used in ggplot2::scale_y_continous() (numeric).
+#' @param xlabels A vector of labels for the x-axis breaks.
+#' @param ylabels A vector of labels for the y-axis breaks.
+#' @param xlim A vector of lower and upper x-axis limits (e.g. c(1950, 2020)) (numeric).
+#' @param ylim A vector of lower and upper y-axis limits (e.g. c(0,1)) (numeric).
 #' @param show_two_sex Set to TRUE to activate a feature that is relevant for two-sex models (logical).
 #' @param scenarios A vector of scenario numbers to be shown on plot (numeric). This was already specified in prep file, but this is a manual override to save running the prep function again.
 #' @param scenario_labels A vector of customised scenario names (character). Default is "Scenario 1", "Scenario 2", etc.
@@ -36,6 +42,12 @@
 growthplot <- function(data,
                        xlab = "Age",
                        ylab = "Carapace length (cm, beginning of year)",
+                       xbreaks = NULL,
+                       ybreaks = NULL,
+                       xlabels = NULL,
+                       ylabels = NULL,
+                       xlim = NULL,
+                       ylim = NULL,
                        show_two_sex=NULL,
                        scenarios = NULL,
                        scenario_labels = NULL,

@@ -8,6 +8,12 @@ growthplot(
   data,
   xlab = "Age",
   ylab = "Carapace length (cm, beginning of year)",
+  xbreaks = NULL,
+  ybreaks = NULL,
+  xlabels = NULL,
+  ylabels = NULL,
+  xlim = NULL,
+  ylim = NULL,
   show_two_sex = NULL,
   scenarios = NULL,
   scenario_labels = NULL,
@@ -36,6 +42,18 @@ growthplot(
 
 \item{ylab}{Label for y-axis (character). Default is "Carapace length (cm, beginning of year)".}
 
+\item{xbreaks}{A vector of breaks between x-axis labels, used in ggplot2::scale_x_continous() (numeric).}
+
+\item{ybreaks}{A vector of breaks between y-axis labels, used in ggplot2::scale_y_continous() (numeric).}
+
+\item{xlabels}{A vector of labels for the x-axis breaks.}
+
+\item{ylabels}{A vector of labels for the y-axis breaks.}
+
+\item{xlim}{A vector of lower and upper x-axis limits (e.g. c(1950, 2020)) (numeric).}
+
+\item{ylim}{A vector of lower and upper y-axis limits (e.g. c(0,1)) (numeric).}
+
 \item{show_two_sex}{Set to TRUE to activate a feature that is relevant for two-sex models (logical).}
 
 \item{scenarios}{A vector of scenario numbers to be shown on plot (numeric). This was already specified in prep file, but this is a manual override to save running the prep function again.}
@@ -54,7 +72,7 @@ Any scenarios not included in "scenario_order" will be tacked on in the order th
 
 \item{variation_on_variation}{Set to TRUE to illustrate MCMC variation on the CV or SD values. Default (FALSE) sets the variation in growth to the median MCMC value.}
 
-\item{text_size}{Text size (num). Default is 12.}
+\item{financial_year}{Set to TRUE if the assessment was based on financial year (logical). Adjusts the x-axis to show full financial year notation.}
 
 \item{text_size, legend_text_size, text_colour, legend_text_colour, legend_position, legend_box, legend_title_blank, panel_border, panel_border_colour, xangle}{Optional plotting theme overrides. Defaults are controlled by \code{theme_ssand()}
 and can be set globally via \code{set_ssand_style()}.}

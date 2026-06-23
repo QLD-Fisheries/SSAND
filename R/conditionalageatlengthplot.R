@@ -11,11 +11,22 @@
 #' @param show_fits Set to TRUE to show model fits.
 #' @param xlab Label for x-axis (character). Default is "Year".
 #' @param ylab Label for y-axis (character). Default is "Spawning biomass (relative)".
+#' @param xbreaks A vector of breaks between x-axis labels, used in ggplot2::scale_x_continous() (numeric).
+#' @param ybreaks A vector of breaks between y-axis labels, used in ggplot2::scale_y_continous() (numeric).
+#' @param xlabels A vector of labels for the x-axis breaks.
+#' @param ylabels A vector of labels for the y-axis breaks.
+#' @param xlim A vector of lower and upper x-axis limits (e.g. c(1950, 2020)) (numeric).
+#' @param ylim A vector of lower and upper y-axis limits (e.g. c(0,1)) (numeric).
 #' @param size_breaks Breaks of size scale for bubbles
 #' @param size_range Range of size scale for bubbles
 #' @param fleet Specify which fleet to plot (numeric). By default, fleet 1 will be shown.
 #' @param ylim A vector of lower and upper y-axis limits (e.g. c(0,1)) (numeric).
 #' @param xlim A vector of lower and upper x-axis limits (e.g. c(1950, 2020)) (numeric).
+#' @param scenarios A vector of scenario numbers to be shown on plot (numeric). This was already specified in prep file, but this is a manual override to save running the prep function again.
+#' @param scenario_labels A vector of customised scenario names (character). Default is "Scenario 1", "Scenario 2", etc.
+#' @param scenario_order A vector to reorder how scenarios are displayed (character). Use the label names defined in "scenario_labels".
+#' If "scenario_labels" is left blank, the labels will be "Scenario 1", "Scenario 2" etc.
+#' Any scenarios not included in "scenario_order" will be tacked on in the order they appear in the input data.
 #' @param ncol Number of columns for facet_wrap(). Default is 3.
 #' @param colours A vector of colours used (character).
 #' @param financial_year Set to TRUE if the assessment was based on financial year (logical). Adjusts the x-axis to show full financial year notation.
@@ -33,12 +44,21 @@ conditionalageatlengthplot <- function(data,
                                        show_fits = TRUE,
                                        xlab = "Age (years)",
                                        ylab = "Length (cm)",
+                                       xbreaks = NULL,
+                                       ybreaks = NULL,
+                                       xlabels = NULL,
+                                       ylabels = NULL,
+                                       xlim = NULL,
+                                       ylim = NULL,
                                        size_breaks = c(0.01,0.25,0.5),
                                        size_range = c(0.01, 6),
                                        fleet = 1,
-                                       ylim = c(NA,NA),
-                                       xlim = c(NA,NA),
+                                       # ylim = c(NA,NA),
+                                       # xlim = c(NA,NA),
                                        ncol = 3,
+                                       scenarios = NULL,
+                                       scenario_labels = NULL,
+                                       scenario_order = NULL,
                                        colours = fq_palette("alisecolours")[c(2,10)],
                                        xangle = NULL,
                                        legend_position = NULL,

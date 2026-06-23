@@ -70,13 +70,13 @@
 #' biomassplot(data, mcmc_style = "boxplot", show_median = c("annual_biomass","trajectory"))
 #' biomassplot(data, mcmc_style = "hairy", show_median = c("annual_biomass","trajectory"))
 #' biomassplot(data, mcmc_style = "CI", show_median = c("annual_biomass","trajectory"), CI_range = 0.9)
-#' biomassplot(data, mcmc_style = "joy", show_median = c("none"))
+#' #biomassplot(data, mcmc_style = "joy", show_median = c("none"))
 #'
 #' # Theme setting:
-#' biomassplot(data)
-#' biomassplot(data, text_size = 16)
-#' set_ssand_style(text_colour = "red")
-#' biomassplot(data)
+#' #biomassplot(data)
+#' #biomassplot(data, text_size = 16)
+#' #set_ssand_style(text_colour = "red")
+#' #biomassplot(data)
 
 biomassplot <- function(data,
                         xlab = "Year",
@@ -209,9 +209,10 @@ biomassplot <- function(data,
     if (mcmc_style == "banded")  p <- mcmc_banded (p, data, alpha, band_labels, band_colour)
     if (mcmc_style == "hairy")   p <- mcmc_hairy  (p, data, hair_width)
     if (mcmc_style == "CI")      p <- mcmc_CI     (p, data, aggregate_scenarios, CI_range, alpha)
-    if (mcmc_style == "joy")     p <- mcmc_joy    (p, data, CI_range, ridge_colour, rel_min_height, alpha, ridge_scale, show_CI,
-                                                   ybreaks, ylin,ylab, xlab, legend_position, text_size,xbreaks,legend_box,facet_wrap,
-                                                   show_median,xlabels,ylabels)
+    # if (mcmc_style == "joy")     p <- mcmc_joy    (p, data, CI_range, ridge_colour, rel_min_height, alpha, ridge_scale, show_CI,
+    #                                                ybreaks, ylim,ylab, xlab, legend_position, text_size,xbreaks,legend_box,facet_wrap,
+    #                                                show_median,xlabels,ylabels)
+
     # Add median lines
     p <- show_median_lines("biomass",p,data,show_median,line_width,colours)
   }
@@ -219,7 +220,7 @@ biomassplot <- function(data,
   # ___________________
   # Final layers
   # ___________________
-  if (show_final_biomass) p <- show_final_biomass(p, data, MCMC, colour_categories,scenario_labels)
+  if (show_final_biomass) p <- show_final_biomass(p, data, MCMC, scenario_labels)
   if (show_target_line)   p <- add_reference_line(p, data[1,], target_value, "#127B06", annotation_position, "Target reference point")
   if (show_limit_line)    p <- add_reference_line(p, data[1,], limit_value, "#AD3D25", annotation_position, "Limit reference point")
   if (facet_wrap)         p <- add_scenario_facets(p, data, scales = scales, ncol = ncol)

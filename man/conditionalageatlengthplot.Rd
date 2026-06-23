@@ -9,12 +9,19 @@ conditionalageatlengthplot(
   show_fits = TRUE,
   xlab = "Age (years)",
   ylab = "Length (cm)",
+  xbreaks = NULL,
+  ybreaks = NULL,
+  xlabels = NULL,
+  ylabels = NULL,
+  xlim = NULL,
+  ylim = NULL,
   size_breaks = c(0.01, 0.25, 0.5),
   size_range = c(0.01, 6),
   fleet = 1,
-  ylim = c(NA, NA),
-  xlim = c(NA, NA),
   ncol = 3,
+  scenarios = NULL,
+  scenario_labels = NULL,
+  scenario_order = NULL,
   colours = fq_palette("alisecolours")[c(2, 10)],
   xangle = NULL,
   legend_position = NULL,
@@ -38,23 +45,37 @@ conditionalageatlengthplot(
 
 \item{ylab}{Label for y-axis (character). Default is "Spawning biomass (relative)".}
 
+\item{xbreaks}{A vector of breaks between x-axis labels, used in ggplot2::scale_x_continous() (numeric).}
+
+\item{ybreaks}{A vector of breaks between y-axis labels, used in ggplot2::scale_y_continous() (numeric).}
+
+\item{xlabels}{A vector of labels for the x-axis breaks.}
+
+\item{ylabels}{A vector of labels for the y-axis breaks.}
+
+\item{xlim}{A vector of lower and upper x-axis limits (e.g. c(1950, 2020)) (numeric).}
+
+\item{ylim}{A vector of lower and upper y-axis limits (e.g. c(0,1)) (numeric).}
+
 \item{size_breaks}{Breaks of size scale for bubbles}
 
 \item{size_range}{Range of size scale for bubbles}
 
 \item{fleet}{Specify which fleet to plot (numeric). By default, fleet 1 will be shown.}
 
-\item{ylim}{A vector of lower and upper y-axis limits (e.g. c(0,1)) (numeric).}
-
-\item{xlim}{A vector of lower and upper x-axis limits (e.g. c(1950, 2020)) (numeric).}
-
 \item{ncol}{Number of columns for facet_wrap(). Default is 3.}
+
+\item{scenarios}{A vector of scenario numbers to be shown on plot (numeric). This was already specified in prep file, but this is a manual override to save running the prep function again.}
+
+\item{scenario_labels}{A vector of customised scenario names (character). Default is "Scenario 1", "Scenario 2", etc.}
+
+\item{scenario_order}{A vector to reorder how scenarios are displayed (character). Use the label names defined in "scenario_labels".
+If "scenario_labels" is left blank, the labels will be "Scenario 1", "Scenario 2" etc.
+Any scenarios not included in "scenario_order" will be tacked on in the order they appear in the input data.}
 
 \item{colours}{A vector of colours used (character).}
 
-\item{legend_position}{Position of the legend ("none", "left", "right", "bottom", "top", or two-element numeric vector for x and y position). Default is "top".}
-
-\item{text_size}{Text size (num). Default is 12.}
+\item{financial_year}{Set to TRUE if the assessment was based on financial year (logical). Adjusts the x-axis to show full financial year notation.}
 
 \item{text_size, legend_text_size, text_colour, legend_text_colour, legend_position, legend_box, legend_title_blank, panel_border, panel_border_colour, xangle}{Optional plotting theme overrides. Defaults are controlled by \code{theme_ssand()}
 and can be set globally via \code{set_ssand_style()}.}

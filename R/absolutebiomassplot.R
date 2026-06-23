@@ -40,6 +40,7 @@
 #' @param show_dates_on_axis Set to TRUE to show full dates on x-axis as opposed to years.
 #' @param sample Number of samples to plot from each MCMC chain to ease burden of rendering dense plots (numeric).
 #' @param band_colour Colour of bands (character). Only used when mcmc_style=="banded". Input one colour, bands will be distinguished using an alpha.
+#' @param band_labels Labels for bands. Default is NULL and interval is used.
 #' @param show_median Type of median shown. Default "annual_biomass" shows the median of each year,
 #' "trajectory" shows median trajectory based on biomass in final year,
 #' @param mcmc_style The type of MCMC plot to be displayed (character). Options are "banded", "hairy", "boxplot", "CI" and "joy", the default is "banded". Only one option can be selected.
@@ -95,6 +96,7 @@ absolutebiomassplot <- function(data,
                                 show_dates_on_axis = FALSE,
                                 sample = NULL,
                                 band_colour = "black",
+                                band_labels = NULL,
                                 show_median = "median_cpue", # trajectory, annual_biomass, none
                                 mcmc_style = "banded", # hairy, boxplot, banded, CI, joy
                                 line_width = 1,
@@ -136,6 +138,9 @@ absolutebiomassplot <- function(data,
   if (MCMC) {data$upper <- data$prob_upper; data$lower <- data$prob_lower}
   if (MCMC) data$med[startsWith(data$med, "median_")] <- "annual"
   if (MCMC) data <- sample_mcmc_runs(data, sample)
+
+  # Determine axis settings if missing
+  facet_wrap <- length(unique(data$scenario))>1 & !aggregate_scenarios
 
   # ___________________
   # Custom to this plot

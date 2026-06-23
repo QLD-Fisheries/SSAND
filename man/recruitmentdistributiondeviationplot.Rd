@@ -99,15 +99,15 @@ Any scenarios not included in "scenario_order" will be tacked on in the order th
 
 \item{band_colour}{Colour of bands (character). Only used when mcmc_style=="banded". Input one colour, bands will be distinguished using an alpha.}
 
-\item{xangle}{Set to 90 to rotate x-axis labels 90 degrees.}
+\item{band_labels}{Labels for bands. Default is NULL and interval is used.}
 
-\item{legend_position}{Position of the legend ("none", "left", "right", "bottom", "top", or two-element numeric vector for x and y position). Default is "top".}
+\item{sample}{Number of samples to plot from each MCMC chain to ease burden of rendering dense plots (numeric).}
+
+\item{boxplot_outliers}{Set to FALSE to remove outlier points from boxplot. Default is TRUE.}
+
+\item{CI_range}{Specify credible interval range (numeric). Only activated if mcmc_style==CI.}
 
 \item{financial_year}{Set to TRUE if the assessment was based on financial year (logical). Adjusts the x-axis to show full financial year notation.}
-
-\item{text_size}{Text size (num). Default is 12.}
-
-\item{legend_box}{Display option for legend (character). Choose "vertical" to stack legend types vertically, or "horizontal" to keep legends in one row.}
 
 \item{text_size, legend_text_size, text_colour, legend_text_colour, legend_position, legend_box, legend_title_blank, panel_border, panel_border_colour, xangle}{Optional plotting theme overrides. Defaults are controlled by \code{theme_ssand()}
 and can be set globally via \code{set_ssand_style()}.}

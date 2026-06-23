@@ -15,6 +15,12 @@
 #' @param data No prep function provided, see example. A data frame with sector (factor), source (chr), startyr (num), endyr (num), col (a colour category, chr), label (a label category, num)
 #' @param xlab Label for x-axis (character). Default is "".
 #' @param ylab Label for y-axis (character). Default is "".
+#' @param xbreaks A vector of breaks between x-axis labels, used in ggplot2::scale_x_continous() (numeric).
+#' @param ybreaks A vector of breaks between y-axis labels, used in ggplot2::scale_y_continous() (numeric).
+#' @param xlabels A vector of labels for the x-axis breaks.
+#' @param ylabels A vector of labels for the y-axis breaks.
+#' @param xlim A vector of lower and upper x-axis limits (e.g. c(1950, 2020)) (numeric).
+#' @param ylim A vector of lower and upper y-axis limits (e.g. c(0,1)) (numeric).
 #' @param colours A vector of colours used (character). Default is c("#FFC000","#9D9D9D","#FFE699").
 #' @param financial_year Set to TRUE if the assessment was based on financial year (logical). Adjusts the x-axis to show full financial year notation.
 #' @param legend_size Size of legend markers. Default is 6.
@@ -67,6 +73,12 @@
 catchdatasourcesplot <- function(data,
                                  ylab = "",
                                  xlab = "",
+                                 xbreaks = NULL,
+                                 ybreaks = NULL,
+                                 xlabels = NULL,
+                                 ylabels = NULL,
+                                 xlim = NULL,
+                                 ylim = NULL,
                                  colours = c("#FFC000","#9D9D9D","#FFE699"),
                                  legend_size = 6,
                                  xangle = NULL,
@@ -104,35 +116,33 @@ catchdatasourcesplot <- function(data,
   # ___________________
   # Axes and theme
   # ___________________
-  x_axis <- build_x_axis(x = data$xvar,
-                         xlab = xlab,
-                         xlim = xlim,
-                         xbreaks = xbreaks,
-                         xlabels = xlabels,
-                         financial_year = financial_year,
-                         expand_upper = as.numeric(show_final_biomass),
-                         xangle = xangle,
-                         is_date = FALSE)
+  # x_axis <- build_x_axis(x = data$xvar,
+  #                        xlab = xlab,
+  #                        xlim = xlim,
+  #                        xbreaks = xbreaks,
+  #                        xlabels = xlabels,
+  #                        financial_year = financial_year,
+  #                        expand_upper = as.numeric(show_final_biomass),
+  #                        xangle = xangle,
+  #                        is_date = FALSE)
+  # y_axis <- build_y_axis(y = data$value,
+  #                        ylab = ylab,
+  #                        ylim = ylim,
+  #                        ybreaks = ybreaks,
+  #                        ylabels = ylabels,
+  #                        lower = 0,
+  #                        upper = data$upper)
 
-  y_axis <- build_y_axis(y = data$value,
-                         ylab = ylab,
-                         ylim = ylim,
-                         ybreaks = ybreaks,
-                         ylabels = ylabels,
-                         lower = 0,
-                         upper = data$upper)
-
-  p <- add_x_scale_continuous(p, x_axis)
-  p <- add_y_scale_continuous(p, y_axis)
+  # p <- add_x_scale_continuous(p, x_axis)
+  # p <- add_y_scale_continuous(p, y_axis)
 
   p <- p +
     ggplot2::scale_x_continuous(breaks=xbreaks, labels = xlabels, expand = c(0,0))
 
-  # p <- p +
-  #   ggplot2::guides(color = ggplot2::guide_legend(override.aes = list(linewidth = legend_size)))
+  p <- p +
+    ggplot2::guides(color = ggplot2::guide_legend(override.aes = list(linewidth = legend_size)))
 
-  if (is.null(text_colour)) legend_position <- "none"
-
+  if (is.null(legend_position)) legend_position <- "none"
 
   p <- add_ssand_theme(p,
                        text_size = text_size,
@@ -144,7 +154,7 @@ catchdatasourcesplot <- function(data,
                        legend_title_blank = legend_title_blank,
                        panel_border = panel_border,
                        panel_border_colour = panel_border_colour,
-                       xangle = x_axis$angle)
+                       xangle = xangle)
 
   return(p)
 }

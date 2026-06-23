@@ -9,7 +9,9 @@ dataplot(
   xlab = "Year",
   ylab = NULL,
   xbreaks = NULL,
+  ybreaks = NULL,
   xlabels = NULL,
+  ylabels = NULL,
   xlim = NULL,
   ylim = NULL,
   colours = fq_palette("alisecolours"),
@@ -43,7 +45,11 @@ dataplot(
 
 \item{xbreaks}{A vector of breaks between x-axis labels, used in ggplot2::scale_x_continous() (numeric).}
 
+\item{ybreaks}{A vector of breaks between y-axis labels, used in ggplot2::scale_y_continous() (numeric).}
+
 \item{xlabels}{A vector of labels for the x-axis breaks.}
+
+\item{ylabels}{A vector of labels for the y-axis breaks.}
 
 \item{xlim}{A vector of lower and upper x-axis limits (e.g. c(1950, 2020)) (numeric).}
 
@@ -68,8 +74,6 @@ Any scenarios not included in "scenario_order" will be tacked on in the order th
 \item{fleet_names}{A vector of customised fleet names for legend}
 
 \item{hollow}{A logitcal to switch between two colouring styles. Default is TRUE.}
-
-\item{xangle}{Set to 90 to rotate x-axis labels 90 degrees.}
 
 \item{financial_year}{Set to TRUE if the assessment was based on financial year (logical). Adjusts the x-axis to show full financial year notation.}
 

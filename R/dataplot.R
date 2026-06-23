@@ -14,6 +14,8 @@
 #' @param xlabels A vector of labels for the x-axis breaks.
 #' @param xlim A vector of lower and upper x-axis limits (e.g. c(1950, 2020)) (numeric).
 #' @param ylim A vector of lower and upper y-axis limits (e.g. c(0,1)) (numeric).
+#' @param ybreaks A vector of breaks between y-axis labels, used in ggplot2::scale_y_continous() (numeric).
+#' @param ylabels A vector of labels for the y-axis breaks.
 #' @param fleet_names A vector of customised fleet names for legend
 #' @param colours A vector of colours used (character).
 #' @param size_range A two-number vector specifying the minimum and maximum sizes for the circles
@@ -42,7 +44,9 @@ dataplot <- function(data,
                      xlab = "Year",
                      ylab = NULL,
                      xbreaks = NULL,
+                     ybreaks = NULL,
                      xlabels = NULL,
+                     ylabels = NULL,
                      xlim = NULL,
                      ylim = NULL,
                      colours = fq_palette("alisecolours"),

@@ -48,13 +48,11 @@ mcmc_finalbiomassposteriorplot(
 
 \item{annotation_text_size}{Size of annotation text (e.g. median and CI). Default is 5.}
 
-\item{legend_text_size}{Size of legend text. Default is 11.5.}
-
 \item{axis_title_size}{Sie of axis title. Default is 13.}
 
 \item{axis_text_size}{Size of axis text. Default is 12.}
 
-\item{legend_position}{Position of the legend ("none", "left", "right", "bottom", "top", or two-element numeric vector for x and y position). Default is "top".}
+\item{financial_year}{Set to TRUE if the assessment was based on financial year (logical). Adjusts the x-axis to show full financial year notation.}
 
 \item{text_size, legend_text_size, text_colour, legend_text_colour, legend_position, legend_box, legend_title_blank, panel_border, panel_border_colour, xangle}{Optional plotting theme overrides. Defaults are controlled by \code{theme_ssand()}
 and can be set globally via \code{set_ssand_style()}.}

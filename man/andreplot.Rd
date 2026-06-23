@@ -14,7 +14,7 @@ andreplot(
   colours = c("black", "grey80", fq_palette("DAF")),
   legend_ratio = c(1, 10),
   xangle = NULL,
-  legend_position = NULL,
+  legend_position = "top",
   financial_year = FALSE,
   text_size = NULL,
   legend_text_size = NULL,
@@ -43,7 +43,7 @@ andreplot(
 
 \item{legend_ratio}{A vector specifying the relative heights of the legend and the rest of the plot. Default is c(1,10)}
 
-\item{legend_position}{Position of the legend ("top" or "bottom"). Default is "top".}
+\item{financial_year}{Set to TRUE if the assessment was based on financial year (logical). Adjusts the x-axis to show full financial year notation.}
 
 \item{text_size, legend_text_size, text_colour, legend_text_colour, legend_position, legend_box, legend_title_blank, panel_border, panel_border_colour, xangle}{Optional plotting theme overrides. Defaults are controlled by \code{theme_ssand()}
 and can be set globally via \code{set_ssand_style()}.}

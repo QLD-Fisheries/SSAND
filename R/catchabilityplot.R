@@ -10,6 +10,12 @@
 #' @param data Output from catchabilityplot_prep(). A dataframe with q (num), month (int), month_point (int), monthnames (factor), fleet (factor), scenario (factor)
 #' @param xlab Label for x-axis (character). Default is "Month".
 #' @param ylab Label for y-axis (character). Default is "Catchability coefficient (q)".
+#' @param xbreaks A vector of breaks between x-axis labels, used in ggplot2::scale_x_continous() (numeric).
+#' @param ybreaks A vector of breaks between y-axis labels, used in ggplot2::scale_y_continous() (numeric).
+#' @param xlabels A vector of labels for the x-axis breaks.
+#' @param ylabels A vector of labels for the y-axis breaks.
+#' @param xlim A vector of lower and upper x-axis limits (e.g. c(1950, 2020)) (numeric).
+#' @param ylim A vector of lower and upper y-axis limits (e.g. c(0,1)) (numeric).
 #' @param ncol Number of columns for facet_wrap(). Default is 2.
 #' @param scales Scales for ggplot2::facet_wrap(). Default is 'free', see ?ggplot2::facet_wrap for options.
 #' @param colours A vector of colours used for lines (character).
@@ -18,6 +24,7 @@
 #' @param scenario_order A vector to reorder how scenarios are displayed (character). Use the label names defined in "scenario_labels".
 #' If "scenario_labels" is left blank, the labels will be "Scenario 1", "Scenario 2" etc.
 #' Any scenarios not included in "scenario_order" will be tacked on in the order they appear in the input data.
+#' @param financial_year Set to TRUE if the assessment was based on financial year (logical). Adjusts the x-axis to show full financial year notation.
 #' @param text_size,legend_text_size,text_colour,legend_text_colour,legend_position,legend_box,legend_title_blank,panel_border,panel_border_colour,xangle Optional plotting theme overrides. Defaults are controlled by `theme_ssand()`
 #'   and can be set globally via `set_ssand_style()`.
 #'
@@ -33,6 +40,12 @@
 catchabilityplot <- function(data,
                              xlab = 'Month',
                              ylab = 'Catchability coefficient (q)',
+                             xbreaks = NULL,
+                             ybreaks = NULL,
+                             xlabels = NULL,
+                             ylabels = NULL,
+                             xlim = NULL,
+                             ylim = NULL,
                              ncol = 2,
                              scales = 'free',
                              colours = fq_palette("alisecolours"),
@@ -68,7 +81,7 @@ catchabilityplot <- function(data,
   p <- p +
     ggplot2::geom_line(ggplot2::aes(x=month,y=q,col=fleet)) +
     ggplot2::geom_point(ggplot2::aes(x=month_point,y=q,col=fleet)) +
-    ggplot2::scale_x_discrete(limits=month.name) + ##########################
+    # ggplot2::scale_x_discrete(limits=month.name) + ##########################
     ggplot2::scale_y_continuous(limits=ylim, breaks = ybreaks) +
     ggplot2::scale_colour_manual(name = "Fleet", values = colours)
 
@@ -82,7 +95,7 @@ catchabilityplot <- function(data,
   # ___________________
   x_axis <- build_x_axis(x = data$xvar,
                          xlab = xlab,
-                         xlim = xlim,
+                         xlim = month.name,
                          xbreaks = xbreaks,
                          xlabels = xlabels,
                          financial_year = financial_year,
@@ -99,7 +112,7 @@ catchabilityplot <- function(data,
                          upper = data$q) #
 
 
-  p <- add_x_scale_continuous(p, x_axis)
+  p <- add_x_scale_discrete(p, x_axis)
   p <- add_y_scale_continuous(p, y_axis)
 
   p <- add_ssand_theme(p,
