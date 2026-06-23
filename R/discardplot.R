@@ -75,13 +75,26 @@ discardplot <- function(data,
   # ___________________
   check_data_columns(data, c("year","fleet","obs","upper","lower","exp"))
   data$xvar <- data$year
-  data$upper <- data$prob_upper; data$lower <- data$prob_lower
+  if (is.null(xlim)) {xlim <- c(min(data$year)-0.5,max(data$year)+0.5)}
 
   # ___________________
   # Filter data
   # ___________________
-  data <- apply_fleet_names(data, fleets, fleet_names)
+  # data <- apply_fleet_names(data, fleets, fleet_names)
   data <- apply_scenarios(data, scenarios, scenario_labels, scenario_order)
+
+  if (!is.null(fleets)) {
+    data <- data |> dplyr::filter(fleet %in% fleets)
+  }
+
+  if (is.null(fleet_names)) {
+    data <- data |> dplyr::mutate(fleet_names = as.factor(paste0("Fleet ",fleet)))
+  } else {
+    fleet.lookup <- data.frame(fleet = unique(data$fleet), fleet_names = fleet_names)
+    data <- data |>
+      dplyr::left_join(fleet.lookup, by = "fleet") |>
+      dplyr::mutate(fleet_names = as.factor(fleet_names))
+  }
 
   # ___________________
   # Basic plot set up
@@ -124,7 +137,7 @@ discardplot <- function(data,
                          xbreaks = xbreaks,
                          xlabels = xlabels,
                          financial_year = financial_year,
-                         expand_upper = as.numeric(show_final_biomass),
+                         expand_upper = 0,
                          xangle = xangle,
                          is_date = FALSE)
 

@@ -173,7 +173,7 @@ growthplot <- function(data,
                          xbreaks = xbreaks,
                          xlabels = xlabels,
                          financial_year = financial_year,
-                         expand_upper = as.numeric(show_final_biomass),
+                         expand_upper = 0,
                          xangle = xangle,
                          is_date = FALSE)
 

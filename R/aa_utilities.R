@@ -242,11 +242,9 @@ build_y_axis <- function(
 
 # Add axes ----
 add_x_scale_date <- function(p, axis) {
-
   # if (!is.null(xbreaks) && !lubridate::is.Date(xbreaks)) {
   #   xbreaks <- as.Date(paste0(xbreaks, "-01-01"))
   # }
-
   p +
     ggplot2::scale_x_date(
       name   = axis$xlab,

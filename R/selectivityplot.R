@@ -92,7 +92,7 @@ selectivityplot <- function(data,
   # Data input warnings
   check_data_columns(data, c("fleet","year","sex","value","type","selectivity","scenario"))
 
-  if (missing(fleets)) {fleets <- unique(data$fleet)}
+  if (is.null(fleets)) {fleets <- unique(data$fleet)}
 
   if (!MCMC) {
     data <- data |>
@@ -101,7 +101,18 @@ selectivityplot <- function(data,
       dplyr::mutate(sex = dplyr::recode(sex, "1" = "Female" ,  "2" = "Male"))
 
     data <- apply_scenarios(data, scenarios, scenario_labels, scenario_order)
-    data <- apply_fleet_names(data, fleets=NULL, fleet_names)
+    # data <- apply_fleet_names(data, fleets=NULL, fleet_names)
+
+    if (is.null(fleet_names)) {
+      data <- data |> dplyr::mutate(fleet_names = as.factor(paste0("Fleet ",fleet)))
+    } else {
+      fleet.lookup <- data.frame(fleet = unique(data$fleet), fleet_names = fleet_names)
+      data <- data |>
+        dplyr::left_join(fleet.lookup, by = "fleet")
+      # Reorder fleet names
+      data$fleet_names <- factor(data$fleet_names, levels = fleet_names)
+    }
+
 
     if(!time_blocks) {
       data <- data |> dplyr::filter(year==endyear)
