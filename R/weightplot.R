@@ -77,7 +77,7 @@ weightplot <- function(data,
   }
 
   if (show_two_sex){
-    p <- p + (aes(colour = sex)) +
+    p <- p + (ggplot2::aes(colour = sex)) +
       ggplot2::theme(legend.position = "top", legend.title = ggplot2::element_blank()) +
       ggplot2::scale_colour_manual(values = colours)
   }
